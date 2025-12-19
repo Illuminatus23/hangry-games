@@ -45,7 +45,7 @@ export default function BasicTerm({
             charSpec: careerCheckSimple(careerData.specduty, upp, characterName),
             charReenlist: careerCheckSimple(careerData.reenlist, upp, characterName)
         }
-        setWarning(`Survival: ${termResults.charSurvival}`)
+        setWarning(`Survival: ${termResults.charSurvival[0]}`)
         console.log(termResults)
         if (!termResults.charSurvival) {
 
@@ -87,8 +87,8 @@ export default function BasicTerm({
     }
     function SkillSelector({ }) {
 
-        const [skillChoice, setSkillChoice] = useState();
-        const [skillChoice2, setSkillChoice2] = useState();
+        const [skillChoice, setSkillChoice] = useState("");
+        const [skillChoice2, setSkillChoice2] = useState("");
         const skillOps = [
             { id: 0, name: "Select a skill category", value: "" },
             { id: 1, name: "Personal Development Skills", value: "personal" },
@@ -99,6 +99,10 @@ export default function BasicTerm({
             skillOps.push({ id: 4, name: "Advanced Education Skills", value: "education" })
         }
         const onSubmitSkill = (skillChoice1, skillChoice2) => {
+            if (!skillChoice1 || (termStep === "init" && !skillChoice2)) {
+                setWarning("Select skill categories before continuing.");
+                return;
+            }
             const roll1 = d6(1, 0);
             const skill1 = skillTables[skillChoice1][roll1];
             const isCascade = skillIncrease(skill1)
@@ -205,6 +209,7 @@ export default function BasicTerm({
                     <button
                         className="mt-btn"
                         type="button"
+                        disabled={!skillChoice || (termStep === "init" && !skillChoice2)}
                         onClick={() => onSubmitSkill(skillChoice, skillChoice2)}
                     >
                         Continue

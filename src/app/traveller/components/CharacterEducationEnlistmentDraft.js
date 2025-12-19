@@ -57,14 +57,14 @@ export default function CharacterEducationEnlistmentDraft({
     }
     const handleSubmission = (val) => {
         setWarning("");
-        const application = val ?? application;
-        if (!application) return;
+        const nextApplication = val ?? application;
+        if (!nextApplication) return;
 
-        if (application === "skip") {
+        if (nextApplication === "skip") {
             setStep("enlistment");
             return;
         }
-        if (application === "enlistarmy") {
+        if (nextApplication === "enlistarmy") {
             setStep("army");
             setCharacterData((prev) => (
                 {
@@ -81,7 +81,7 @@ export default function CharacterEducationEnlistmentDraft({
             ));
             return;
         }
-        if (application === "enlistnavy") {
+        if (nextApplication === "enlistnavy") {
             setStep("navy");
             setCharacterData((prev) => (
                 {
@@ -98,7 +98,7 @@ export default function CharacterEducationEnlistmentDraft({
             ));
             return;
         }
-        if (application === "enlistmarines") {
+        if (nextApplication === "enlistmarines") {
             setStep("marines");
             setCharacterData((prev) => (
                 {
@@ -116,7 +116,7 @@ export default function CharacterEducationEnlistmentDraft({
             return;
         }
 
-        const results = handleSchoolApp(upp, application, characterName);
+        const results = handleSchoolApp(upp, nextApplication, characterName);
         let friendlyName = "college";
         switch (results.school) {
             case "military":
@@ -140,11 +140,11 @@ export default function CharacterEducationEnlistmentDraft({
 
         console.log(results)
 
-        if (application === "autoflight" ||
-            application === "flight" ||
-            application === "medical"
+        if (nextApplication === "autoflight" ||
+            nextApplication === "flight" ||
+            nextApplication === "medical"
         ) {
-            const results = handleSchoolApp(upp, application, characterName);
+            const results = handleSchoolApp(upp, nextApplication, characterName);
             if (!results.admission) {
                 handleHistoryAdd(`${characterName} applied to ${friendlyName} but was rejected.`);
                 //setStep("enlistment")
@@ -214,13 +214,13 @@ export default function CharacterEducationEnlistmentDraft({
 
         if (!results.admission) {
             // Remove the failed option from the dropdown
-            if (application === "college" || application === "collegeotc" || application === "collegenotc") {
+            if (nextApplication === "college" || nextApplication === "collegeotc" || nextApplication === "collegenotc") {
                 setSchoolOptions(prev =>
                     prev.filter(option => option.value !== "college" && option.value !== "collegeotc" && option.value !== "collegenotc")
                 );
             } else {
                 setSchoolOptions(prev =>
-                    prev.filter(option => option.value !== application)
+                    prev.filter(option => option.value !== nextApplication)
                 );
             }
 

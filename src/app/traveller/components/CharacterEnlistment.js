@@ -33,16 +33,16 @@ export default function CharacterEnlistment({
 
     const handleSubmission = (val) => {
         setWarning("");
-        const enlistmentChoice = val ?? enlistmentChoice;
+        const nextEnlistmentChoice = val ?? enlistmentChoice;
 
 
         //handle automatic options
-        if (enlistmentChoice === "draft") {
+        if (nextEnlistmentChoice === "draft") {
             setStep("draft");
             return
         }
 
-        if (enlistmentChoice === "year1") {
+        if (nextEnlistmentChoice === "year1") {
 
             if (characterData.career.category === "basic") {
                 setStep("year1");
@@ -51,16 +51,16 @@ export default function CharacterEnlistment({
             }
             return
         }
-        const careerCategory = careers[enlistmentChoice].category
-        const careerName = (careerCategory === "navy") ? "navy" : (careerCategory === "merchants" ? "merchants" : enlistmentChoice);
-        const subCareerName = (careerCategory === "navy" || careerCategory === "merchants") ? enlistmentChoice : "";
+        const careerCategory = careers[nextEnlistmentChoice].category
+        const careerName = (careerCategory === "navy") ? "navy" : (careerCategory === "merchants" ? "merchants" : nextEnlistmentChoice);
+        const subCareerName = (careerCategory === "navy" || careerCategory === "merchants") ? nextEnlistmentChoice : "";
 
         if (
             characterData.commission === careerCategory || //auto officer
-            (grad && enlistmentChoice === "scouts") || //auto bureau
-            (honorsgrad && enlistmentChoice === "megacorp trader") || //auto enlist
-            (medgrad && careerCategory !== "basic" && enlistmentChoice !== "marines") || //special
-            enlistmentChoice === "noble" //auto enlist
+            (grad && nextEnlistmentChoice === "scouts") || //auto bureau
+            (honorsgrad && nextEnlistmentChoice === "megacorp trader") || //auto enlist
+            (medgrad && careerCategory !== "basic" && nextEnlistmentChoice !== "marines") || //special
+            nextEnlistmentChoice === "noble" //auto enlist
         ) {
             const info = "auto enlist";
             const historyStr = "auto enlist";
@@ -81,7 +81,7 @@ export default function CharacterEnlistment({
             setWarning(info);
             handleHistoryAdd(historyStr)
         } else {
-            const stats = careers[enlistmentChoice].enlist;
+            const stats = careers[nextEnlistmentChoice].enlist;
             const enlist = {
                 target: stats[0],
                 skill1: [stats[1], stats[2]],
@@ -90,14 +90,14 @@ export default function CharacterEnlistment({
             const result = careerCheck(enlist, upp, characterName);
             const descriptor = (result[0]) ? "and was admmitted" : "but was rejected";
             const failText = (result[0]) ? "succeeding. Begin your career." : "failing. Make another selection.";
-            const historyStr = `${characterName} applied for position with the ${enlistmentChoice} ${descriptor}.`;
+            const historyStr = `${characterName} applied for position with the ${nextEnlistmentChoice} ${descriptor}.`;
             const info = `${result[1]}, ${failText}`
             setWarning(info);
             handleHistoryAdd(historyStr)
 
             if (!result[0]) {
                 setEnlistOps(prev =>
-                    prev.filter(option => option.value !== enlistmentChoice)
+                    prev.filter(option => option.value !== nextEnlistmentChoice)
                 );
                 setEnlistmentChoice("");
             } else {
