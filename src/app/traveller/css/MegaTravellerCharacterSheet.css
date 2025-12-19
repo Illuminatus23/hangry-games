@@ -1,0 +1,334 @@
+.mt-sheet {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  background: #f8f8fa;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #222;
+}
+
+.mt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.mt-title {
+  font-size: 1.7rem;
+  margin: 0;
+}
+
+.mt-upp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #aaa;
+  background: #fff;
+}
+
+.mt-upp-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #666;
+}
+
+.mt-upp-value {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+  font-weight: 700;
+}
+
+.mt-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #ddd;
+}
+
+.mt-section-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+}
+
+.mt-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mt-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mt-grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.mt-grid-4 {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.mt-grid-7 {
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+}
+
+.mt-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mt-label {
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.mt-input,
+.mt-textarea {
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+.mt-input:focus,
+.mt-textarea:focus {
+  border-color: #666;
+  outline: none;
+  box-shadow: 0 0 0 1px #6662;
+}
+
+.mt-input-center {
+  text-align: center;
+}
+
+.mt-char-block {
+  text-align: center;
+  padding: 0.25rem 0.35rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+}
+
+.mt-char-hex {
+  margin-top: 0.15rem;
+  font-size: 0.85rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-weight: 600;
+}
+
+.mt-help-text {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 0.35rem;
+}
+
+/* Table styles */
+.mt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.mt-table th,
+.mt-table td {
+  border: 1px solid #ddd;
+  padding: 0.35rem;
+  vertical-align: middle;
+}
+
+.mt-table th {
+  background: #f0f0f4;
+  text-align: left;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #555;
+}
+
+/* Buttons */
+.mt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #444;
+  background: #444;
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.mt-btn:hover {
+  background: #222;
+}
+
+.mt-btn-secondary {
+  border-color: #888;
+  background: #eee;
+  color: #222;
+}
+
+.mt-btn-secondary:hover {
+  background: #ddd;
+}
+
+.mt-btn-icon {
+  padding-inline: 0.4rem;
+  border-radius: 999px;
+  min-width: 2rem;
+}
+
+/* Textarea */
+.mt-textarea {
+  resize: vertical;
+}
+
+.homeworld p {
+  text-align: center;
+}
+.mt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid #444;
+  background: linear-gradient(#444, #333);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+
+.mt-btn:hover {
+  background: linear-gradient(#333, #222);
+  box-shadow: 0 0 4px #0004;
+}
+
+.mt-btn:active {
+  transform: translateY(1px);
+  background: #111;
+}
+/* checkboxes */
+/* ===== BASE CHECKBOX WRAPPER ===== */
+.mt-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+/* hide the default checkbox */
+.mt-checkbox input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 4px;
+  border: 2px solid #444;
+  background: #fff;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+/* hover state */
+.mt-checkbox input[type="checkbox"]:hover {
+  border-color: #222;
+  background: #f2f2f2;
+}
+
+/* checked look — retro digital block */
+.mt-checkbox input[type="checkbox"]:checked {
+  background: #333;
+  border-color: #111;
+}
+
+/* add checkmark indicator */
+.mt-checkbox input[type="checkbox"]:checked::after {
+  content: "✓";
+  font-size: 0.8rem;
+  color: #fff;
+  position: absolute;
+  top: 0.05rem;
+  left: 0.22rem;
+  font-weight: bold;
+  text-shadow: 0 0 3px #0008;
+}
+
+/* disabled option (optional) */
+.mt-checkbox input[type="checkbox"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* select dropdowns*/
+.mt-select {
+  border: 1px solid #999;
+  background: linear-gradient(#fafafa, #e8e8e8);
+  padding: 0.45rem 1.8rem 0.45rem 0.6rem;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  min-width: 180px;
+  color: #222;
+  transition: border .15s, box-shadow .15s;
+  appearance: none;
+  -webkit-appearance: none;
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  background-size: 0.6rem;
+}
+
+/* Custom dropdown arrow */
+.mt-select {
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%23333' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+}
+
+/* Interactive states */
+.mt-select:hover {
+  border-color: #666;
+}
+
+.mt-select:focus {
+  outline: none;
+  border-color: #444;
+  box-shadow: 0 0 0 2px #4444;
+}
+.mt-cap {
+  text-transform: capitalize;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  .mt-sheet {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .mt-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

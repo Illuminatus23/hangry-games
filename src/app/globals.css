@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+svg.grid g {
+  fill-opacity: 0.9;
+}
+svg.grid g.arena, svg.grid g.old {
+  fill: #666;
+}
+svg.grid g.deactivated {
+  fill: #000;
+  fill-opacity: 0.4;
+
+}
+svg.grid g.field {
+  fill: #606c38;
+}
+svg.grid g.woods {
+  fill: #283618;
+}
+svg.grid g.swamp {
+  fill: #dda15e;
+}
+svg.grid g.lake {
+  fill: #457b9d;
+}
+svg.grid g.ravine {
+  fill: #000;
+}
+svg.grid g:hover {
+  fill-opacity: 1;
+}
+
+svg.grid g:hover text {
+  fill-opacity: 1;
+}
+
+svg.grid g polygon {
+  stroke: #3F51B5;
+  stroke-width: 0.2;
+  transition: fill-opacity 0.2s;
+}
+
+svg.grid g.impass polygon {
+  stroke:var(--background);
+  stroke-width: 0.2;
+  transition: fill-opacity 0.2s;
+  fill-opacity: 0;
+}
+
+svg.grid g text {
+  font-size: .15em;
+  fill: #FFFFFF;
+  fill-opacity: 0.4;
+  transition: fill-opacity 0.2s;
+  text-transform: capitalize;
+}
+
+svg.grid g.playerIcon .playerPopup {
+  display: none;
+} 
+svg.grid g.playerIcon:hover .playerPopup {
+  display: block;
+}
+
+/* svg.grid path {
+  fill: none;
+  stroke: #c2c2a3;
+  stroke-width: 0.4em;
+  stroke-opacity: 0.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+} */
+.logWrapper {
+  max-height: 650px;
+  overflow-y: scroll;
+}
+.icons {
+  display: "inline"
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
