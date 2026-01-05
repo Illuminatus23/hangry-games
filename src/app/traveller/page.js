@@ -147,7 +147,7 @@ export default function CharacterCreation() {
 
         if (characterData.career.subcareername !== "") {
 
-            if (characterData.career.subcareername === "flyers" || characterData.career.subcareername === "sailors") {
+            if (characterData.career.subcareername === "flyer" || characterData.career.subcareername === "sailor") {
                 setStep("year1")
             } else {
                 setStep(characterData.career.subcareername)
@@ -172,10 +172,10 @@ export default function CharacterCreation() {
                 draftBranch = "scouts";
                 break;
             case 5:
-                draftBranch = "flyers";
+                draftBranch = "flyer";
                 break;
             case 6:
-                draftBranch = "sailors";
+                draftBranch = "sailor";
                 break;
             default:
                 draftBranch = "Something went wrong";
@@ -266,7 +266,6 @@ export default function CharacterCreation() {
                                 setStep={setStep}
                                 characterName={characterName}
                                 handleHistoryAdd={handleHistoryAdd}
-                                skills={skills}
                                 setSkills={setSkills}
                             />
                             : null}

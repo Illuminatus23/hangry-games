@@ -203,6 +203,7 @@
 .homeworld p {
   text-align: center;
 }
+
 .mt-btn {
   display: inline-flex;
   align-items: center;
@@ -228,6 +229,7 @@
   transform: translateY(1px);
   background: #111;
 }
+
 /* checkboxes */
 /* ===== BASE CHECKBOX WRAPPER ===== */
 .mt-checkbox {
@@ -316,8 +318,38 @@
   border-color: #444;
   box-shadow: 0 0 0 2px #4444;
 }
+
 .mt-cap {
   text-transform: capitalize;
+}
+
+.mt-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mt-modal-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.25rem;
+}
+
+.mt-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+
+.mt-rolled-skill {
+  background: #e9eef3;
+  border-left: 4px solid #003366;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
 }
 
 /* Responsive tweaks */

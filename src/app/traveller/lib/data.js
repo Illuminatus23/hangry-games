@@ -153,12 +153,12 @@ export const datatables = {
             availability: [['starport', 'E']],
             category: "merchants",
         },
-        "flyers": {
+        "flyer": {
             enlist: [6, 'STR', 7, 'DEX', 9],
             availability: [['tech', 2], ['pop', 2], ['atmos', 2]],
             category: "basic",
         },
-        "sailors": {
+        "sailor": {
             enlist: [6, 'END', 10, 'STR', 8],
             availability: [['hydro', 4]],
             category: "basic",
@@ -359,14 +359,14 @@ export const datatables = {
                 Freetraders: ['', ['4th Officer', ''], ['3rd Officer', ''], ['2nd Officer', ''], ['1st Officer', ''], ['Captain', 'Capt'], ['Owner', 'Capt']]
             }
         },
-        flyers: {
+        flyer: {
             E: [['', ''], ['', '']],
             O: ['', ['Pilot', ''], ['Flight Leader', ''], ['Squadron Leader', ''], ['Staff Major', ''], ['Group Leader', ''], ['Air Marshall', ''],],
             skills: {
                 'E1': ['Vacc Suit', 'Aircraft']
             }
         },
-        sailors: {
+        sailor: {
             E: [['', ''], ['', '']],
             O: [['', ''], ['Ensign', 'Ens'], ['Lieutenent', 'Lt'], ['Lieutenant Commander', 'Lt Cdr'], ['Commander', 'Cdr'], ['Captain', 'Cpt'], ['Admiral', 'Adm'],],
             skills: {
@@ -459,8 +459,8 @@ export const datatables = {
         navy: "",
         scouts: "",
         merchants: "",
-        flyers: "began a career in the air force flyers. Flyers are trained individual conducting a medical practice. Doctors know and understand well the art and science of medical diagnosis and treatment.",
-        sailors: "began a military career in the Nautical Force Command (the wet navy) of a world. Sailors patrol a world’s hydrosphere, monitor traffic upon it, and protect those travelling the seaways from being preyed upon by lawless elements",
+        flyer: "began a career in the air force flyers. Flyers are trained individual conducting a medical practice. Doctors know and understand well the art and science of medical diagnosis and treatment.",
+        sailor: "began a military career in the Nautical Force Command (the wet navy) of a world. Sailors patrol a world’s hydrosphere, monitor traffic upon it, and protect those travelling the seaways from being preyed upon by lawless elements",
         law: "became a law enforcement officer. Law enforcers typically have good investigative skills and tend to be familiar with the unsavory aspects of society.",
         doctor: "started a career as a medical doctor, a trained individual conducting a medical practice. Doctors know and understand well the art and science of medical diagnosis and treatment.",
         diplomat: "began a career as a diplomat, a member of the foreign service of a government. Diplomats may gain valuable interpersonal abiliies and academic knowledge during their careers.",
@@ -501,7 +501,7 @@ export const datatables = {
         'Vice': ['Bribery', 'Disguise', 'Forgery', 'Gambling', 'Intrusion', 'Streetwise'],
     },
     Basics: {
-        flyers: {
+        flyer: {
             survival: [5, 'DEX', 8, 2],
             position: [5, 'EDU', 6, 1],
             promotion: [8, 'EDU', 8, 1],
@@ -514,7 +514,7 @@ export const datatables = {
                 education: ['', 'Medical', 'Inborn', 'Space', 'Technical', 'Inborn', 'Interpersonal'],
             }
         },
-        sailors: {
+        sailor: {
             survival: [5, 'END', 8, 2],
             position: [5, 'INT', 9, 1],
             promotion: [6, 'EDU', 8, 1],
