@@ -54,12 +54,13 @@ export function generateBirthText(uppArray, birthworld, name, homeworldName, ski
         bioText + `and exhibited ${bPhys}. ${name}${desc.education[upp.EDU - 2]} ${bEdu} their${desc.intelligence[upp.INT - 2]}` :
         bioText + `and exhibited ${bPhys}. ${name}${desc.education[upp.EDU - 2]} and had an${desc.intelligence[upp.INT - 2]}`;
 
-        
-    const techLevel=datatables.planetDescriptors.tech[uwp[5]].toLowerCase();
-    const skillStr = `From daily living in their homeworld's ${techLevel} tech, ${name} gained the following skills: ${skills.join("; ")}`;
-    
 
-    return [birthText,bioText,skillStr];
+    const techLevel = datatables.planetDescriptors.tech[uwp[5]].toLowerCase();
+    //TODO clean this display up
+    const skillStr = `From daily living in their homeworld's ${techLevel} tech, ${name} gained the following skills: ${skills.join("; ")}`;
+
+
+    return [birthText, bioText, skillStr];
 }
 function homeworldDescription(uwp, government, name, tradeClasses, starport) {
     const uwpDescriptors = [
@@ -72,13 +73,13 @@ function homeworldDescription(uwp, government, name, tradeClasses, starport) {
     ];
     let tradeDesc = "";
     for (let i = 0; i < tradeClasses.length; i++) {
-        if (i !==0) {
-            tradeDesc=tradeDesc+", ";
+        if (i !== 0) {
+            tradeDesc = tradeDesc + ", ";
         }
-        tradeDesc=tradeDesc+datatables.tradeFlags[tradeClasses[i]];
+        tradeDesc = tradeDesc + datatables.tradeFlags[tradeClasses[i]];
     }
-    const planet = (uwp[0]===0) ? "an asteroid":`a ${uwpDescriptors[0]}-sized, ${tradeDesc} planet`;
-    const govtDesc = (uwp[4]===0)? "living in total anarchy": `ruled by ${datatables.government[government]}`;
+    const planet = (uwp[0] === 0) ? "an asteroid" : `a ${uwpDescriptors[0]}-sized, ${tradeDesc} planet`;
+    const govtDesc = (uwp[4] === 0) ? "living in total anarchy" : `ruled by ${datatables.government[government]}`;
 
     const worldDescriptionString = `${name} is ${planet} with a ${uwpDescriptors[1]} atmosphere located ${datatables.starport[starport]}. ${name} has a ${uwpDescriptors[5]} civilization ${govtDesc.toLowerCase()}`;
     return worldDescriptionString;

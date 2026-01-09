@@ -90,7 +90,7 @@ export default function CharacterEnlistment({
             const result = careerCheck(enlist, upp, characterName);
             const descriptor = (result[0]) ? "and was admmitted" : "but was rejected";
             const failText = (result[0]) ? "succeeding. Begin your career." : "failing. Make another selection.";
-            const historyStr = `${characterName} applied for position with the ${nextEnlistmentChoice} ${descriptor}.`;
+            const historyStr = `${characterName} applied for as a ${nextEnlistmentChoice} ${descriptor}.`;
             const info = `${result[1]}, ${failText}`
             setWarning(info);
             handleHistoryAdd(historyStr)

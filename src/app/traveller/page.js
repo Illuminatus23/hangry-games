@@ -5,6 +5,7 @@ import { growUp, toTravellerHex, generateUPP, d6 } from "./lib/helpers";
 import CharacterEducationEnlistmentDraft from "./components/CharacterEducationEnlistmentDraft";
 import CharacterEnlistment from "./components/CharacterEnlistment";
 import BasicTerm from "./components/BasicTerm";
+import MusterOut from "./components/MusterOut";
 import { datatables } from "./lib/data";
 
 /**
@@ -283,6 +284,9 @@ export default function CharacterCreation() {
                             : null}
                         {step === "merchants" ?
                             <p>Merchants career</p>
+                            : null}
+                        {step === "retire" ?
+                            <MusterOut career={characterData.career.careername} terms={characterData.career.terms} rank={characterData.career.rank} setSkills={setSkills} skills={skills} />
                             : null}
                     </Section>
                     {characterData.history.length !== 0 ?

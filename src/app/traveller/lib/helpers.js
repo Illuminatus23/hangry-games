@@ -247,7 +247,7 @@ export function generateSystemName() {
         name = name + sylable;
     }
     if (name.length > 12) {
-        name = name.substr(0, 12);
+        name = name.substring(0, 12);
     } else if (name.length === 1) {
         var letterArray = ['a', 'e', 'i', 'o', 'u', 'y'];
         var letter = Math.floor(Math.random() * 5);
@@ -255,6 +255,49 @@ export function generateSystemName() {
     }
     return name;
 }
+export function generateOperationName() {
+    var adjRoll = Math.floor((Math.random() * 26));
+    var nounRoll = Math.floor((Math.random() * 26));
+    var animal = Math.round(Math.random());
+    var adjective = datatables.Specops.adjectives[adjRoll];
+    var nounBase = (animal) ? datatables.Specops.animals : datatables.Specops.nouns;
+    var noun = nounBase[nounRoll];
+    var battleName = 'Operation ' + adjective + ' ' + noun;
+    return battleName;
+}
+
+export function generateBattlename(place) {
+    var data = datatables.Battles;
+    var battleType = data.type[Math.floor((Math.random() * data.type.length))];
+    var nounChance = Math.floor((Math.random() * 18));
+    var noun = '';
+    var battleStarName = generateSystemName();
+    var battleName = '';
+    var position = Math.round(Math.random());
+    if (nounChance <= 6) {
+        var randoSelect = Math.floor((Math.random() * 7));
+        if (randoSelect === 7) {
+            noun = ' the ' + data.theplace[Math.floor((Math.random() * data.theplace.length))];
+        } else if (place === 'space') {
+            noun = ' ' + data.spaceplace[Math.floor((Math.random() * data.spaceplace.length))];
+        } else {
+            noun = ' ' + data.planetplace[Math.floor((Math.random() * data.planetplace.length))];
+        }
+        if (nounChance === 0 || nounChance === 2) {
+            var numberText = ' ' + Math.floor((Math.random() * 9)) + Math.floor((Math.random() * 9)) + Math.floor((Math.random() * 9));
+            noun = noun + numberText;
+        } else if (nounChance === 2 || nounChance === 3) {
+            noun = '\'s' + noun;
+        }
+    }
+    if (position === 1) {
+        battleName = battleType + ' of ' + battleStarName + noun;
+    } else {
+        battleName = battleStarName + noun + ' ' + battleType;
+    }
+    return battleName;
+}
+
 export function handleSchoolApp(upp, school, characterName) {
 
     const testing = false;
@@ -393,7 +436,7 @@ export function generateCheckChances(Throw, Skill, SkillModCheck, DM, SkillTwo, 
     var targetRoll = Throw;
     targetRoll = (Skill < SkillModCheck) ? targetRoll : targetRoll - DM;
     targetRoll = (SkillTwo < SkillModCheckTwo) ? targetRoll : targetRoll - DMTwo;
-    return JRPG.Constants.chanceToDescriptor[targetRoll];
+    return datatables.chanceToDescriptor[targetRoll];
 }
 export function generateEnlistmentChoices(upp, homeworld) {
     const enlistmentPassList = { draft: ["draft"] };
@@ -490,9 +533,20 @@ export function careerCheckSimple(check, upp, characterName) {
     const roll = d6(2, mod);
 
     const result = (roll >= req);
+    const crit = (roll >= req + 4);
     const modStr = (mod !== 0) ? `modified by their ${[check[1]]}` : "";
     const logStr = `${characterName} needed a ${req} to succeed and rolled a ${roll} (${roll - mod}+${mod}) ${modStr} `;
-    return [result, logStr]
+    return [result, logStr, crit]
+}
+
+export function careerCheckSpecReinlist(check, characterName) {
+    //check [5, 'EDU', 9, 2]
+    const req = check[0];
+    const roll = d6(2, 0);
+    const result = (roll >= req);
+    const crit = (roll >= req + 4);
+    const logStr = `${characterName} needed a ${req} to succeed and rolled a ${roll} `;
+    return [result, logStr, crit, (roll === 12)]
 }
 
 function careerCouncilor(upp) {
