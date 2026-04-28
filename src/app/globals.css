@@ -91,7 +91,7 @@ svg.grid g.playerIcon:hover .playerPopup {
 } */
 .logWrapper {
   max-height: 650px;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 .icons {
   display: "inline"
