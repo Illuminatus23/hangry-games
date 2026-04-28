@@ -11,7 +11,7 @@ export default function Home() {
   const [teamsArray, setTeamsArray] = useState(null);
   const [buttonText, setButtonText] = useState('Begin');
   const [roundCount, setRoundCount] = useState(0);
-  const [logContent, setLogContent] = useState([]);
+  const [logArchive, setLogArchive] = useState([]);
 
   function advanceRound() {
     const newLog = [];
@@ -24,8 +24,7 @@ export default function Home() {
       startNewRound(teamsArray, mapHexes, players, newLog, roundCount);
       if (players.filter(p => p.health > 0).length === 1) setButtonText('End');
     }
-    // Spread copies so React detects the state change and re-renders
-    setLogContent(newLog);
+    setLogArchive(prev => [...prev, newLog]);
     setRoundCount(r => r + 1);
     setPlayers([...players]);
     setMapHexes([...mapHexes]);
@@ -38,7 +37,7 @@ export default function Home() {
     setMapHexes(generatedMap);
     setPlayers(generatedPlayers);
     setTeamsArray(generatedTeams);
-    setLogContent(generatedLogContent);
+    setLogArchive([generatedLogContent]);
   }, []);
 
   return (
@@ -56,7 +55,7 @@ export default function Home() {
         }
         {teamsArray &&
           <div className="p-5 bg-stone-900 rounded-lg relative logColumn">
-            <PublicLog logContent={logContent} />
+            <PublicLog logArchive={logArchive} />
             <div className="text-center inset-x-0 bottom-0 absolute mb-5">
               {buttonText !== "End" ? (
                 <button
