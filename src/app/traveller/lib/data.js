@@ -500,6 +500,7 @@ export const datatables = {
         'Vehicle': ['Helicopter', 'Jet Aircraft', 'Lighter-than-Air Craft', 'Propeller Aircraft', 'Small Watercraft', 'Large Watercraft', 'Grav Vehicle', 'Ships Boat', 'Tracked Vehicles', 'Wheeled Vehicles', 'Hovercraft'],
         'Vice': ['Bribery', 'Disguise', 'Forgery', 'Gambling', 'Intrusion', 'Streetwise'],
     },
+    Weapons: ["Advanced Combat Rifle", "Assault Rifle", "Autocannon", "Battle Axe", "Bayonet", "Blade", "Blowgun", "Body Pistol", "Bola", "Boomerang", "Bow", "Broadsword", "Carbine", "Crossbow", "Cudgel", "Cutlass", "Dagger", "Archaic Firearm", "Foil", "Fusion Gun", "Gauss Rifle", "Grenade Launcher", "Halberd", "Hand Axe", "Laser Pistol", "Laser Rifle", "Light Assault Gun", "Machine Gun", "Neural Pistol", "Neural Rifle", "Pike", "Pistol", "Plasma Gun", "Revolver", "Rifle", "Sling", "Snub Pistol", "Spear", "Submachinegun", "Sword", "VRF Gauss Gun"],
     Basics: {
         flyer: {
             survival: [5, 'DEX', 8, 2],
@@ -516,7 +517,7 @@ export const datatables = {
             specDutyDesc: 'saw some air combat during the battle name',
             muster: {
                 cash: [2, 5, 10, 10, 10, 20, 30],
-                benefits: ['Low passage', 'EDU+1', 'Weapon', 'Weapon', 'High passage', 'Mid passage', 'SOC+1']
+                benefits: ['Low passage', 'EDU', 'Weapon', 'Weapon', 'High passage', 'Mid passage', 'SOC']
             }
         },
         sailor: {
@@ -534,7 +535,7 @@ export const datatables = {
             specDutyDesc: 'saw some sea combat during the battle name',
             muster: {
                 cash: [2, 5, 10, 10, 10, 20, 30],
-                benefits: ['Low passage', 'INT+1', 'EDU+1', 'Weapon', 'SOC+1', 'High passage', 'Traveller Aid Membership']
+                benefits: ['Low passage', 'INT', 'EDU', 'Weapon', 'SOC', 'High passage', 'Traveller Aid Membership']
             }
         },
         law: {
@@ -552,7 +553,7 @@ export const datatables = {
             specDutyDesc: ['solved a high profile murder of a nobel', 'cracked a cold case and put a predator behind bars', 'took on the local organized crime ring, and won', 'put a corrupt politician behind bars', 'shut down a smuggling operation'],
             muster: {
                 cash: [1, 2, 5, 7.5, 10, 25, 50],
-                benefits: ['Low passage', 'INT+1', 'Forensics kit', 'Weapon', 'High passage', 'SOC+1', 'Traveller Aid Membership']
+                benefits: ['Low passage', 'INT', 'Forensics kit', 'Weapon', 'High passage', 'SOC', 'Traveller Aid Membership']
             }
         },
         doctor: {
@@ -570,7 +571,7 @@ export const datatables = {
             specDutyDesc: ['served as a medic in a war torn system', 'was mentored by a well-known surgon', 'began their own private practice', 'did break through research on a deadly disease', 'studied alien physiology'],
             muster: {
                 cash: [20, 20, 20, 30, 40, 60, 100],
-                benefits: ['Low passage', 'EDU+1', 'EDU+1', 'Weapon', 'Medical instruments', 'Mid passage', '']
+                benefits: ['Low passage', 'EDU', 'EDU', 'Weapon', 'Medical instruments', 'Mid passage', '']
             }
         },
         diplomat: {
@@ -588,7 +589,7 @@ export const datatables = {
             specDutyDesc: ['was part of a delegation that brokered an important peace treaty', 'was elected for a term as a local official', 'was mentored by a renowned politicial', 'helped draft major planetary reforms', 'served as an ambassador in a foriegn system'],
             muster: {
                 cash: [2, 5, 10, 10, 10, 20, 30],
-                benefits: ['Low passage', 'INT+1', 'EDU+2', 'Weapon', 'SOC+1', 'High passage', 'Travellers Aid membership']
+                benefits: ['Low passage', 'INT', 'EDU+2', 'Weapon', 'SOC', 'High passage', 'Travellers Aid membership']
             }
         },
         bureaucrat: {
@@ -606,7 +607,7 @@ export const datatables = {
             specDutyDesc: ['brokered a major trade deal', 'served the board of directors of a megacorporation', 'served on a multi-system trade comission', 'was mentored by a highly successful investor', 'met all their KPIs and exceeded expectations'],
             muster: {
                 cash: [0, 0, 10, 10, 40, 40, 80],
-                benefits: ['Low passage', 'Mid passage', '', 'Watch', '', 'High passage', 'SOC+1']
+                benefits: ['Low passage', 'Mid passage', '', 'Watch', '', 'High passage', 'SOC']
             }
         },
         scientist: {
@@ -624,7 +625,7 @@ export const datatables = {
             specDutyDesc: ['worked on cutting edge technology for a local government', 'was mentored by one of the top researchers in the galaxy', 'created many household inventions', 'completed some defense contracts to develop new weaponry', 'founded a think tank to study fringe fields of science'],
             muster: {
                 cash: [1, 2, 5, 10, 20, 30, 40],
-                benefits: ['Low passage', 'Mid passage', 'High passage', 'SOC+1', 'Weapon', 'Lab ship']
+                benefits: ['Low passage', 'Mid passage', 'High passage', 'SOC', 'Weapon', 'Lab ship']
             }
         },
         belter: {
@@ -642,7 +643,7 @@ export const datatables = {
             specDutyDesc: ['discovered a forgotten belt rich in minerals', 'successfully fought off a gang of claim jumpers', 'was mentored by the grittiest, most ornery prospector in the galaxy', 'developed a new efficient mining technique', 'stumbled on some interesting ruins'],
             muster: {
                 cash: [0, 0, 1, 10, 100, 100, 100],
-                benefits: ['Low passage', 'INT+1', 'Weapon', 'High passage', 'Traveller Aid membership', 'Seeker']
+                benefits: ['Low passage', 'INT', 'Weapon', 'High passage', 'Traveller Aid membership', 'Seeker']
             }
         },
         pirate: {
@@ -659,7 +660,7 @@ export const datatables = {
             }, specDutyDesc: ['helped take a cruiseliner with out a single casualty', 'ransomed a nobel family and escaped', 'helped defeat a rival crew in deep space', 'was captured, but was freed in a daring escape', 'captured a government transport of high quality goods'],
             muster: {
                 cash: [0, 0, 1, 10, 50, 50, 50],
-                benefits: ['Low passage', 'INT+1', 'Weapon', 'Letter of marque', 'SOC+-1', 'Mid passage', 'Corsair']
+                benefits: ['Low passage', 'INT', 'Weapon', 'Letter of marque', 'SOC+-1', 'Mid passage', 'Corsair']
             }
         },
         rogue: {
@@ -677,7 +678,7 @@ export const datatables = {
             specDutyDesc: ['started a minor crime syndicate planetside', 'robbed a high security bank and got away', 'was arrested, but escaped', 'conned a noble out of some valuables', 'smuggled valuables into the local system'],
             muster: {
                 cash: [0, 0, 10, 10, 50, 100, 100],
-                benefits: ['Low passage', 'SOC+1', 'Weapon', 'Weapon', 'High passage', 'Traveller Aid membership']
+                benefits: ['Low passage', 'SOC', 'Weapon', 'Weapon', 'High passage', 'Traveller Aid membership']
             }
         },
         hunter: {
@@ -695,7 +696,7 @@ export const datatables = {
             specDutyDesc: ['discovered an unknown species', 'took down a predator of record breaking size', 'spent a full year in the wilderness', 'was mentored by a famous hunter', 'saved a species of exotic mammals through a capture and release program'],
             muster: {
                 cash: [1, 1, 5, 5, 10, 100, 100],
-                benefits: ['Low passage', 'High passage', 'Weapon', 'Weapon', 'Weapon', 'Safari Ship']
+                benefits: ['Low passage', 'High passage', 'Weapon', 'Weapon', 'Weapon', 'Safari ship']
             }
         },
         barbarian: {

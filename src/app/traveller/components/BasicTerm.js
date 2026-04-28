@@ -20,7 +20,7 @@ export default function BasicTerm({
     const career = characterData.career?.careername;
     const careerData = datatables.Basics?.[career];
     const skillTables = careerData?.skills ?? {};
-    const canPromote = careerData.position[0] !== 99;
+    const canPromote = careerData?.position[0] !== 99;
     const skillData = datatables.rank?.[career]?.skills;
     const terms = characterData.career.terms + 1;
 
@@ -131,13 +131,21 @@ export default function BasicTerm({
             handleHistoryAdd?.(
                 `Starting a career as a ${career}, ${characterName} gained experience with ${resolvedPicks.join(" and ")}.`
             );
-
+        let skillGained = false;
+        /* testing
         const termResults = {
             charSurvival: careerCheckSimple(careerData.survival, upp, characterName),
             charPosition: (canPromote) ? careerCheckSimple(careerData.position, upp, characterName) : [false, ""],
             charPromo: (canPromote) ? careerCheckSimple(careerData.promotion, upp, characterName) : [false, ""],
             charSpec: careerCheckSpecReinlist(careerData.specduty, characterName),
             charReenlist: careerCheckSpecReinlist(careerData.reenlist, characterName)
+        } */
+        const termResults = {
+            charSurvival: [true, "testing", true],
+            charPosition: (canPromote) ? [true, "testing", true] : [false, ""],
+            charPromo: (canPromote) ? [true, "testing", true] : [false, ""],
+            charSpec: [true, "more test", false, false],
+            charReenlist: [true, "more test", false, false],
         }
 
         if (career === "belter") {
@@ -149,7 +157,6 @@ export default function BasicTerm({
         }
         warningText = `Survival: ${termResults.charSurvival[1]}. `;
 
-        console.log(termResults)
         if (!termResults.charSurvival[0]) {
             if (careerData.survival[0] <= 4) {
                 handleHistoryAdd?.(`Even life as a ${career} is not without its risks. ${characterName} died in a freak accident. The story ends here.`);
@@ -163,12 +170,14 @@ export default function BasicTerm({
             } else if (careerData.survival[0] >= 6) {
                 handleHistoryAdd?.(`Life as a ${career} can be brutal and violent. ${characterName} dies in the line of duty. The story ends here.`);
             }
+            setStep("End")
         } else {
             historyText = historyText + `${characterName} spent 4 years as a ${career}. `;
             //lived!
             if (termStep !== "init" && !characterData.career?.officer && canPromote) { // commish
                 warningText = warningText + `  Position: ${termResults.charPosition[1]}`;
                 if (termResults.position[0]) {
+                    skillGained = true;
                     const ranks = datatables.rank[career]["O"];
                     if (termResults.charPosition[2]) {
                         historyText = historyText + `${characterName} performed well and was made a ${ranks[1]} in recognition of their performance. `;
@@ -181,7 +190,7 @@ export default function BasicTerm({
                     setCharacterData((prev) => (
                         {
                             ...prev, ["career"]: {
-                                ...prev,
+                                ...prev.career,
                                 rank: 1,
                                 officer: true,
                             }
@@ -195,6 +204,7 @@ export default function BasicTerm({
                     const ranks = datatables.rank[career]["O"];
                     const newRank = characterData.career.rank + 1;
                     //handleHistoryAdd?.(`${characterName} a good ${career} and was promoted to ${ranks[newRank]}.`);
+                    skillGained = true;
                     if (termResults.charPromo[2]) {
                         historyText = historyText + `${characterName} an excellent ${career} and was promoted to ${ranks[newRank]}. `;
                         setPicksRemaining((prev) => Math.max(0, prev + 2));
@@ -206,7 +216,7 @@ export default function BasicTerm({
                     setCharacterData((prev) => (
                         {
                             ...prev, ["career"]: {
-                                ...prev,
+                                ...prev.career,
                                 rank: newRank,
                             }
                         }
@@ -225,10 +235,12 @@ export default function BasicTerm({
                     descriptor = datatables.Basics[career].specDutyDesc[rando];
                 }
                 historyText = historyText + `During that time ${characterName} ${descriptor}. `;
+                skillGained = true;
                 if (termResults.charSpec[2]) {
-                    setPicksRemaining((prev) => Math.max(0, prev + 2));
+                    setPicksRemaining((prev) => prev + 2);
                 } else {
-                    setPicksRemaining((prev) => Math.max(0, prev + 1));
+                    setPicksRemaining((prev) => prev + 1);
+                    console.log(termResults.charSpec)
                 }
             }
             warningText = warningText + `Reinlist: ${termResults.charReenlist[1]}. `;
@@ -240,16 +252,41 @@ export default function BasicTerm({
                 historyText = historyText + `At the end of 4 years, social and political presure forced them out of their career. `
                 setTermStep('retire')
             } else {
-                setTermStep('reinlistChoice')
+
+                if (!skillGained) {
+                    setTermStep('reinlistChoice')
+                }
             }
         }
         //setTermStep('results');
         setWarning(warningText)
         handleHistoryAdd(historyText)
     }
+    const handleRetire = () => {
+        const currentVal = characterData.career.terms + 1;
+        const currentAge = characterData.age + 4;
+
+        setCharacterData((prev) => (
+            {
+                ...prev, ["age"]:
+                    currentAge
+            }
+
+        ));
+        setCharacterData((prev) => (
+            {
+                ...prev, ["career"]: {
+                    ...prev.career,
+                    terms: currentVal,
+                }
+            }
+        ));
+        setStep('retire');
+    }
+
     return (
         <div>
-            <h2 className="mt-section-title">Career Term {terms}</h2>
+            <h2 className="mt-section-title">Career Term {terms} {picksRemaining}</h2>
 
             {warning !== "" && (
                 <p className="mt-label" style={{ marginBottom: "0.5rem", color: "red" }}>
@@ -297,6 +334,7 @@ export default function BasicTerm({
             )}
             {(termStep === "retire" || termStep === 'forced' || termStep === 'reinlistChoice') ?
                 <div>
+                    <p>{termStep}</p>
                     {termStep !== 'retire' ?
                         <button
                             className="mt-btn"
@@ -313,7 +351,7 @@ export default function BasicTerm({
                             className="mt-btn"
                             type="button"
                             onClick={() => {
-                                setStep('retire');
+                                handleRetire();
                             }}
                         >
                             Retire

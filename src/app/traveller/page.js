@@ -76,8 +76,12 @@ export default function CharacterCreation() {
         awards: [],
         grad: [false, false],
         medgrad: [false, false],
+        cash: 0,
+        ship: "",
+        shipshares: 0,
     });
     const [skills, setSkills] = useState([]); //[skillname, value]
+    const [gear, setGear] = useState([]); //[skillname, value]
     const [step, setStep] = useState("initial")
     const [warning, setWarning] = useState("");
 
@@ -121,8 +125,10 @@ export default function CharacterCreation() {
         const peerage = (characterData.SOC >= 10) ? `${datatables.Title.M[characterData.SOC - 9][1]} ` : "";
         const medgrad = (characterData.awards.includes("med school graduate")) ? " MD" : "";
         let rankName = "";
-        if (characterData.career.careername !== "") {
+        if (characterData.career.careername !== "" && characterData.career.careername !== "noble") {
             const ranktable = datatables.rank[characterData.career.careername];
+            //console.log(characterData)
+            //console.log(ranktable)
             const rank = (characterData.career.officer) ? ranktable["O"] : ranktable["E"];
             rankName = `${rank[characterData.career.rank][1]} `
         }
@@ -286,7 +292,7 @@ export default function CharacterCreation() {
                             <p>Merchants career</p>
                             : null}
                         {step === "retire" ?
-                            <MusterOut career={characterData.career.careername} terms={characterData.career.terms} rank={characterData.career.rank} setSkills={setSkills} skills={skills} />
+                            <MusterOut characterData={characterData} setCharacterData={setCharacterData} setSkills={setSkills} skills={skills} setGear={setGear} />
                             : null}
                     </Section>
                     {characterData.history.length !== 0 ?
@@ -415,6 +421,25 @@ export default function CharacterCreation() {
                                 </tbody>
                             </table>
                         </Section> : null}
+
+                    <Section title="Gear">
+                        <table className="mt-table">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        Credits: {characterData.cash}
+                                    </td>
+                                </tr>
+                                {gear.map((gear, index) => (
+                                    <tr key={index}>
+                                        <td>
+                                            {gear}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </Section>
                 </div>
             </div>
         </div>

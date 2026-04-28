@@ -515,7 +515,7 @@ export function careerCheck(check, upp, characterName) {
     let mod = (pSkill1 >= target1) ? 1 : 0;
     if (pSkill2 >= target2) { mod = mod + 2 }
     const roll = d6(2, mod);
-    console.log(check)
+    //console.log(check)
 
     const result = (roll >= req);
     const modStr = (mod !== 0) ? `modified by their ${[check.skill1[0]]} and ${[check.skill2[0]]}` : "";
