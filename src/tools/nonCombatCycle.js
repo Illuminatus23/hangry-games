@@ -1,6 +1,7 @@
 import { craftableWeapons, weapons } from "../app/data/staticData";
 import { getValidTravelHexes, updateHexLocation } from "./helpers";
 import { d10, hexLookup, selectRandom } from "./utils";
+import { logDeath } from "./logStyles";
 
 export function nonCombatCycleDecisions(player) {
     const hasWeaponMod = (player.weapon !== 'bare fist') ? 2 : 0;
@@ -71,7 +72,7 @@ export function nonCombatCycle(playersMoving, playersNonCombat, mapHexes, logCon
             player.health = 0;
             player.location = 'dead';
             player.death = 'killed by a shrinking map.';
-            logContent.push(player.name + ', cut off from escape in the ' + player.locationname + ', is killed by a shrinking map.');
+            logContent.push(logDeath(player.name + ', cut off from escape in the ' + player.locationname + ', is killed by a shrinking map.'));
         }
     });
 }

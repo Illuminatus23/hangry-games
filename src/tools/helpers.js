@@ -1,6 +1,7 @@
 import { names, weapons, playerHexColors, tempStaticPlayers, mapData, weaponsStats } from "../app/data/staticData";
 import { combatCycleNew } from "./combatCycle";
 import { d8, d10, selectFromHat, selectRandom, hexLookup } from "./utils";
+import { logDissolve, logShrink, logWinner } from "./logStyles";
 
 export function generateMap(size) {
     const hexCount = size - 6;
@@ -180,7 +181,7 @@ export function firstRound(mapHexes, players, logContent, roundCount) {
     const leaders = players.filter(player => player.teamleader === player.id);
 
     soloPlayers.forEach(player => {
-        if (d10() > player.aggro + 2) {
+        if (d10() > player.aggro - 2) {
             const randomHex = selectRandom(validHexes);
             player = weaponSearch(player, logContent, 2);
             player = updateHexLocation(mapHexes, randomHex, player);
@@ -226,34 +227,39 @@ export function startNewRound(teamsArray, mapHexes, players, logContent, roundCo
         const leaderId = leader.id;
 
         if (players[leaderId - 1].health <= 0) {
+            team[1].forEach(record => { players[record.id - 1].teamleader = -1; });
             players[leaderId - 1].teamleader = -1;
             teamsArray.splice(idx, 1);
-            logContent.push("With " + leader.name + " dead their team disolves.");
+            logContent.push(logDissolve("With " + leader.name + " dead their team dissolves."));
         } else {
             const roll = d10();
             if (roll > leader.lead) {
                 team[1].forEach(record => { players[record.id - 1].teamleader = -1; });
                 players[leaderId - 1].teamleader = -1;
                 teamsArray.splice(idx, 1);
-                logContent.push(leader.name + "'s team mutinies and the alliance disolves.");
+                logContent.push(logDissolve(leader.name + "'s team mutinies and the alliance dissolves."));
             } else {
-                const survivors = team[1].filter(member => {
+                // Remove dead members before loyalty checks so they don't count toward team size
+                const liveMembers = team[1].filter(m => players[m.id - 1].health > 0);
+                const survivors = liveMembers.filter(member => {
                     if (d10() > players[member.id - 1].lead) {
                         players[member.id - 1].teamleader = -1;
-                        logContent.push(member.name + " leaves their team.");
+                        logContent.push(logDissolve(member.name + " leaves their team."));
                         return false;
                     }
                     return true;
                 });
                 team[1] = survivors;
-                if (survivors.length === 1) {
-                    players[survivors[0].id - 1].teamleader = -1;
+                if (survivors.length === 0) {
+                    players[leaderId - 1].teamleader = -1;
+                    teamsArray.splice(idx, 1);
+                    logContent.push(logDissolve(leader.name + " is left without a team."));
                 }
             }
         }
     }
 
-    combatCycleNew(livingPlayers, mapHexes, logContent, false, roundCount);
+    combatCycleNew(livingPlayers, mapHexes, logContent, false, roundCount, [], teamsArray);
 
     if (players.filter(player => player.health > 0).length === 1) {
         crownWinner(players.filter(player => player.health > 0)[0], logContent);
@@ -266,14 +272,14 @@ export function shrinkMap(players, mapHexes, logContent) {
     const activeHexes = mapHexes.filter(hex => hex.isValid);
     if (Math.ceil(livingPlayers.length / 2) < activeHexes.length) {
         const targetHex = activeHexes[activeHexes.length - 1];
-        logContent.push(targetHex.biome + ' is being deactivated');
+        logContent.push(logShrink(targetHex.biome + ' is being deactivated'));
         targetHex.isValid = false;
         targetHex.styleName = "ravine";
     }
 }
 
 function crownWinner(winner, logContent) {
-    logContent.push(winner.name + ' has won the Hangry Games!');
+    logContent.push(logWinner(winner.name + ' has won the Hangry Games!'));
 }
 
 export function getValidTravelHexes(currentHex, mapHexes) {

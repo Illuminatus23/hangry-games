@@ -4,6 +4,7 @@ import HexMapAnimated from "./components/hexMapAnimated";
 import PlayerList from "./components/playerList";
 import PublicLog from "./components/publicLog";
 import { generatePlayers, generateMap, firstRound, startNewRound } from "@/tools/helpers";
+import { logRound } from "@/tools/logStyles";
 
 export default function Home() {
   const [mapHexes, setMapHexes] = useState(null);
@@ -17,10 +18,10 @@ export default function Home() {
     const newLog = [];
     if (roundCount === 0) {
       setButtonText('Advance Round');
-      newLog.push(<b>Round 1</b>);
+      newLog.push(logRound(1));
       firstRound(mapHexes, players, newLog, roundCount);
     } else {
-      newLog.push(<b>Round {roundCount + 1}</b>);
+      newLog.push(logRound(roundCount + 1));
       startNewRound(teamsArray, mapHexes, players, newLog, roundCount);
       if (players.filter(p => p.health > 0).length === 1) setButtonText('End');
     }
