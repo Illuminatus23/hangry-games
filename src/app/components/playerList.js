@@ -18,7 +18,7 @@ export default function PlayerList({ players }) {
       } else if (int > 4) {
         return "strategist"
       }
-      return "eratic"
+      return "erratic"
     } else {
       if (int > 6) {
         return "intelligent"
@@ -79,7 +79,7 @@ export default function PlayerList({ players }) {
   }
 
   return sortedPlayers.map((player, idx) =>
-    <div key={player.id} className={bordercolor(player)} style={{ borderColor: playerHexColors[player.teamleader - 1] }} >
+    <div key={player.id} className={bordercolor(player)} style={{ borderColor: player.teamleader !== -1 ? playerHexColors[player.teamleader - 1] : undefined }} >
       <div className={(player.health <= 0) ? "text-gray-600" : ""}>
         <h3 className={(player.health <= 0) ? "text-xl text-red-600" : "text-xl"}>{player.name}
           {' '}<GiPerson className="inline" fill={player.color} />{' '}

@@ -77,7 +77,7 @@ export const weaponsStats = {
         skill: 'dex',
         verb: 'shoots',
         ammo: 25,
-        damage: Math.floor(Math.random() * 3) + 1,
+        damage: () => Math.floor(Math.random() * 3) + 1,
         icon: <GiPistolGun title="pistol" color="white" className="inline" />
     },
     'uzi': {
@@ -85,7 +85,7 @@ export const weaponsStats = {
         skill: 'dex',
         verb: 'shoots',
         ammo: 25,
-        damage: Math.floor(Math.random() * 3) + 1,
+        damage: () => Math.floor(Math.random() * 3) + 1,
         icon: <GiUzi title="uzi" color="white" className="inline" />
     },
     'bow': {
@@ -93,7 +93,7 @@ export const weaponsStats = {
         skill: 'dex',
         verb: 'shoots',
         ammo: 25,
-        damage: Math.floor(Math.random() * 3) + 1,
+        damage: () => Math.floor(Math.random() * 3) + 1,
         icon: <GiHighShot title="bow" color="white" className="inline" />
     },
     'grenade': {
@@ -101,7 +101,7 @@ export const weaponsStats = {
         skill: 'dex',
         verb: 'attacks',
         ammo: 100,
-        damage: 3,
+        damage: () => 3,
         icon: <GiGrenade title="grenade" color="white" className="inline" />
     },
     'knife': {
@@ -109,7 +109,7 @@ export const weaponsStats = {
         skill: 'dex',
         verb: 'stabs',
         ammo: 0,
-        damage: Math.floor(Math.random() * 2) + 1,
+        damage: () => Math.floor(Math.random() * 2) + 1,
         icon: <GiBowieKnife title="knife" color="white" className="inline" />
     },
     'harpoon chain': {
@@ -117,23 +117,23 @@ export const weaponsStats = {
         skill: 'dex',
         verb: 'swings',
         ammo: 0,
-        damage: 2,
-        icon: <GiHarpoonChain title="knife" color="white" className="inline" />
+        damage: () => 2,
+        icon: <GiHarpoonChain title="harpoon chain" color="white" className="inline" />
     },
     'axe': {
         speed: 6,
         skill: 'str',
         verb: 'swings',
         ammo: 0,
-        damage: Math.floor(Math.random() * 2) + 1,
-        icon: <GiFireAxe title="knife" color="white" className="inline" />
+        damage: () => Math.floor(Math.random() * 2) + 1,
+        icon: <GiFireAxe title="axe" color="white" className="inline" />
     },
     'club': {
         speed: 5,
         skill: 'str',
         verb: 'swings',
         ammo: 0,
-        damage: Math.floor(Math.random() * 2) + 1,
+        damage: () => Math.floor(Math.random() * 2) + 1,
         icon: <GiWoodClub title="club" color="white" className="inline" />
     },
     'spear': {
@@ -141,7 +141,7 @@ export const weaponsStats = {
         skill: 'str',
         verb: 'stabs',
         ammo: 0,
-        damage: Math.floor(Math.random() * 2) + 1,
+        damage: () => Math.floor(Math.random() * 2) + 1,
         icon: <GiSpearHook title="spear" color="white" className="inline" />
     },
     'boomerang': {
@@ -149,7 +149,7 @@ export const weaponsStats = {
         skill: 'dex',
         verb: 'throws',
         ammo: 0,
-        damage: 1,
+        damage: () => 1,
         icon: <GiBoomerang title="boomerang" color="white" className="inline" />
     },
     'bare fist': {
@@ -157,7 +157,7 @@ export const weaponsStats = {
         skill: 'str',
         verb: 'punches',
         ammo: 0,
-        damage: 1,
+        damage: () => 1,
         icon: <GiFist title="bare fist" color="white" className="inline" />
     },
 }

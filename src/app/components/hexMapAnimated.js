@@ -1,7 +1,7 @@
 
 import { useEffect, useRef } from 'react';
 import { HexGrid, Layout, Hexagon, Text, Pattern, Path, Hex, GridGenerator } from 'react-hexgrid';
-import { motion, delay } from 'motion/react';
+import { motion } from 'motion/react';
 import { playerHexColors } from '@/app/data/staticData';
 import { IconContext } from 'react-icons';
 import { GiPerson, GiHastyGrave } from 'react-icons/gi';
