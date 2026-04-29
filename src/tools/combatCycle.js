@@ -1,7 +1,7 @@
 import { weaponsStats } from "../app/data/staticData";
 import { nonCombatCycleDecisions, nonCombatCycle } from "./nonCombatCycle";
 import { d10, d100, selectRandom } from "./utils";
-import { logBattle, logHit, logDeath, logAlliance, logAllianceCheck } from "./logStyles";
+import { logBattle, logBattleList, logMiss, logHit, logDeath, logAlliance, logAllianceCheck } from "./logStyles";
 
 export function combatCycleNew(livingPlayers, mapHexes, logContent, isFirstRound, roundCount = 1, betrayers = [], teamsArray = []) {
     const availableHexes = mapHexes.map(hex =>
@@ -61,7 +61,7 @@ export function hexBattle(currentHex, hexName, battle, logContent, isFirstRound,
         const defenders = battle.filter(def =>
             def.health > 0 &&
             (def.teamleader !== attacker.teamleader ||
-             (def.teamleader === -1 && def.id !== attacker.id))
+                (def.teamleader === -1 && def.id !== attacker.id))
         );
 
         const validHex = currentHex.isValid;
@@ -89,6 +89,8 @@ export function hexBattle(currentHex, hexName, battle, logContent, isFirstRound,
         if (targets.length !== 0) {
             if (!announced) {
                 logContent.push(logBattle("Battle in the " + hexName));
+                const names = targets.map(target => target.name);
+                logContent.push(logBattleList(names.join(', ') + " and " + attacker.name));
                 announced = true;
             }
 
@@ -191,7 +193,7 @@ export function attackResults(attacker, targets, currentHex, roundCount, inBattl
                 }
             }
         }
-        return attacker.name + ' ' + weaponsStats[attacker.weapon].verb + ' ' + defender.name + ' with a ' + attacker.weapon + ' but misses.';
+        return logMiss(attacker.name + ' ' + weaponsStats[attacker.weapon].verb + ' ' + defender.name + ' with a ' + attacker.weapon + ' but misses.');
     }
 
     return null;

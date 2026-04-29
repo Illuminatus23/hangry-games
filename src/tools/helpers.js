@@ -1,7 +1,7 @@
 import { names, weapons, playerHexColors, tempStaticPlayers, mapData, weaponsStats } from "../app/data/staticData";
 import { combatCycleNew } from "./combatCycle";
 import { d8, d10, selectFromHat, selectRandom, hexLookup } from "./utils";
-import { logDissolve, logShrink, logWinner } from "./logStyles";
+import { logDissolve, logShrink, logWinner, logFailedSearch } from "./logStyles";
 
 export function generateMap(size) {
     const hexCount = size - 6;
@@ -175,19 +175,54 @@ export function writeTeamLog(teams, logContent = []) {
     return logContent;
 }
 
+// Returns the weapon name if found, null if not. Caller handles all logging.
+function firstRoundSearch(player, modifier, failedSearchers) {
+    if (d10() <= player.find + modifier) {
+        const weapon = selectRandom(weapons);
+        player.weapon = weapon;
+        player.speed = weaponsStats[weapon].speed;
+        return weapon;
+    }
+    failedSearchers.push(player.name);
+    return null;
+}
+
+function logBatchedFailedSearches(failedSearchers, logContent) {
+    if (failedSearchers.length === 0) return;
+    const n = failedSearchers.length;
+    let names;
+    if (n === 1) {
+        names = failedSearchers[0];
+    } else if (n === 2) {
+        names = failedSearchers[0] + ' and ' + failedSearchers[1];
+    } else {
+        names = failedSearchers.slice(0, -1).join(', ') + ', and ' + failedSearchers[n - 1];
+    }
+    const verb = n === 1 ? ' searches' : ' all search';
+    logContent.push(logFailedSearch(names + verb + ' for a weapon and find nothing!'));
+}
+
 export function firstRound(mapHexes, players, logContent, roundCount) {
     const validHexes = getValidTravelHexes([0, 0, 0], mapHexes);
     const soloPlayers = players.filter(player => player.teamleader === -1);
     const leaders = players.filter(player => player.teamleader === player.id);
+    const failedSearchers = [];
 
     soloPlayers.forEach(player => {
         if (d10() > player.aggro - 2) {
             const randomHex = selectRandom(validHexes);
-            player = weaponSearch(player, logContent, 2);
+            const foundWeapon = firstRoundSearch(player, 2, failedSearchers);
             player = updateHexLocation(mapHexes, randomHex, player);
-            logContent.push('Then, ' + player.name + ' retreats to the ' + player.locationname + '.');
+            if (foundWeapon) {
+                logContent.push(player.name + ' searches for a weapon and finds a ' + foundWeapon + ' and retreats to the ' + player.locationname + '.');
+            } else {
+                logContent.push('Then, ' + player.name + ' retreats to the ' + player.locationname + '.');
+            }
         } else {
-            player = weaponSearch(player, logContent, 2);
+            const foundWeapon = firstRoundSearch(player, 2, failedSearchers);
+            if (foundWeapon) {
+                logContent.push(player.name + ' searches for a weapon and finds a ' + foundWeapon + '!');
+            }
         }
     });
 
@@ -195,25 +230,33 @@ export function firstRound(mapHexes, players, logContent, roundCount) {
         if (d10() > leader.aggro) {
             const randomHex = selectRandom(validHexes);
             leader = updateHexLocation(mapHexes, randomHex, leader);
-            leader = weaponSearch(leader, logContent, 2);
+            const leaderWeapon = firstRoundSearch(leader, 2, failedSearchers);
             players.forEach(player => {
                 if (player.teamleader === leader.id && player.id !== leader.id) {
-                    player = weaponSearch(player, logContent, 3);
+                    firstRoundSearch(player, 3, failedSearchers);
                     player = updateHexLocation(mapHexes, randomHex, player);
                 }
             });
-            logContent.push('Then ' + leader.name + ' retreats to the ' + leader.locationname + '. Their team follows.');
+            if (leaderWeapon) {
+                logContent.push(leader.name + ' finds a ' + leaderWeapon + ' and retreats to the ' + leader.locationname + '. Their team follows.');
+            } else {
+                logContent.push('Then ' + leader.name + ' retreats to the ' + leader.locationname + '. Their team follows.');
+            }
         } else {
-            leader = weaponSearch(leader, logContent, 2);
+            const leaderWeapon = firstRoundSearch(leader, 2, failedSearchers);
+            if (leaderWeapon) {
+                logContent.push(leader.name + ' searches for a weapon and finds a ' + leaderWeapon + '!');
+            }
             players.forEach(player => {
                 if (player.teamleader === leader.id && player.id !== leader.id) {
-                    player = weaponSearch(player, logContent, 3);
+                    firstRoundSearch(player, 3, failedSearchers);
                 }
             });
             logContent.push('Then ' + leader.name + ' leads their team to fight in the arena.');
         }
     });
 
+    logBatchedFailedSearches(failedSearchers, logContent);
     combatCycleNew(players, mapHexes, logContent, true);
 }
 
@@ -272,7 +315,7 @@ export function shrinkMap(players, mapHexes, logContent) {
     const activeHexes = mapHexes.filter(hex => hex.isValid);
     if (Math.ceil(livingPlayers.length / 2) < activeHexes.length) {
         const targetHex = activeHexes[activeHexes.length - 1];
-        logContent.push(logShrink(targetHex.biome + ' is being deactivated'));
+        logContent.push(logShrink('The ' + targetHex.biome + ' is being deactivated'));
         targetHex.isValid = false;
         targetHex.styleName = "ravine";
     }

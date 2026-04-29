@@ -107,7 +107,7 @@ export const weaponsStats = {
     'knife': {
         speed: 5,
         skill: 'dex',
-        verb: 'stabs',
+        verb: 'stabs at',
         ammo: 0,
         damage: () => Math.floor(Math.random() * 2) + 1,
         icon: <GiBowieKnife title="knife" color="white" className="inline" />
@@ -139,7 +139,7 @@ export const weaponsStats = {
     'spear': {
         speed: 4,
         skill: 'str',
-        verb: 'stabs',
+        verb: 'stabs at',
         ammo: 0,
         damage: () => Math.floor(Math.random() * 2) + 1,
         icon: <GiSpearHook title="spear" color="white" className="inline" />
@@ -155,7 +155,7 @@ export const weaponsStats = {
     'bare fist': {
         speed: 9,
         skill: 'str',
-        verb: 'punches',
+        verb: 'swings at',
         ammo: 0,
         damage: () => 1,
         icon: <GiFist title="bare fist" color="white" className="inline" />

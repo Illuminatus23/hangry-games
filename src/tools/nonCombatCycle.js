@@ -22,8 +22,8 @@ export function nonCombatCycle(playersMoving, playersNonCombat, mapHexes, logCon
         } else if (player.weapon === 'bare fist') {
             if (
                 (player.locationname === 'arena' ||
-                 player.locationname === 'old fort' ||
-                 player.locationname === 'old shed') &&
+                    player.locationname === 'old fort' ||
+                    player.locationname === 'old shed') &&
                 findPassCheck
             ) {
                 const newWeapon = selectRandom(weapons);
@@ -61,6 +61,9 @@ export function nonCombatCycle(playersMoving, playersNonCombat, mapHexes, logCon
             randomHex = busyHexes[0];
         } else if (!isAggressive && emptyHexes.length > 0) {
             reason = ' looking for a place to lay low';
+            randomHex = selectRandom(emptyHexes);
+        } else if (emptyHexes.length > 0 && player.health < 2) {
+            reason = ' trying to escape';
             randomHex = selectRandom(emptyHexes);
         }
 
