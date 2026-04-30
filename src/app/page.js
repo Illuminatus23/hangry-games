@@ -1,82 +1,160 @@
 "use client"
-import { useState, useEffect } from "react";
-import HexMapAnimated from "./components/hexMapAnimated";
-import PlayerList from "./components/playerList";
-import PublicLog from "./components/publicLog";
-import { generatePlayers, generateMap, firstRound, startNewRound } from "@/tools/helpers";
-import { logRound } from "@/tools/logStyles";
+import { useState } from "react";
+import Link from "next/link";
+import { occupations } from "@/app/data/staticData";
+
+const professions = occupations.map(o => o.occupation).sort();
 
 export default function Home() {
-  const [mapHexes, setMapHexes] = useState(null);
-  const [players, setPlayers] = useState(null);
-  const [teamsArray, setTeamsArray] = useState(null);
-  const [buttonText, setButtonText] = useState('Begin');
-  const [roundCount, setRoundCount] = useState(0);
-  const [logArchive, setLogArchive] = useState([]);
+  const [view, setView] = useState('landing');
+  const [playerCount, setPlayerCount] = useState(24);
+  const [customPlayers, setCustomPlayers] = useState([]);
 
-  function advanceRound() {
-    const newLog = [];
-    if (roundCount === 0) {
-      setButtonText('Advance Round');
-      newLog.push(logRound(1));
-      firstRound(mapHexes, players, newLog, roundCount);
-    } else {
-      newLog.push(logRound(roundCount + 1));
-      startNewRound(teamsArray, mapHexes, players, newLog, roundCount);
-      if (players.filter(p => p.health > 0).length === 1) setButtonText('End');
-    }
-    setLogArchive(prev => [...prev, newLog]);
-    setRoundCount(r => r + 1);
-    setPlayers([...players]);
-    setMapHexes([...mapHexes]);
-    setTeamsArray([...teamsArray]);
+  function initCustomForm() {
+    setCustomPlayers(
+      Array.from({ length: playerCount }, () => ({ name: '', district: '', profession: '' }))
+    );
+    setView('customize-form');
   }
 
-  useEffect(() => {
-    const [generatedPlayers, generatedTeams, generatedLogContent] = generatePlayers(24);
-    const generatedMap = generateMap(14);
-    setMapHexes(generatedMap);
-    setPlayers(generatedPlayers);
-    setTeamsArray(generatedTeams);
-    setLogArchive([generatedLogContent]);
-  }, []);
+  function updatePlayer(idx, field, value) {
+    setCustomPlayers(prev => prev.map((p, i) => i === idx ? { ...p, [field]: value } : p));
+  }
+
+  const districtCounts = customPlayers.reduce((acc, p) => {
+    if (p.district) acc[p.district] = (acc[p.district] || 0) + 1;
+    return acc;
+  }, {});
+
+  const isFormView = view === 'customize-form';
 
   return (
-    <div className="grid grid sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <header>
-        <p className="text-4xl">The Hangry Games</p>
-        <p className="text-2xl text-gray-600">Round {roundCount.toString()}</p>
-        <p className="text-2xl text-gray-600">{players?.filter(p => p.health > 0).length.toString()} Players</p>
+    <div className={`min-h-screen flex flex-col sm:p-20 font-[family-name:var(--font-geist-sans)] ${isFormView ? '' : 'items-center justify-center'}`}>
+      <header className="text-center mb-10">
+        <p className="text-6xl font-bold tracking-tight">The Hangry Games</p>
+        <p className="text-stone-400 mt-3 text-lg">May the Hanger be ever in your favour.</p>
       </header>
-      <main className="grid grid-cols-4 2xl:grid-cols-5 gap-3">
-        {mapHexes &&
-          <div className="col-span-3 2xl:col-span-4">
-            <HexMapAnimated mapHexes={mapHexes} players={players} round={roundCount} />
+
+      {view === 'landing' && (
+        <main className="flex flex-col items-center gap-8 max-w-xl text-center">
+          <p className="text-stone-300 leading-relaxed">
+            Welcome to the Hangry Games where up to twenty-four players are drafted from twelve districts in a hex-grid battle to the death.
+            Alliances form and fracture. Weapons are found, crafted, and fumbled.
+            Player-bots make choices and have different skillsets.
+            Each round plays out automatically — you only watch and advance.
+            Only one player lives to be declared the winner.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+            <Link href="/game">
+              <button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-lg transition-colors">
+                Run Hangry Games
+              </button>
+            </Link>
+            <button
+              className="w-full sm:w-auto bg-stone-700 hover:bg-stone-600 text-white font-bold py-3 px-8 rounded-lg transition-colors"
+              onClick={() => setView('customize-count')}
+            >
+              Customize Hangry Games
+            </button>
           </div>
-        }
-        {teamsArray &&
-          <div className="p-5 bg-stone-900 rounded-lg relative logColumn">
-            <PublicLog logArchive={logArchive} />
-            <div className="text-center inset-x-0 bottom-0 absolute mb-5">
-              {buttonText !== "End" ? (
-                <button
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                  onClick={advanceRound}
+        </main>
+      )}
+
+      {view === 'customize-count' && (
+        <main className="flex flex-col items-center gap-6 max-w-sm w-full">
+          <p className="text-stone-300 text-lg">How many players?</p>
+          <input
+            type="number"
+            min={2}
+            max={24}
+            value={playerCount}
+            onChange={e => setPlayerCount(Math.min(24, Math.max(2, Number(e.target.value))))}
+            className="w-32 text-center text-2xl font-bold bg-stone-800 border border-stone-600 rounded-lg py-2 px-4 focus:outline-none focus:border-blue-500"
+          />
+          <div className="flex gap-4">
+            <button
+              className="bg-stone-700 hover:bg-stone-600 text-white font-bold py-2 px-6 rounded-lg transition-colors"
+              onClick={() => setView('landing')}
+            >
+              Back
+            </button>
+            <button
+              className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-lg transition-colors"
+              onClick={initCustomForm}
+            >
+              Continue
+            </button>
+          </div>
+        </main>
+      )}
+
+      {view === 'customize-form' && (
+        <main className="w-full">
+          <p className="text-stone-400 text-sm uppercase tracking-widest text-center mb-6">
+            Player Customization — {playerCount} Players
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {customPlayers.map((player, idx) => (
+              <div key={idx} className="bg-stone-800 border border-stone-700 rounded-lg p-4 flex flex-col gap-3">
+                <p className="text-stone-400 text-xs uppercase tracking-wider font-semibold">
+                  Player {idx + 1}
+                </p>
+
+                <input
+                  type="text"
+                  placeholder="Name"
+                  value={player.name}
+                  onChange={e => updatePlayer(idx, 'name', e.target.value)}
+                  className="bg-stone-900 border border-stone-600 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500 w-full"
+                />
+
+                <select
+                  value={player.district}
+                  onChange={e => updatePlayer(idx, 'district', e.target.value)}
+                  className="bg-stone-900 border border-stone-600 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500 w-full"
                 >
-                  {buttonText}
-                </button>
-              ) : (
-                <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">
-                  The End
-                </button>
-              )}
-            </div>
+                  <option value="">District...</option>
+                  {Array.from({ length: 12 }, (_, d) => {
+                    const distNum = String(d + 1);
+                    const isFull = (districtCounts[distNum] || 0) >= 2 && player.district !== distNum;
+                    return (
+                      <option key={distNum} value={distNum} disabled={isFull}>
+                        District {distNum}{isFull ? ' (full)' : ''}
+                      </option>
+                    );
+                  })}
+                </select>
+
+                <select
+                  value={player.profession}
+                  onChange={e => updatePlayer(idx, 'profession', e.target.value)}
+                  className="bg-stone-900 border border-stone-600 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500 w-full"
+                >
+                  <option value="">Profession...</option>
+                  {professions.map(p => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
+              </div>
+            ))}
           </div>
-        }
-      </main>
-      <footer className="grid grid-cols-4 2xl:grid-cols-6 my-10">
-        {players && <PlayerList players={players} />}
-      </footer>
+
+          <div className="flex justify-between items-center">
+            <button
+              className="bg-stone-700 hover:bg-stone-600 text-white font-bold py-2 px-6 rounded-lg transition-colors"
+              onClick={() => setView('customize-count')}
+            >
+              Back
+            </button>
+            <Link href="/game">
+              <button className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-lg transition-colors">
+                Start Game
+              </button>
+            </Link>
+          </div>
+        </main>
+      )}
     </div>
   );
 }

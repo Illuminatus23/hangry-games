@@ -202,7 +202,7 @@ function logBatchedFailedSearches(failedSearchers, logContent) {
     logContent.push(logFailedSearch(names + verb + ' for a weapon and find nothing!'));
 }
 
-export function firstRound(mapHexes, players, logContent, roundCount) {
+export function firstRound(mapHexes, players, logContent, roundCount, woundEvents = []) {
     const validHexes = getValidTravelHexes([0, 0, 0], mapHexes);
     const soloPlayers = players.filter(player => player.teamleader === -1);
     const leaders = players.filter(player => player.teamleader === player.id);
@@ -257,10 +257,10 @@ export function firstRound(mapHexes, players, logContent, roundCount) {
     });
 
     logBatchedFailedSearches(failedSearchers, logContent);
-    combatCycleNew(players, mapHexes, logContent, true);
+    combatCycleNew(players, mapHexes, logContent, true, 1, [], [], woundEvents);
 }
 
-export function startNewRound(teamsArray, mapHexes, players, logContent, roundCount) {
+export function startNewRound(teamsArray, mapHexes, players, logContent, roundCount, woundEvents = []) {
     const livingPlayers = players.filter(player => player.health > 0);
 
     // Iterate backwards so splice doesn't skip elements
@@ -302,7 +302,7 @@ export function startNewRound(teamsArray, mapHexes, players, logContent, roundCo
         }
     }
 
-    combatCycleNew(livingPlayers, mapHexes, logContent, false, roundCount, [], teamsArray);
+    combatCycleNew(livingPlayers, mapHexes, logContent, false, roundCount, [], teamsArray, woundEvents);
 
     if (players.filter(player => player.health > 0).length === 1) {
         crownWinner(players.filter(player => player.health > 0)[0], logContent);

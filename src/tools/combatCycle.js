@@ -3,7 +3,7 @@ import { nonCombatCycleDecisions, nonCombatCycle } from "./nonCombatCycle";
 import { d10, d100, selectRandom } from "./utils";
 import { logBattle, logBattleList, logMiss, logHit, logDeath, logAlliance, logAllianceCheck } from "./logStyles";
 
-export function combatCycleNew(livingPlayers, mapHexes, logContent, isFirstRound, roundCount = 1, betrayers = [], teamsArray = []) {
+export function combatCycleNew(livingPlayers, mapHexes, logContent, isFirstRound, roundCount = 1, betrayers = [], teamsArray = [], woundEvents = []) {
     const availableHexes = mapHexes.map(hex =>
         hex.hex.q.toString() + hex.hex.r.toString() + hex.hex.s.toString()
     );
@@ -29,7 +29,7 @@ export function combatCycleNew(livingPlayers, mapHexes, logContent, isFirstRound
         if (battle.length >= 2) {
             const currentHex = mapHexes.find(maphex => maphex.id === key);
             if (currentHex) {
-                const results = hexBattle(currentHex, currentHex.biome, battle, logContent, isFirstRound, roundCount, teamsArray);
+                const results = hexBattle(currentHex, currentHex.biome, battle, logContent, isFirstRound, roundCount, teamsArray, woundEvents);
                 playersMoving = playersMoving.concat(results.playersMoving);
                 playersNonCombat = playersNonCombat.concat(results.playersNonCombat);
             }
@@ -50,7 +50,7 @@ export function combatCycleNew(livingPlayers, mapHexes, logContent, isFirstRound
     }
 }
 
-export function hexBattle(currentHex, hexName, battle, logContent, isFirstRound, roundCount, teamsArray = []) {
+export function hexBattle(currentHex, hexName, battle, logContent, isFirstRound, roundCount, teamsArray = [], woundEvents = []) {
     let announced = false;
     const playersNonCombat = [];
     const playersMoving = [];
@@ -94,7 +94,7 @@ export function hexBattle(currentHex, hexName, battle, logContent, isFirstRound,
                 announced = true;
             }
 
-            const attackMessage = attackResults(attacker, targets, currentHex, roundCount, battle);
+            const attackMessage = attackResults(attacker, targets, currentHex, roundCount, battle, woundEvents);
             if (attackMessage) logContent.push(attackMessage);
 
             const outOfAmmo = ammoCheck(attacker.weapon);
@@ -160,7 +160,7 @@ function checkAllianceFormation(battle, logContent, teamsArray) {
     ));
 }
 
-export function attackResults(attacker, targets, currentHex, roundCount, inBattle) {
+export function attackResults(attacker, targets, currentHex, roundCount, inBattle, woundEvents = null) {
     if (d10() > attacker.aggro && attacker.weapon === 'bare fist') {
         return null;
     }
@@ -177,6 +177,7 @@ export function attackResults(attacker, targets, currentHex, roundCount, inBattl
             defender.death = 'killed by ' + attacker.name + ' with a ' + attacker.weapon + ' in the ' + currentHex.biome + ' on round ' + (roundCount + 1);
             return logDeath(attacker.name + ' ' + weaponsStats[attacker.weapon].verb + ' ' + defender.name + ' with a ' + attacker.weapon + '. ' + defender.name + ' dies.');
         }
+        if (woundEvents) woundEvents.push({ attackerId: attacker.id, defenderId: defender.id });
         return logHit(attacker.name + ' ' + weaponsStats[attacker.weapon].verb + ' ' + defender.name + ' with a ' + attacker.weapon + ' wounding them.');
 
     } else if (defender.health > 0) {

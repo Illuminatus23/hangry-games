@@ -7,7 +7,15 @@ import { IconContext } from 'react-icons';
 import { GiPerson, GiHastyGrave } from 'react-icons/gi';
 import { mapData } from '@/app/data/staticData';
 
-export default function HexMapAnimated({ mapHexes, players, round }) {
+export default function HexMapAnimated({ mapHexes, players, round, woundEvents = [] }) {
+    const prevDeadIdsRef = useRef(new Set());
+    const attackerIds = new Set(woundEvents.map(e => e.attackerId));
+    const woundedIds  = new Set(woundEvents.map(e => e.defenderId));
+
+    useEffect(() => {
+        prevDeadIdsRef.current = new Set(players.filter(p => p.health <= 0).map(p => p.id));
+    }, [round, players]);
+
     const drawPopulation = [];
 
     mapHexes.forEach((hex) => {
@@ -41,33 +49,43 @@ export default function HexMapAnimated({ mapHexes, players, round }) {
                 delay: (player.health <= 0) ? 0 : (i * .1)+.5
             }
 
+            const justDied = player.health <= 0 && !prevDeadIdsRef.current.has(player.id);
+            const isAttacker = player.health > 0 && attackerIds.has(player.id);
+            const isWounded  = player.health > 0 && woundedIds.has(player.id);
+            const isInCombat = isAttacker || isWounded;
             if (player.health <= 0) { deadCount++ } else { liveCount++ }
-            //player.oldLocation = hex.id;
             hexPop.push(
-                <g
-                    key={hex.pop[i]}
-                    className='playerIcon'>
-
+                <g key={hex.pop[i]} className='playerIcon'>
                     <motion.g
                         transition={movetransition}
-                        //initial={false}
                         initial={{ x: oldLocation[0]+xPos, y: oldLocation[1]+yPos }}
                         animate={moveAnimate}
-                        
                     >
-                        <IconContext.Provider value={{ attr: { fill: teamColor, stroke: 'gray', strokeWidth: '1' } }} >
-                            {
-                                (player.health <= 0) ?
+                        <motion.g
+                            key={isInCombat ? `combat-${player.id}-${round}` : `idle-${player.id}`}
+                            animate={isInCombat ? { x: [-1.5, 1.5, -1.5, 1.5, 0] } : { x: 0 }}
+                            transition={isInCombat ? { duration: 0.35, delay: 1.2, ease: 'easeInOut' } : { duration: 0 }}
+                        >
+                            <IconContext.Provider value={{ attr: { fill: teamColor, stroke: 'gray', strokeWidth: '1' } }}>
+                                {justDied ? (
+                                    <>
+                                        <motion.g initial={{ opacity: 1 }} animate={{ opacity: 0 }} transition={{ delay: 0.6, duration: 0.2 }}>
+                                            <GiPerson size='3' />
+                                        </motion.g>
+                                        <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6, duration: 0.2 }}>
+                                            <GiHastyGrave size='2.5' />
+                                        </motion.g>
+                                    </>
+                                ) : player.health <= 0 ? (
                                     <GiHastyGrave size='2.5' />
-                                    :
-                                    <GiPerson size='3'/>
-                            }
-                        </IconContext.Provider>
-                        {/* </motion.g> */}
-                        <rect className="playerPopup" x="-0.75em" ry="2" y={-4 + yPos} width="1.5em" height=".25em" fill={player.color} />
-                        <Text className="playerPopup" textAnchor="middle" y={-1 + yPos} dy="">{player.name}</Text>
+                                ) : (
+                                    <GiPerson size='3' />
+                                )}
+                            </IconContext.Provider>
+<rect className="playerPopup" x="-0.75em" ry="2" y={-4 + yPos} width="1.5em" height=".25em" fill={player.color} />
+                            <Text className="playerPopup" textAnchor="middle" y={-1 + yPos} dy="">{player.name}</Text>
+                        </motion.g>
                     </motion.g>
-
                 </g>)
         }
         drawPopulation.push(hexPop)
