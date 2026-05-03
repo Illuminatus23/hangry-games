@@ -1,6 +1,6 @@
 import { craftableWeapons, weapons } from "../app/data/staticData";
 import { getValidTravelHexes, updateHexLocation } from "./helpers";
-import { d10, hexLookup, selectRandom } from "./utils";
+import { d10, hexLookup, selectRandom, article } from "./utils";
 import { logDeath } from "./logStyles";
 
 export function nonCombatCycleDecisions(player) {
@@ -27,11 +27,11 @@ export function nonCombatCycle(playersMoving, playersNonCombat, mapHexes, logCon
                 findPassCheck
             ) {
                 const newWeapon = selectRandom(weapons);
-                logContent.push(player.name + ' finds a ' + newWeapon + ' in the ' + player.locationname + '.');
+                logContent.push(player.name + ' finds ' + article(newWeapon) + ' ' + newWeapon + ' in the ' + player.locationname + '.');
                 player.weapon = newWeapon;
             } else if (intPassCheck) {
                 const newWeapon = selectRandom(craftableWeapons);
-                logContent.push(player.name + ' successfuly crafts a ' + newWeapon + '.');
+                logContent.push(player.name + ' successfuly crafts ' + article(newWeapon) + ' ' + newWeapon + '.');
                 player.weapon = newWeapon;
             }
         } else if (currentHex.defendowner === player.id || currentHex.defendowner === player.teamleader) {

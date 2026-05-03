@@ -1,8 +1,8 @@
 import { GiHarpoonChain, GiFireAxe, GiUzi, GiHighShot, GiGrenade, GiBowieKnife, GiWoodClub, GiSpearHook, GiFist, GiPistolGun, GiBoomerang } from "react-icons/gi"
 export const mapData = {
 
-    terrain: ['open field', 'open field', 'open field', 'open field', 'woods', 'woods', 'woods', 'woods', 'swamp', 'swamp', 'old fort', 'lake', 'old shed', 'ravine', 'mountain'],
-    names: ['open field', 'meadow', 'clearing', 'wastes', 'woods', 'scrubland', 'forest', 'dense woods', 'swamp', 'bog', 'old fort', 'lake', 'old shed', 'ravine', 'mountain'],
+    terrain: ['open field', 'open field', 'open field', 'open field', 'woods', 'woods', 'woods', 'woods', 'swamp', 'swamp', 'old fort', 'lake', 'old shed', 'ravine', 'mountain', 'ruins', 'mudflats', 'cave'],
+    names: ['open field', 'meadow', 'clearing', 'wastes', 'woods', 'scrubland', 'forest', 'dense woods', 'swamp', 'bog', 'old fort', 'lake', 'old shed', 'ravine', 'mountain', 'ruins', 'mudflats', 'cave'],
     reqHexes: [
         [1, 0, -1],
         [1, -1, 0],
@@ -41,6 +41,9 @@ export const mapData = {
         'old shed': 'old',
         'ravine': 'impass',
         'mountain': 'impass',
+        'ruins': 'ruins',
+        'mudflats': 'shore',
+        'cave': 'cave',
     },
 
     translateValues: {
@@ -148,6 +151,7 @@ export const weaponsStats = {
         speed: 8,
         skill: 'dex',
         verb: 'throws',
+        verbFirst: true,
         ammo: 0,
         damage: () => 1,
         icon: <GiBoomerang title="boomerang" color="white" className="inline" />

@@ -1,5 +1,6 @@
 "use client"
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import HexMapAnimated from "../components/hexMapAnimated";
 import PlayerList from "../components/playerList";
 import PublicLog from "../components/publicLog";
@@ -7,6 +8,8 @@ import { generatePlayers, writeTeamLog, generateMap, firstRound, startNewRound }
 import { logRound } from "@/tools/logStyles";
 
 export default function Game() {
+  const router = useRouter();
+  const deathCounterRef = useRef(0);
   const [mapHexes, setMapHexes] = useState(null);
   const [players, setPlayers] = useState(null);
   const [teamsArray, setTeamsArray] = useState(null);
@@ -27,12 +30,22 @@ export default function Game() {
       startNewRound(teamsArray, mapHexes, players, newLog, roundCount, woundEvts);
       if (players.filter(p => p.health > 0).length === 1) setButtonText('End');
     }
+    players.forEach(p => {
+      if (p.health <= 0 && p.deathOrder === null) {
+        p.deathOrder = ++deathCounterRef.current;
+      }
+    });
     setWoundEvents(woundEvts);
     setLogArchive(prev => [...prev, newLog]);
     setRoundCount(r => r + 1);
     setPlayers([...players]);
     setMapHexes([...mapHexes]);
     setTeamsArray([...teamsArray]);
+  }
+
+  function goToResults() {
+    sessionStorage.setItem('gameResults', JSON.stringify(players));
+    router.push('/results');
   }
 
   useEffect(() => {
@@ -79,7 +92,10 @@ export default function Game() {
                   {buttonText}
                 </button>
               ) : (
-                <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed">
+                <button
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={goToResults}
+                >
                   The End
                 </button>
               )}

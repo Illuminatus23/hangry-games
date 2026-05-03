@@ -3,40 +3,7 @@ import { GiPerson } from "react-icons/gi";
 import { weaponsStats } from "@/app/data/staticData";
 import { IconContext } from "react-icons";
 import { HealthStatus } from "./playerList";
-
-function getTemp(leadership, int) {
-  if (leadership > 6) return int > 6 ? "leader" : "charismatic";
-  if (leadership > 4) {
-    if (int > 6) return "quick witted";
-    if (int > 4) return "strategist";
-    return "erratic";
-  }
-  if (int > 6) return "intelligent";
-  if (int > 4) return "loner";
-  return "hostile";
-}
-
-function getTraining(dex, str) {
-  if (str > 6) return dex > 6 ? "combat training" : "strength training";
-  if (str > 4) {
-    if (dex > 6) return "martial arts training";
-    if (dex > 4) return "endurance training";
-    return "naturally strong";
-  }
-  if (dex > 6) return "martial arts training";
-  if (dex > 4) return "naturally dextrous";
-  return "no training";
-}
-
-function getHideAndSeek(find, hide) {
-  if (find > 6 && hide > 6) return "killer";
-  if (find > 6) return "paranoid";
-  if (hide > 6) return "stealthy";
-  if (find > 4 && hide > 4) return "hunter";
-  if (find > 4) return "spotter";
-  if (hide > 4) return "quiet";
-  return "careless";
-}
+import { getTemp, getTraining, getHideAndSeek } from "@/tools/helpers";
 
 export default function PlayerIntros({ players, district }) {
   const districtPlayers = players.filter(p => p.district === Number(district));
@@ -59,14 +26,14 @@ export default function PlayerIntros({ players, district }) {
           <p className="text-stone-400 mt-1">
             {getTraining(player.dex, player.str)}, {getHideAndSeek(player.find, player.hide)}, {getTemp(player.lead, player.int)}
           </p>
-          <hr className="border-stone-600 my-3 w-full" />
+          {/*  <hr className="border-stone-600 my-3 w-full" />
           <div className="flex items-center gap-3 text-lg">
             <HealthStatus health={player.health} />
             <IconContext.Provider value={{ attr: { className: 'inline' } }}>
               {weaponsStats[player.weapon].icon}
             </IconContext.Provider>
             <span className="text-stone-400 capitalize">{player.weapon}</span>
-          </div>
+          </div> */}
         </motion.div>
       ))}
     </div>

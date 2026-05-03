@@ -16,6 +16,9 @@ export function selectFromHat(list) {
 export function selectRandom(list) {
     return list[Math.floor(Math.random() * list.length)];
 }
+export function article(word) {
+    return /^[aeiou]/i.test(word) ? 'an' : 'a';
+}
 export function hexLookup(address, mapHexes) {
     return mapHexes.filter(hex =>
         address[0] === hex.hex.q && address[1] === hex.hex.r && address[2] === hex.hex.s

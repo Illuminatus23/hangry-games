@@ -1,7 +1,15 @@
 import { weaponsStats } from "../app/data/staticData";
 import { nonCombatCycleDecisions, nonCombatCycle } from "./nonCombatCycle";
-import { d10, d100, selectRandom } from "./utils";
+import { d10, d100, selectRandom, article } from "./utils";
 import { logBattle, logBattleList, logMiss, logHit, logDeath, logAlliance, logAllianceCheck } from "./logStyles";
+
+function attackPhrase(attackerName, defenderName, weapon) {
+    const stats = weaponsStats[weapon];
+    if (stats.verbFirst) {
+        return attackerName + ' ' + stats.verb + ' ' + article(weapon) + ' ' + weapon + ' at ' + defenderName;
+    }
+    return attackerName + ' ' + stats.verb + ' ' + defenderName + ' with ' + article(weapon) + ' ' + weapon;
+}
 
 export function combatCycleNew(livingPlayers, mapHexes, logContent, isFirstRound, roundCount = 1, betrayers = [], teamsArray = [], woundEvents = []) {
     const availableHexes = mapHexes.map(hex =>
@@ -174,11 +182,13 @@ export function attackResults(attacker, targets, currentHex, roundCount, inBattl
         defender.health = defender.health - damage;
 
         if (defender.health <= 0) {
-            defender.death = 'killed by ' + attacker.name + ' with a ' + attacker.weapon + ' in the ' + currentHex.biome + ' on round ' + (roundCount + 1);
-            return logDeath(attacker.name + ' ' + weaponsStats[attacker.weapon].verb + ' ' + defender.name + ' with a ' + attacker.weapon + '. ' + defender.name + ' dies.');
+            attacker.kills = (attacker.kills || 0) + 1;
+            attacker.killLog = [...(attacker.killLog || []), { victim: defender.name, weapon: attacker.weapon, round: roundCount + 1 }];
+            defender.death = 'killed by ' + attacker.name + ' with ' + article(attacker.weapon) + ' ' + attacker.weapon + ' in the ' + currentHex.biome + ' on round ' + (roundCount + 1);
+            return logDeath(attackPhrase(attacker.name, defender.name, attacker.weapon) + '. ' + defender.name + ' dies.');
         }
         if (woundEvents) woundEvents.push({ attackerId: attacker.id, defenderId: defender.id });
-        return logHit(attacker.name + ' ' + weaponsStats[attacker.weapon].verb + ' ' + defender.name + ' with a ' + attacker.weapon + ' wounding them.');
+        return logHit(attackPhrase(attacker.name, defender.name, attacker.weapon) + ' wounding them.');
 
     } else if (defender.health > 0) {
         if (attacker.weapon === "grenade") {
@@ -186,15 +196,17 @@ export function attackResults(attacker, targets, currentHex, roundCount, inBattl
             if (oopsie.health > 0) {
                 oopsie.health = 0;
                 if (attacker.name === oopsie.name) {
-                    oopsie.death = 'accidentally killed themselves with a ' + attacker.weapon + ' in the ' + currentHex.biome + ' on round ' + (roundCount + 1);
-                    return logDeath(attacker.name + ' ' + weaponsStats[attacker.weapon].verb + ' ' + defender.name + ' with a ' + attacker.weapon + ' but fumbles, blowing themselves up.');
+                    oopsie.death = 'accidentally killed themselves with ' + article(attacker.weapon) + ' ' + attacker.weapon + ' in the ' + currentHex.biome + ' on round ' + (roundCount + 1);
+                    return logDeath(attackPhrase(attacker.name, defender.name, attacker.weapon) + ' but fumbles, blowing themselves up.');
                 } else {
-                    oopsie.death = 'accidentally killed by ' + attacker.name + ' with a ' + attacker.weapon + ' in the ' + currentHex.biome + ' on round ' + (roundCount + 1);
-                    return logDeath(attacker.name + ' ' + weaponsStats[attacker.weapon].verb + ' ' + defender.name + ' with a ' + attacker.weapon + ' but misses. An unlucky bounce catches ' + oopsie.name + ' in the blast, killing them.');
+                    attacker.kills = (attacker.kills || 0) + 1;
+                    attacker.killLog = [...(attacker.killLog || []), { victim: oopsie.name, weapon: attacker.weapon, round: roundCount + 1 }];
+                    oopsie.death = 'accidentally killed by ' + attacker.name + ' with ' + article(attacker.weapon) + ' ' + attacker.weapon + ' in the ' + currentHex.biome + ' on round ' + (roundCount + 1);
+                    return logDeath(attackPhrase(attacker.name, defender.name, attacker.weapon) + ' but misses. An unlucky bounce catches ' + oopsie.name + ' in the blast, killing them.');
                 }
             }
         }
-        return logMiss(attacker.name + ' ' + weaponsStats[attacker.weapon].verb + ' ' + defender.name + ' with a ' + attacker.weapon + ' but misses.');
+        return logMiss(attackPhrase(attacker.name, defender.name, attacker.weapon) + ' but misses.');
     }
 
     return null;

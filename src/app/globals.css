@@ -45,6 +45,15 @@ svg.grid g.lake {
 svg.grid g.ravine {
   fill: #000;
 }
+svg.grid g.ruins {
+  fill: #5c4a3a;
+}
+svg.grid g.shore {
+  fill: #b5a06e;
+}
+svg.grid g.cave {
+  fill: #1e1e2e;
+}
 svg.grid g:hover {
   fill-opacity: 1;
 }

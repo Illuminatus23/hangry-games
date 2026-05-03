@@ -1,7 +1,7 @@
 import { names, weapons, playerHexColors, tempStaticPlayers, mapData, weaponsStats, occupations } from "../app/data/staticData";
 import { combatCycleNew } from "./combatCycle";
-import { d4, d8, d10, selectFromHat, selectRandom, hexLookup } from "./utils";
-import { logDissolve, logShrink, logWinner, logFailedSearch } from "./logStyles";
+import { d4, d8, d10, selectFromHat, selectRandom, hexLookup, article } from "./utils";
+import { logDissolve, logShrink, logWinner, logFailedSearch, logAlliance } from "./logStyles";
 
 export function generateMap(size) {
     const hexCount = size - 6;
@@ -27,8 +27,8 @@ export function generateMap(size) {
         const biome = selectFromHat(terrain);
         const style = terrainBiomes[biome];
         const isValid = biome !== 'mountain' && biome !== 'ravine';
-        const defensemod = biome === 'old fort' ? 2 : 0;
-        const hidemod = biome === 'woods' ? 2 : 0;
+        const defensemod = (biome === 'old fort' || style === 'ruins' || style === 'cave') ? 2 : 0;
+        const hidemod = (biome === 'woods' || style === 'ruins') ? 2 : style === 'cave' ? 3 : style === 'shore' ? 1 : 0;
         mapHexes.push({
             id: hex[0].toString() + hex[1].toString() + hex[2].toString(),
             hex: { q: hex[0], r: hex[1], s: hex[2] },
@@ -113,6 +113,9 @@ export function generatePlayers({ count, customPlayers = [] }) {
             teamleader: -1,
             color: playerHexColors[i],
             death: null,
+            kills: 0,
+            killLog: [],
+            deathOrder: null,
         };
         playerStats.powerinx = leadRoll + playerStats.dex + playerStats.str + playerStats.int + playerStats.find + playerStats.hide;
         playerStats.job = getProfession(playerStats.dex, playerStats.str, playerStats.find, playerStats.hide, playerStats.lead, playerStats.int);
@@ -149,6 +152,40 @@ export function generatePlayers({ count, customPlayers = [] }) {
     const teams = generateInitialTeams(players);
     const initialLogContent = writeTeamLog(teams);
     return [players, teams, initialLogContent];
+}
+
+export function getTemp(leadership, int) {
+    if (leadership > 6) return int > 6 ? "leader" : "charismatic";
+    if (leadership > 4) {
+        if (int > 6) return "quick witted";
+        if (int > 4) return "strategist";
+        return "erratic";
+    }
+    if (int > 6) return "intelligent";
+    if (int > 4) return "loner";
+    return "hostile";
+}
+
+export function getTraining(dex, str) {
+    if (str > 6) return dex > 6 ? "combat training" : "strength training";
+    if (str > 4) {
+        if (dex > 6) return "martial arts training";
+        if (dex > 4) return "endurance training";
+        return "naturally strong";
+    }
+    if (dex > 6) return "martial arts training";
+    if (dex > 4) return "naturally dextrous";
+    return "no training";
+}
+
+export function getHideAndSeek(find, hide) {
+    if (find > 6 && hide > 6) return "sociopath";
+    if (find > 6) return "paranoid";
+    if (hide > 6) return "stealthy";
+    if (find > 4 && hide > 4) return "hunter";
+    if (find > 4) return "observant";
+    if (hide > 4) return "quiet";
+    return "careless";
 }
 
 export function generateCustomPlayer({ name, district, profession }, idx) {
@@ -247,12 +284,12 @@ export function writeTeamLog(teams, logContent = []) {
                     ? memberNames + 'and ' + member.name
                     : memberNames + member.name + ', ';
             });
-            logContent.push(leader.name + ' forms a team with ' + memberNames + '.');
+            logContent.push(logAlliance(leader.name + ' forms a team with ' + memberNames + '.'));
         } else {
             if (leader.district === members[0].district) {
-                logContent.push(leader.name + " and " + members[0].name + " show some District " + leader.district + " solidarity.");
+                logContent.push(logAlliance(leader.name + " and " + members[0].name + " show some District " + leader.district + " solidarity."));
             } else {
-                logContent.push(leader.name + " forms an alliance with " + members[0].name);
+                logContent.push(logAlliance(leader.name + " forms an alliance with " + members[0].name));
             }
         }
     });
@@ -298,14 +335,14 @@ export function firstRound(mapHexes, players, logContent, roundCount, woundEvent
             const foundWeapon = firstRoundSearch(player, 2, failedSearchers);
             player = updateHexLocation(mapHexes, randomHex, player);
             if (foundWeapon) {
-                logContent.push(player.name + ' searches for a weapon and finds a ' + foundWeapon + ' and retreats to the ' + player.locationname + '.');
+                logContent.push(player.name + ' searches for a weapon and finds ' + article(foundWeapon) + ' ' + foundWeapon + ' and retreats to the ' + player.locationname + '.');
             } else {
-                logContent.push('Then, ' + player.name + ' retreats to the ' + player.locationname + '.');
+                logContent.push(player.name + ' retreats to the ' + player.locationname + '.');
             }
         } else {
             const foundWeapon = firstRoundSearch(player, 2, failedSearchers);
             if (foundWeapon) {
-                logContent.push(player.name + ' searches for a weapon and finds a ' + foundWeapon + '!');
+                logContent.push(player.name + ' searches for a weapon and finds ' + article(foundWeapon) + ' ' + foundWeapon + '!');
             }
         }
     });
@@ -322,14 +359,14 @@ export function firstRound(mapHexes, players, logContent, roundCount, woundEvent
                 }
             });
             if (leaderWeapon) {
-                logContent.push(leader.name + ' finds a ' + leaderWeapon + ' and retreats to the ' + leader.locationname + '. Their team follows.');
+                logContent.push(leader.name + ' finds ' + article(leaderWeapon) + ' ' + leaderWeapon + ' and retreats to the ' + leader.locationname + '. Their team follows.');
             } else {
                 logContent.push('Then ' + leader.name + ' retreats to the ' + leader.locationname + '. Their team follows.');
             }
         } else {
             const leaderWeapon = firstRoundSearch(leader, 2, failedSearchers);
             if (leaderWeapon) {
-                logContent.push(leader.name + ' searches for a weapon and finds a ' + leaderWeapon + '!');
+                logContent.push(leader.name + ' searches for a weapon and finds ' + article(leaderWeapon) + ' ' + leaderWeapon + '!');
             }
             players.forEach(player => {
                 if (player.teamleader === leader.id && player.id !== leader.id) {
@@ -445,7 +482,7 @@ export function weaponSearch(player, logContent, modifier = 0) {
         const weapon = selectRandom(weapons);
         player.weapon = weapon;
         player.speed = weaponsStats[weapon].speed;
-        logContent.push(player.name + ' searches for a weapon and finds a ' + weapon + '!');
+        logContent.push(player.name + ' searches for a weapon and finds ' + article(weapon) + ' ' + weapon + '!');
     } else {
         logContent.push(player.name + ' searches for a weapon and finds nothing!');
     }

@@ -2,71 +2,10 @@ import { GiSkullCrossedBones, GiHeartMinus, GiHearts, GiPerson } from "react-ico
 import { playerHexColors } from '@/app/data/staticData';
 import { weaponsStats } from "@/app/data/staticData";
 import { IconContext } from "react-icons";
+import { getTemp, getTraining, getHideAndSeek } from "@/tools/helpers";
 
 export default function PlayerList({ players }) {
   const sortedPlayers = players.toSorted((a, b) => (a.teamleader > b.teamleader) ? -1 : 1);
-  function getTemp(leadership, int) {
-    if (leadership > 6) {
-      if (int > 6) {
-        return "leader"
-      }
-      return "charismatic"
-
-    } else if (leadership > 4) {
-      if (int > 6) {
-        return "quick witted"
-      } else if (int > 4) {
-        return "strategist"
-      }
-      return "erratic"
-    } else {
-      if (int > 6) {
-        return "intelligent"
-      } else if (int > 4) {
-        return "loner"
-      }
-      return "hostile"
-    }
-
-  }
-  function getTraining(dex, str) {
-    if (str > 6) {
-      if (dex > 6) {
-        return "combat training"
-      }
-      return "strength training"
-    } else if (str > 4) {
-      if (dex > 6) {
-        return "martial arts training"
-      } else if (dex > 4) {
-        return "endurance training"
-      }
-      return "naturally strong"
-    } else {
-      if (dex > 6) {
-        return "martial arts training"
-      } else if (dex > 4) {
-        return "naturally dextrous"
-      }
-      return "no training"
-    }
-  }
-  function getHideAndSeek(find, hide) {
-    if (find > 6 && hide > 6) {
-      return "killer"
-    } else if (find > 6) {
-      return "paranoid"
-    } else if (hide > 6) {
-      return "stealthy"
-    } else if (find > 4 && hide > 4) {
-      return "hunter"
-    } else if (find > 4) {
-      return "spotter"
-    } else if (hide > 4) {
-      return "quiet"
-    }
-    return "careless"
-  }
   function getTeamColor(player) {
     return (player.teamleader === -1) ? player.color : playerHexColors[player.teamleader - 1];
   }
