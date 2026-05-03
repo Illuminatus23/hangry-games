@@ -7,6 +7,9 @@ export function d10() {
 export function d8() {
     return Math.floor(Math.random() * 8) + 1;
 }
+export function d4() {
+    return Math.floor(Math.random() * 4) + 1;
+}
 export function selectFromHat(list) {
     return list.splice(Math.floor(Math.random() * list.length), 1)[0];
 }

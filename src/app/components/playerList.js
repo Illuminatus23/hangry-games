@@ -55,7 +55,7 @@ export default function PlayerList({ players }) {
     if (find > 6 && hide > 6) {
       return "killer"
     } else if (find > 6) {
-      return "marksman"
+      return "paranoid"
     } else if (hide > 6) {
       return "stealthy"
     } else if (find > 4 && hide > 4) {
@@ -89,18 +89,21 @@ export default function PlayerList({ players }) {
         {/* <p className="ml-2 text-sm">Dexterity:{player.dex}</p>
         <p className="ml-2 text-sm">Strength:{player.str}</p> */}
         <p className="text-xs mb-1 ml-1">DISTRICT {player.district}</p>
-        <p className="text-xs ml-2 mb-1">{getTraining(player.dex, player.str)}, {getHideAndSeek(player.find, player.hide)}, {getTemp(player.lead, player.int)}</p>
-        <p className="ml-2 text-sm capitalize">Location: {player.locationname}{/*  ({player.location}) */}</p>
+        <hr className="border-stone-600 my-2" />
+        <p className="text-xs mb-1 ml-1">{player.job}</p>
+        <p className="text-xs mb-1 ml-1">{getTraining(player.dex, player.str)}, {getHideAndSeek(player.find, player.hide)}, {getTemp(player.lead, player.int)}</p>
+        <hr className="border-stone-600 my-2" />
+        <p className="text-sm capitalize ml-1">Location: {player.locationname}{/*  ({player.location}) */}</p>
 
         {
           player.teamleader != -1 ?
-            <p className="ml-2 text-sm capitalize">Team: {players[player.teamleader - 1].name} <GiPerson className="inline" fill={getTeamColor(player)} /></p>
+            <p className="text-sm capitalize ml-1">Team: {players[player.teamleader - 1].name} <GiPerson className="inline" fill={getTeamColor(player)} /></p>
             :
-            <p className="ml-2 text-sm capitalize">Team: none</p>
+            <p className="text-sm capitalize ml-1">Team: none</p>
         }
         {
           player.death ?
-            <p className="ml-2 text-xs font-semibold">{player.death}</p>
+            <p className="text-xs font-semibold ml-1">{player.death}</p>
             :
             null
         }

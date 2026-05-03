@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import HexMapAnimated from "../components/hexMapAnimated";
 import PlayerList from "../components/playerList";
 import PublicLog from "../components/publicLog";
-import { generatePlayers, generateMap, firstRound, startNewRound } from "@/tools/helpers";
+import { generatePlayers, writeTeamLog, generateMap, firstRound, startNewRound } from "@/tools/helpers";
 import { logRound } from "@/tools/logStyles";
 
 export default function Game() {
@@ -36,16 +36,26 @@ export default function Game() {
   }
 
   useEffect(() => {
-    const [generatedPlayers, generatedTeams, generatedLogContent] = generatePlayers(24);
     const generatedMap = generateMap(14);
     setMapHexes(generatedMap);
-    setPlayers(generatedPlayers);
-    setTeamsArray(generatedTeams);
-    setLogArchive([generatedLogContent]);
+    const storedSetup = sessionStorage.getItem('gameSetup');
+    if (storedSetup) {
+      const { players: savedPlayers, teams: savedTeams } = JSON.parse(storedSetup);
+      setPlayers(savedPlayers);
+      setTeamsArray(savedTeams);
+      setLogArchive([writeTeamLog(savedTeams)]);
+    } else {
+      const stored = sessionStorage.getItem('customPlayers');
+      const customPlayers = stored ? JSON.parse(stored) : [];
+      const [generatedPlayers, generatedTeams, generatedLogContent] = generatePlayers({ count: 24, customPlayers });
+      setPlayers(generatedPlayers);
+      setTeamsArray(generatedTeams);
+      setLogArchive([generatedLogContent]);
+    }
   }, []);
 
   return (
-    <div className="grid grid sm:p-20 font-[family-name:var(--font-geist-sans)]">
+    <div className="grid sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <header>
         <p className="text-4xl">The Hangry Games</p>
         <p className="text-2xl text-gray-600">Round {roundCount.toString()}</p>

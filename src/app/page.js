@@ -1,11 +1,12 @@
 "use client"
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { occupations } from "@/app/data/staticData";
 
-const professions = occupations.map(o => o.occupation).sort();
+const professions = Object.keys(occupations).sort();
 
 export default function Home() {
+  const router = useRouter();
   const [view, setView] = useState('landing');
   const [playerCount, setPlayerCount] = useState(24);
   const [customPlayers, setCustomPlayers] = useState([]);
@@ -32,7 +33,7 @@ export default function Home() {
     <div className={`min-h-screen flex flex-col sm:p-20 font-[family-name:var(--font-geist-sans)] ${isFormView ? '' : 'items-center justify-center'}`}>
       <header className="text-center mb-10">
         <p className="text-6xl font-bold tracking-tight">The Hangry Games</p>
-        <p className="text-stone-400 mt-3 text-lg">May the Hanger be ever in your favour.</p>
+        <p className="text-stone-400 mt-3 text-lg">May the Hanger be ever in your favor.</p>
       </header>
 
       {view === 'landing' && (
@@ -45,11 +46,12 @@ export default function Home() {
             Only one player lives to be declared the winner.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-            <Link href="/game">
-              <button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-lg transition-colors">
-                Run Hangry Games
-              </button>
-            </Link>
+            <button
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-lg transition-colors"
+              onClick={() => router.push('/intro')}
+            >
+              Run Hangry Games
+            </button>
             <button
               className="w-full sm:w-auto bg-stone-700 hover:bg-stone-600 text-white font-bold py-3 px-8 rounded-lg transition-colors"
               onClick={() => setView('customize-count')}
@@ -62,7 +64,7 @@ export default function Home() {
 
       {view === 'customize-count' && (
         <main className="flex flex-col items-center gap-6 max-w-sm w-full">
-          <p className="text-stone-300 text-lg">How many players?</p>
+          <p className="text-stone-300 text-lg">How many custom players?</p>
           <input
             type="number"
             min={2}
@@ -147,11 +149,16 @@ export default function Home() {
             >
               Back
             </button>
-            <Link href="/game">
-              <button className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-lg transition-colors">
-                Start Game
-              </button>
-            </Link>
+            <button
+              className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-lg transition-colors"
+              onClick={() => {
+                const filled = customPlayers.filter(p => p.name && p.district && p.profession);
+                sessionStorage.setItem('customPlayers', JSON.stringify(filled));
+                router.push('/intro');
+              }}
+            >
+              Start Game
+            </button>
           </div>
         </main>
       )}

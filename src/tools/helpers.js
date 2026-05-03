@@ -1,6 +1,6 @@
-import { names, weapons, playerHexColors, tempStaticPlayers, mapData, weaponsStats } from "../app/data/staticData";
+import { names, weapons, playerHexColors, tempStaticPlayers, mapData, weaponsStats, occupations } from "../app/data/staticData";
 import { combatCycleNew } from "./combatCycle";
-import { d8, d10, selectFromHat, selectRandom, hexLookup } from "./utils";
+import { d4, d8, d10, selectFromHat, selectRandom, hexLookup } from "./utils";
 import { logDissolve, logShrink, logWinner, logFailedSearch } from "./logStyles";
 
 export function generateMap(size) {
@@ -64,16 +64,37 @@ export function generateMap(size) {
     return mapHexes;
 }
 
-export function generatePlayers(count) {
+function getProfession(dex, str, find, hide, lead, int) {
+    const stats = {
+        attitude: (lead > 5) ? "Leader" : "Agressive",
+        strength: (str > 5) ? "Strong" : "Weak",
+        dexterity: (dex > 5) ? "Agile" : "Clumsy",
+        awareness: (find > 5) ? "Perceptive" : "Unaware",
+        noise: (hide > 5) ? "Stealthy" : "Loud",
+        intelligence: (int > 5) ? "Intelligent" : "Dumb",
+    };
+    return Object.keys(occupations).find(name => {
+        const occ = occupations[name];
+        return occ.attitude === stats.attitude
+            && occ.strength === stats.strength
+            && occ.dexterity === stats.dexterity
+            && occ.awareness === stats.awareness
+            && occ.noise === stats.noise
+            && occ.intelligence === stats.intelligence;
+    }) ?? "";
+}
+export function generatePlayers({ count, customPlayers = [] }) {
     const players = [];
-    let district = 1;
     const namePool = [...tempStaticPlayers];
+    let district = 1;
     for (let i = 0; i < count; i++) {
-        const pDistrict = Math.ceil(district / 2);
+        const pDistrict = Math.min(12, Math.ceil(district / 2));
         const leadRoll = d10();
+        const name = selectRandom(names)
         const playerStats = {
             id: i + 1,
-            name: selectFromHat(namePool),
+            name: name, //selectFromHat(namePool),
+            job: "",
             dex: d8() + 1,
             str: d8() + 1,
             find: d8() + 1,
@@ -94,12 +115,75 @@ export function generatePlayers(count) {
             death: null,
         };
         playerStats.powerinx = leadRoll + playerStats.dex + playerStats.str + playerStats.int + playerStats.find + playerStats.hide;
+        playerStats.job = getProfession(playerStats.dex, playerStats.str, playerStats.find, playerStats.hide, playerStats.lead, playerStats.int);
         district++;
         players.push(playerStats);
     }
+
+    const replacedCount = {};
+    customPlayers.forEach(custom => {
+        const dist = Number(custom.district);
+        replacedCount[dist] = replacedCount[dist] || 0;
+        const target = players.filter(p => p.district === dist)[replacedCount[dist]];
+        if (!target) return;
+        const jobValues = occupations[custom.profession];
+        const attitude = (jobValues.attitude === "Agressive") ? d4() + 5 : d4() + 1;
+        const strength = (jobValues.strength === "Strong") ? d4() + 5 : d4() + 1;
+        const dexterity = (jobValues.dexterity === "Agile") ? d4() + 5 : d4() + 1;
+        const awareness = (jobValues.awareness === "Perceptive") ? d4() + 5 : d4() + 1;
+        const noise = (jobValues.noise === "Stealthy") ? d4() + 5 : d4() + 1;
+        const intelligence = (jobValues.intelligence === "Intelligent") ? d4() + 5 : d4() + 1;
+        target.name = custom.name;
+        target.job = custom.profession;
+        target.dex = dexterity;
+        target.str = strength;
+        target.find = awareness;
+        target.hide = noise;
+        target.lead = attitude;
+        target.aggro = 10 - attitude;
+        target.int = intelligence;
+        target.powerinx = attitude + target.dex + target.str + target.int + target.find + target.hide;
+        replacedCount[dist]++;
+    });
+
     const teams = generateInitialTeams(players);
     const initialLogContent = writeTeamLog(teams);
     return [players, teams, initialLogContent];
+}
+
+export function generateCustomPlayer({ name, district, profession }, idx) {
+    const jobValues = occupations[profession];
+    const attitude = (jobValues.attitude === "Agressive") ? d4() + 5 : d4() + 1;
+    const strength = (jobValues.strength === "Strong") ? d4() + 5 : d4() + 1;
+    const dexterity = (jobValues.dexterity === "Agile") ? d4() + 5 : d4() + 1;
+    const awareness = (jobValues.awareness === "Perceptive") ? d4() + 5 : d4() + 1;
+    const noise = (jobValues.noise === "Stealthy") ? d4() + 5 : d4() + 1;
+    const intelligence = (jobValues.intelligence === "Intelligent") ? d4() + 5 : d4() + 1;
+    const playerStats = {
+        id: idx + 1,
+        name,
+        job: profession,
+        dex: dexterity,
+        str: strength,
+        find: awareness,
+        hide: noise,
+        lead: attitude,
+        aggro: 10 - attitude,
+        int: intelligence,
+        district: Number(district),
+        weapon: 'bare fist',
+        speed: 9,
+        location: [0, 0, 0],
+        oldLocation: "000",
+        oldAddress: [0, 0],
+        locationname: 'arena',
+        health: 3,
+        teamleader: -1,
+        color: playerHexColors[idx],
+        death: null,
+    };
+    playerStats.powerinx = attitude + playerStats.dex + playerStats.str + playerStats.int + playerStats.find + playerStats.hide;
+    return playerStats;
 }
 
 export function generateInitialTeams(players) {
