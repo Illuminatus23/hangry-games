@@ -35,12 +35,6 @@ export default function HexMapAnimated({ mapHexes, players, round, woundEvents =
             const oldLocation = mapData.translateValues[player.oldLocation]
             const adjustedPosition = (player.health > 0) ? [translateData[0]+xPos, translateData[1]+yPos] : [translateData[0] + deadCx, translateData[1] + deadCy]
 
-            const initialTransition = {
-                duration: 0.8,
-                delay: (round !== 0) ? i * .18 : 0,
-                ease: [0, 0.71, 0.2, 1.01],
-            }
-
             const moveAnimate = { x: adjustedPosition[0], y: adjustedPosition[1] }
             const movetransition = {
                 type: "spring",
@@ -63,7 +57,11 @@ export default function HexMapAnimated({ mapHexes, players, round, woundEvents =
                     >
                         <motion.g
                             key={isInCombat ? `combat-${player.id}-${round}` : `idle-${player.id}`}
-                            animate={isInCombat ? { x: [-1.5, 1.5, -1.5, 1.5, 0] } : { x: 0 }}
+                            animate={
+                                isAttacker ? { scale: [1, 1.3, 1] } :
+                                isWounded  ? { opacity: [1, 0.2, 1] } :
+                                             { scale: 1, opacity: 1 }
+                            }
                             transition={isInCombat ? { duration: 0.35, delay: 1.2, ease: 'easeInOut' } : { duration: 0 }}
                         >
                             <IconContext.Provider value={{ attr: { fill: teamColor, stroke: 'gray', strokeWidth: '1' } }}>

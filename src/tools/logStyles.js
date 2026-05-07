@@ -13,3 +13,5 @@ export const logDissolve = (text) => <span className="text-stone-400 italic">{te
 export const logShrink = (text) => <span className="text-orange-400">{text}</span>;
 export const logWinner       = (text) => <span className="text-green-700 font-bold">{text}</span>;
 export const logFailedSearch = (text) => <span className="text-gray-500 italic">{text}</span>;
+export const logMove        = (text) => <span className="text-amber-800">{text}</span>;
+export const logCraft       = (text) => <span className="text-lime-400">{text}</span>;

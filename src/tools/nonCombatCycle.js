@@ -1,7 +1,7 @@
 import { craftableWeapons, weapons } from "../app/data/staticData";
 import { getValidTravelHexes, updateHexLocation } from "./helpers";
 import { d10, hexLookup, selectRandom, article } from "./utils";
-import { logDeath } from "./logStyles";
+import { logDeath, logMove, logCraft } from "./logStyles";
 
 export function nonCombatCycleDecisions(player) {
     const hasWeaponMod = (player.weapon !== 'bare fist') ? 2 : 0;
@@ -17,7 +17,7 @@ export function nonCombatCycle(playersMoving, playersNonCombat, mapHexes, logCon
         const findPassCheck = d10() <= player.find;
 
         if (player.health < 3 && intPassCheck) {
-            logContent.push(player.name + ' successfuly crafts a balm and heals themself.');
+            logContent.push(logCraft(player.name + ' successfuly crafts a balm and heals themself.'));
             player.health = player.health + 1;
         } else if (player.weapon === 'bare fist') {
             if (
@@ -27,15 +27,15 @@ export function nonCombatCycle(playersMoving, playersNonCombat, mapHexes, logCon
                 findPassCheck
             ) {
                 const newWeapon = selectRandom(weapons);
-                logContent.push(player.name + ' finds ' + article(newWeapon) + ' ' + newWeapon + ' in the ' + player.locationname + '.');
+                logContent.push(logCraft(player.name + ' finds ' + article(newWeapon) + ' ' + newWeapon + ' in the ' + player.locationname + '.'));
                 player.weapon = newWeapon;
             } else if (intPassCheck) {
                 const newWeapon = selectRandom(craftableWeapons);
-                logContent.push(player.name + ' successfuly crafts ' + article(newWeapon) + ' ' + newWeapon + '.');
+                logContent.push(logCraft(player.name + ' successfuly crafts ' + article(newWeapon) + ' ' + newWeapon + '.'));
                 player.weapon = newWeapon;
             }
         } else if (currentHex.defendowner === player.id || currentHex.defendowner === player.teamleader) {
-            logContent.push(player.name + ' fortifies their position.');
+            logContent.push(logCraft(player.name + ' fortifies their position.'));
             currentHex.defensemod = currentHex.defensemod + 1;
         }
     });
@@ -69,7 +69,7 @@ export function nonCombatCycle(playersMoving, playersNonCombat, mapHexes, logCon
 
         if (randomHex) {
             player = updateHexLocation(mapHexes, randomHex, player);
-            logContent.push(player.name + ' moves from the ' + currentHex.biome + ' to the ' + player.locationname + reason);
+            logContent.push(logMove(player.name + ' moves from the ' + currentHex.biome + ' to the ' + player.locationname + reason));
         } else {
             currentHex.pop = currentHex.pop.filter(id => id !== player.id);
             player.health = 0;
