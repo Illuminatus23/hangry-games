@@ -30,9 +30,9 @@ export default function Home() {
   const isFormView = view === 'customize-form';
 
   return (
-    <div className={`min-h-screen flex flex-col sm:p-20 font-[family-name:var(--font-geist-sans)] ${isFormView ? '' : 'items-center justify-center'}`}>
+    <div className={`min-h-screen flex flex-col p-4 sm:p-20 font-[family-name:var(--font-geist-sans)] ${isFormView ? '' : 'items-center justify-center'}`}>
       <header className="text-center mb-10">
-        <p className="text-6xl font-bold tracking-tight">The Hangry Games</p>
+        <p className="text-3xl sm:text-6xl font-bold tracking-tight">The Hangry Games</p>
         <p className="text-stone-400 mt-3 text-lg">May the Hanger be ever in your favor.</p>
       </header>
 

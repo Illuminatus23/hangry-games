@@ -3,6 +3,7 @@ import { combatCycleNew } from "./combatCycle";
 import { d4, d8, d10, selectFromHat, selectRandom, hexLookup, article } from "./utils";
 import { logDissolve, logShrink, logWinner, logFailedSearch, logAlliance } from "./logStyles";
 
+// Builds the hex map: one fixed arena at the origin, required hexes filled from the terrain pool, then optional hexes up to (size - 6) total.
 export function generateMap(size) {
     const hexCount = size - 6;
     const mapHexes = [{
@@ -64,6 +65,7 @@ export function generateMap(size) {
     return mapHexes;
 }
 
+// Maps six stat rolls to a named occupation by pattern-matching high/low thresholds against the occupations table.
 function getProfession(dex, str, find, hide, lead, int) {
     const stats = {
         attitude: (lead > 5) ? "Leader" : "Agressive",
@@ -83,6 +85,7 @@ function getProfession(dex, str, find, hide, lead, int) {
             && occ.intelligence === stats.intelligence;
     }) ?? "";
 }
+// Generates `count` random players distributed across 12 districts, then replaces matching district slots with custom player entries in order.
 export function generatePlayers({ count, customPlayers = [] }) {
     const players = [];
     const namePool = [...tempStaticPlayers];
@@ -154,6 +157,7 @@ export function generatePlayers({ count, customPlayers = [] }) {
     return [players, teams, initialLogContent];
 }
 
+// Returns a temperament label based on leadership and intelligence — used as flavor text on player cards.
 export function getTemp(leadership, int) {
     if (leadership > 6) return int > 6 ? "leader" : "charismatic";
     if (leadership > 4) {
@@ -166,6 +170,7 @@ export function getTemp(leadership, int) {
     return "hostile";
 }
 
+// Returns a training label based on strength and dexterity — used as flavor text on player cards.
 export function getTraining(dex, str) {
     if (str > 6) return dex > 6 ? "combat training" : "strength training";
     if (str > 4) {
@@ -178,6 +183,7 @@ export function getTraining(dex, str) {
     return "no training";
 }
 
+// Returns a stealth/perception label based on find and hide stats — used as flavor text on player cards.
 export function getHideAndSeek(find, hide) {
     if (find > 6 && hide > 6) return "sociopath";
     if (find > 6) return "paranoid";
@@ -188,6 +194,7 @@ export function getHideAndSeek(find, hide) {
     return "careless";
 }
 
+// Builds a single player object from form data; stat ranges are biased high or low based on the occupation's stat profile.
 export function generateCustomPlayer({ name, district, profession }, idx) {
     const jobValues = occupations[profession];
     const attitude = (jobValues.attitude === "Agressive") ? d4() + 5 : d4() + 1;
@@ -223,6 +230,7 @@ export function generateCustomPlayer({ name, district, profession }, idx) {
     return playerStats;
 }
 
+// Rolls leadership checks to elect a random set of team leaders, then assigns members — leaders prefer recruiting from their own district first.
 export function generateInitialTeams(players) {
     const availablePlayers = [];
     const availableLeaders = [];
@@ -272,6 +280,7 @@ export function generateInitialTeams(players) {
     return availableLeaders;
 }
 
+// Converts team data into alliance log entries; two-person teams get a distinct district-solidarity message.
 export function writeTeamLog(teams, logContent = []) {
     teams.forEach(team => {
         const leader = team[0];
@@ -296,7 +305,7 @@ export function writeTeamLog(teams, logContent = []) {
     return logContent;
 }
 
-// Returns the weapon name if found, null if not. Caller handles all logging.
+// Rolls a weapon search for one player; on miss, pushes their name to failedSearchers for batched log output. Returns weapon name or null.
 function firstRoundSearch(player, modifier, failedSearchers) {
     if (d10() <= player.find + modifier) {
         const weapon = selectRandom(weapons);
@@ -308,6 +317,7 @@ function firstRoundSearch(player, modifier, failedSearchers) {
     return null;
 }
 
+// Collapses multiple failed weapon searches into a single grammatical log line.
 function logBatchedFailedSearches(failedSearchers, logContent) {
     if (failedSearchers.length === 0) return;
     const n = failedSearchers.length;
@@ -323,6 +333,7 @@ function logBatchedFailedSearches(failedSearchers, logContent) {
     logContent.push(logFailedSearch(names + verb + ' for a weapon and find nothing!'));
 }
 
+// Runs the opening round: solo players and team leaders scatter from the arena, search for weapons, then combat resolves.
 export function firstRound(mapHexes, players, logContent, roundCount, woundEvents = []) {
     const validHexes = getValidTravelHexes([0, 0, 0], mapHexes);
     const soloPlayers = players.filter(player => player.teamleader === -1);
@@ -381,6 +392,7 @@ export function firstRound(mapHexes, players, logContent, roundCount, woundEvent
     combatCycleNew(players, mapHexes, logContent, true, 1, [], [], woundEvents);
 }
 
+// Runs one full game round: team loyalty checks and dissolves, combat, winner detection, then map shrink.
 export function startNewRound(teamsArray, mapHexes, players, logContent, roundCount, woundEvents = []) {
     const livingPlayers = players.filter(player => player.health > 0);
 
@@ -431,6 +443,7 @@ export function startNewRound(teamsArray, mapHexes, players, logContent, roundCo
     shrinkMap(livingPlayers, mapHexes, logContent);
 }
 
+// Deactivates the outermost valid hex when the number of active hexes exceeds half the living player count.
 export function shrinkMap(players, mapHexes, logContent) {
     const livingPlayers = players.filter(player => player.health > 0);
     const activeHexes = mapHexes.filter(hex => hex.isValid);
@@ -446,6 +459,7 @@ function crownWinner(winner, logContent) {
     logContent.push(logWinner(winner.name + ' has won the Hangry Games!'));
 }
 
+// Returns the subset of the six cube-coordinate neighbors that exist on the map and are not deactivated.
 export function getValidTravelHexes(currentHex, mapHexes) {
     const Q = currentHex[0];
     const R = currentHex[1];
@@ -466,6 +480,7 @@ export function getValidTravelHexes(currentHex, mapHexes) {
     return validHexes;
 }
 
+// Moves a player between hexes: removes them from the old hex pop, adds them to the new one, and updates all location fields on the player.
 export function updateHexLocation(mapHexes, newLocation, player) {
     const oldLocation = hexLookup(player.location, mapHexes)[0];
     const newAddress = [newLocation.hex.q, newLocation.hex.r, newLocation.hex.s];
@@ -477,6 +492,7 @@ export function updateHexLocation(mapHexes, newLocation, player) {
     return player;
 }
 
+// Standalone weapon search with inline logging; used outside the opening round when a player actively hunts for a weapon mid-game.
 export function weaponSearch(player, logContent, modifier = 0) {
     if (d10() <= player.find + modifier) {
         const weapon = selectRandom(weapons);

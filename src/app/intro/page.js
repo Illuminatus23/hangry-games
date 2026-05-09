@@ -26,17 +26,17 @@ export default function Intro() {
   if (!players) return null;
 
   return (
-    <div className="min-h-screen flex flex-col items-center sm:p-20 font-[family-name:var(--font-geist-sans)]">
+    <div className="min-h-screen flex flex-col items-center p-4 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <header className="text-center mb-8">
-        <p className="text-6xl font-bold tracking-tight">The Hangry Games</p>
-        <p className="text-stone-400 mt-3 text-4xl">Introducing District {district}</p>
+        <p className="text-3xl sm:text-6xl font-bold tracking-tight">The Hangry Games</p>
+        <p className="text-stone-400 mt-3 text-2xl sm:text-4xl">Introducing District {district}</p>
       </header>
 
       <main className="w-full">
         <PlayerIntros players={players} district={district} />
       </main>
 
-      <div className="flex gap-4 mt-10">
+      <div className="flex flex-wrap justify-center gap-4 mt-10">
         <button
           className="bg-stone-700 hover:bg-stone-600 text-white font-bold py-2 px-6 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           onClick={() => setDistrict(d => d - 1)}

@@ -9,7 +9,7 @@ export default function PlayerIntros({ players, district }) {
   const districtPlayers = players.filter(p => p.district === Number(district));
 
   return (
-    <div className="flex gap-8 w-full overflow-hidden">
+    <div className="flex flex-col sm:flex-row gap-8 w-full overflow-hidden">
       {districtPlayers.map((player, idx) => (
         <motion.div
           key={`${district}-${player.id}`}
@@ -18,8 +18,8 @@ export default function PlayerIntros({ players, district }) {
           animate={{ x: 0, opacity: 1 }}
           transition={{ type: "spring", stiffness: 80, damping: 16, delay: idx * 0.1 }}
         >
-          <GiPerson style={{ fontSize: '50vh' }} fill={player.color} />
-          <h2 className="text-4xl font-bold mt-4">{player.name}</h2>
+          <GiPerson style={{ fontSize: 'min(50vh, 40vw)' }} fill={player.color} />
+          <h2 className="text-2xl sm:text-4xl font-bold mt-4">{player.name}</h2>
           <p className="text-stone-400 text-sm uppercase tracking-widest mt-1">District {player.district}</p>
           <hr className="border-stone-600 my-3 w-full" />
           <p className="text-xl font-semibold">{player.job}</p>

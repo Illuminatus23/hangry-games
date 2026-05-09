@@ -3,6 +3,7 @@ import { getValidTravelHexes, updateHexLocation } from "./helpers";
 import { d10, hexLookup, selectRandom, article } from "./utils";
 import { logDeath, logMove, logCraft } from "./logStyles";
 
+// Decides whether a solo player forages (stays) or moves; armed players get a +2 bonus making them more likely to forage.
 export function nonCombatCycleDecisions(player) {
     const hasWeaponMod = (player.weapon !== 'bare fist') ? 2 : 0;
     // Armed/confident players stay to forage; unarmed/scared players move
@@ -10,6 +11,7 @@ export function nonCombatCycleDecisions(player) {
     return playerForages;
 }
 
+// Runs foraging actions (heal, find weapon, craft, fortify) for stationary players, then moves roaming players toward goals based on aggro.
 export function nonCombatCycle(playersMoving, playersNonCombat, mapHexes, logContent) {
     playersNonCombat.forEach(player => {
         const currentHex = hexLookup(player.location, mapHexes)[0];

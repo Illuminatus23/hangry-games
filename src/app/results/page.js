@@ -63,13 +63,13 @@ export default function Results() {
   const isTopThree = place <= 3;
 
   return (
-    <div className="min-h-screen flex flex-col sm:p-20 font-[family-name:var(--font-geist-sans)]">
+    <div className="min-h-screen flex flex-col p-4 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <header className="text-center mb-8">
-        <p className="text-6xl font-bold tracking-tight">The Hangry Games</p>
-        <p className="text-stone-400 mt-3 text-2xl">Final Results</p>
+        <p className="text-3xl sm:text-6xl font-bold tracking-tight">The Hangry Games</p>
+        <p className="text-stone-400 mt-3 text-lg sm:text-2xl">Final Results</p>
       </header>
 
-      <main className="flex gap-8 w-full flex-1">
+      <main className="flex flex-col md:flex-row gap-8 w-full flex-1">
         {/* Left: player card */}
         <motion.div
           key={`card-${player.id}`}
@@ -78,8 +78,8 @@ export default function Results() {
           animate={{ x: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 80, damping: 16 }}
         >
-          <GiPerson style={{ fontSize: '50vh' }} fill={player.color} />
-          <h2 className="text-4xl font-bold mt-4">{player.name}</h2>
+          <GiPerson style={{ fontSize: 'min(50vh, 40vw)' }} fill={player.color} />
+          <h2 className="text-2xl sm:text-4xl font-bold mt-4">{player.name}</h2>
           <p className="text-stone-400 text-sm uppercase tracking-widest mt-1">District {player.district}</p>
           <hr className="border-stone-600 my-3 w-full" />
           <p className="text-xl font-semibold">{player.job}</p>
@@ -98,12 +98,12 @@ export default function Results() {
         >
           {isTopThree ? (
             <div className={`border-2 rounded-xl p-6 ${placeConfig.banner}`}>
-              <p className={`text-5xl font-bold ${placeConfig.text}`}>
+              <p className={`text-3xl sm:text-5xl font-bold ${placeConfig.text}`}>
                 {placeConfig.icon}{placeConfig.label}
               </p>
             </div>
           ) : (
-            <p className="text-4xl font-bold text-stone-400">{ordinal(place)}</p>
+            <p className="text-2xl sm:text-4xl font-bold text-stone-400">{ordinal(place)}</p>
           )}
 
           <div className="bg-stone-900 border border-stone-700 rounded-xl p-6 flex flex-col gap-4">
@@ -140,7 +140,7 @@ export default function Results() {
         </motion.div>
       </main>
 
-      <div className="flex gap-4 mt-10 justify-center">
+      <div className="flex flex-wrap gap-4 mt-10 justify-center">
         <button
           className="bg-stone-700 hover:bg-stone-600 text-white font-bold py-2 px-6 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           onClick={() => setIdx(i => i - 1)}

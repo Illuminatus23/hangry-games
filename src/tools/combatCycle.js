@@ -3,6 +3,7 @@ import { nonCombatCycleDecisions, nonCombatCycle } from "./nonCombatCycle";
 import { d10, d100, selectRandom, article } from "./utils";
 import { logBattle, logBattleList, logMiss, logHit, logDeath, logAlliance, logAllianceCheck } from "./logStyles";
 
+// Builds the attack sentence; verbFirst weapons (e.g. boomerang) use "throws X at Y" order instead of "attacks Y with X".
 function attackPhrase(attackerName, defenderName, weapon) {
     const stats = weaponsStats[weapon];
     if (stats.verbFirst) {
@@ -11,6 +12,7 @@ function attackPhrase(attackerName, defenderName, weapon) {
     return attackerName + ' ' + stats.verb + ' ' + defenderName + ' with ' + article(weapon) + ' ' + weapon;
 }
 
+// Groups all living players by hex, then runs hexBattle for contested hexes and nonCombatCycle for solo players.
 export function combatCycleNew(livingPlayers, mapHexes, logContent, isFirstRound, roundCount = 1, betrayers = [], teamsArray = [], woundEvents = []) {
     const availableHexes = mapHexes.map(hex =>
         hex.hex.q.toString() + hex.hex.r.toString() + hex.hex.s.toString()
@@ -58,6 +60,7 @@ export function combatCycleNew(livingPlayers, mapHexes, logContent, isFirstRound
     }
 }
 
+// Resolves one round of combat for all players sharing a hex: hide rolls, attacks, hex capture, and post-combat alliance checks.
 export function hexBattle(currentHex, hexName, battle, logContent, isFirstRound, roundCount, teamsArray = [], woundEvents = []) {
     let announced = false;
     const playersNonCombat = [];
@@ -138,6 +141,7 @@ export function hexBattle(currentHex, hexName, battle, logContent, isFirstRound,
     };
 }
 
+// After a peaceful hex (no combat announced), rolls for spontaneous alliance between solo players who both pass a lead check.
 function checkAllianceFormation(battle, logContent, teamsArray) {
     const solos = battle.filter(p => p.health > 0 && p.teamleader === -1);
     if (solos.length < 2) return;
@@ -168,6 +172,7 @@ function checkAllianceFormation(battle, logContent, teamsArray) {
     ));
 }
 
+// Resolves one attack: hit/miss roll, damage, grenade fumble chance. Updates kills, killLog, and death fields on the player objects in place.
 export function attackResults(attacker, targets, currentHex, roundCount, inBattle, woundEvents = null) {
     if (d10() > attacker.aggro && attacker.weapon === 'bare fist') {
         return null;
@@ -212,6 +217,7 @@ export function attackResults(attacker, targets, currentHex, roundCount, inBattl
     return null;
 }
 
+// Returns true if the weapon should be depleted this turn; ammo value in weaponsStats is the percent chance of running out.
 export function ammoCheck(weapon) {
     const ammo = weaponsStats[weapon].ammo;
     return ammo > 0 && d100() < ammo;

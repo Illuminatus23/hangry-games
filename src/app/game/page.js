@@ -68,15 +68,15 @@ export default function Game() {
   }, []);
 
   return (
-    <div className="grid sm:p-20 font-[family-name:var(--font-geist-sans)]">
+    <div className="grid p-4 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <header>
         <p className="text-4xl">The Hangry Games</p>
         <p className="text-2xl text-gray-600">Round {roundCount.toString()}</p>
         <p className="text-2xl text-gray-600">{players?.filter(p => p.health > 0).length.toString()} Players</p>
       </header>
-      <main className="grid grid-cols-4 2xl:grid-cols-5 gap-3">
+      <main className="grid grid-cols-1 md:grid-cols-4 2xl:grid-cols-5 gap-3">
         {mapHexes &&
-          <div className="col-span-3 2xl:col-span-4">
+          <div className="md:col-span-3 2xl:col-span-4">
             <HexMapAnimated mapHexes={mapHexes} players={players} round={roundCount} woundEvents={woundEvents} />
           </div>
         }
@@ -103,7 +103,7 @@ export default function Game() {
           </div>
         }
       </main>
-      <footer className="grid grid-cols-4 2xl:grid-cols-6 my-10">
+      <footer className="grid grid-cols-2 sm:grid-cols-4 2xl:grid-cols-6 my-10">
         {players && <PlayerList players={players} />}
       </footer>
     </div>
