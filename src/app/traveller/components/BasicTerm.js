@@ -3,7 +3,7 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { datatables } from "../lib/data";
 import SkillSelector from "./SkillSelector";
-import { careerCheckSimple, careerCheckSpecReinlist, generateBattlename, generateOperationName, d6 } from "../lib/helpers";
+import { careerCheckSimple, careerCheckSpecReinlist, generateBattlename, d6, applySkill } from "../lib/helpers";
 
 export default function BasicTerm({
     upp,
@@ -24,8 +24,6 @@ export default function BasicTerm({
     const skillData = datatables.rank?.[career]?.skills;
     const terms = characterData.career.terms + 1;
 
-    //const rookieSkills = useMemo(() => ["Vacc Suit", "Aircraft"], []);
-
     const automaticSkills = useMemo(() => {
         if (!career) return [];
         if (!skillData) return [];
@@ -34,8 +32,7 @@ export default function BasicTerm({
             skillsGained = ['Vacc Suit'];
         }
         return skillsGained;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [career])
+    }, [career, skillData])
 
     // Queue of preset skills to resolve (rookie skills)
     const [presetQueue, setPresetQueue] = useState([]);
@@ -52,30 +49,7 @@ export default function BasicTerm({
     const currentPreset = presetQueue.length > 0 ? presetQueue[0] : null;
 
     function addSkill(newSkill) {
-
-        if (['STR', 'DEX', 'END', 'INT', 'EDU', 'SOC'].includes(newSkill)) {
-            const currentVal = characterData[newSkill]
-            setCharacterData((prev) => ({ ...prev, [newSkill]: currentVal + 1 }));
-        } else {
-            setSkills(prev => {
-                // Find if skill already exists
-                const index = prev.findIndex(([name]) => name === newSkill);
-
-                if (index === -1) {
-                    if (termStep === "init" && newSkill === "Vacc Suit") {
-                        return [...prev, [newSkill, 0]];
-                    }
-                    // No match → add as new skill at level 1
-                    return [...prev, [newSkill, 1]];
-                }
-
-                // Exists → increment level
-
-                return prev.map((skill, i) =>
-                    i === index ? [skill[0], skill[1] + 1] : skill
-                );
-            });
-        }
+        applySkill(setSkills, setCharacterData, newSkill, { zeroIfNew: termStep === "init" && newSkill === "Vacc Suit" });
     }
 
     // Apply FINAL skill only (already resolved from cascade if needed)
@@ -96,9 +70,6 @@ export default function BasicTerm({
             // Otherwise consume one normal pick
             setPicksRemaining((prev) => Math.max(0, prev - 1));
         }
-
-        // history entry (optional)
-        //handleHistoryAdd?.(`${characterName} gained ${finalSkill}.`);
 
         // Reset selector UI for the next pick
         setPickIndex((prev) => prev + 1);
@@ -132,20 +103,12 @@ export default function BasicTerm({
                 `Starting a career as a ${career}, ${characterName} gained experience with ${resolvedPicks.join(" and ")}.`
             );
         let skillGained = false;
-        /* testing
         const termResults = {
             charSurvival: careerCheckSimple(careerData.survival, upp, characterName),
             charPosition: (canPromote) ? careerCheckSimple(careerData.position, upp, characterName) : [false, ""],
             charPromo: (canPromote) ? careerCheckSimple(careerData.promotion, upp, characterName) : [false, ""],
             charSpec: careerCheckSpecReinlist(careerData.specduty, characterName),
-            charReenlist: careerCheckSpecReinlist(careerData.reenlist, characterName)
-        } */
-        const termResults = {
-            charSurvival: [true, "testing", true],
-            charPosition: (canPromote) ? [true, "testing", true] : [false, ""],
-            charPromo: (canPromote) ? [true, "testing", true] : [false, ""],
-            charSpec: [true, "more test", false, false],
-            charReenlist: [true, "more test", false, false],
+            charReenlist: careerCheckSpecReinlist(careerData.reenlist, characterName),
         }
 
         if (career === "belter") {
@@ -176,7 +139,7 @@ export default function BasicTerm({
             //lived!
             if (termStep !== "init" && !characterData.career?.officer && canPromote) { // commish
                 warningText = warningText + `  Position: ${termResults.charPosition[1]}`;
-                if (termResults.position[0]) {
+                if (termResults.charPosition[0]) {
                     skillGained = true;
                     const ranks = datatables.rank[career]["O"];
                     if (termResults.charPosition[2]) {
@@ -187,15 +150,10 @@ export default function BasicTerm({
                         setPicksRemaining((prev) => Math.max(0, prev + 1));
                     }
 
-                    setCharacterData((prev) => (
-                        {
-                            ...prev, ["career"]: {
-                                ...prev.career,
-                                rank: 1,
-                                officer: true,
-                            }
-                        }
-                    ));
+                    setCharacterData((prev) => ({
+                        ...prev,
+                        career: { ...prev.career, rank: 1, officer: true },
+                    }));
                 }
             }
             if (characterData.career?.officer && canPromote) { //promote
@@ -213,14 +171,10 @@ export default function BasicTerm({
                         setPicksRemaining((prev) => Math.max(0, prev + 1));
                     }
 
-                    setCharacterData((prev) => (
-                        {
-                            ...prev, ["career"]: {
-                                ...prev.career,
-                                rank: newRank,
-                            }
-                        }
-                    ));
+                    setCharacterData((prev) => ({
+                        ...prev,
+                        career: { ...prev.career, rank: newRank },
+                    }));
                 }
             }
             warningText = warningText + `Special Assignment: ${termResults.charSpec[1]}. `;
@@ -240,7 +194,6 @@ export default function BasicTerm({
                     setPicksRemaining((prev) => prev + 2);
                 } else {
                     setPicksRemaining((prev) => prev + 1);
-                    console.log(termResults.charSpec)
                 }
             }
             warningText = warningText + `Reinlist: ${termResults.charReenlist[1]}. `;
@@ -265,22 +218,11 @@ export default function BasicTerm({
     const handleRetire = () => {
         const currentVal = characterData.career.terms + 1;
         const currentAge = characterData.age + 4;
-
-        setCharacterData((prev) => (
-            {
-                ...prev, ["age"]:
-                    currentAge
-            }
-
-        ));
-        setCharacterData((prev) => (
-            {
-                ...prev, ["career"]: {
-                    ...prev.career,
-                    terms: currentVal,
-                }
-            }
-        ));
+        setCharacterData((prev) => ({
+            ...prev,
+            age: currentAge,
+            career: { ...prev.career, terms: currentVal },
+        }));
         setStep('retire');
     }
 

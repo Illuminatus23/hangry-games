@@ -1,4 +1,3 @@
-import { Stardos_Stencil } from "next/font/google";
 import { datatables } from "./data";
 import { generateBirthText } from "./historyText";
 
@@ -89,19 +88,10 @@ export function growUp(upp, characterName) {
 }
 function getBaseSkills(tech) {
     const skills = [];
-    if (tech > 2) {
-        skills.push(["Gun Combat", 0])
-    }
-    if (tech > 4 && tech < 9) {
-        skills.push(["Wheeled Vehicle", 0])
-    }
-    if (tech > 6) {
-        skills.push(["Computer", 0])
-    }
-    if (tech > 8) {
-        skills.push(["Grav Vehicle", 0])
-    }
-
+    if (tech > 2) skills.push({ name: "Gun Combat", level: 0 });
+    if (tech > 4 && tech < 9) skills.push({ name: "Wheeled Vehicle", level: 0 });
+    if (tech > 6) skills.push({ name: "Computer", level: 0 });
+    if (tech > 8) skills.push({ name: "Grav Vehicle", level: 0 });
     return skills;
 }
 export function generateWorld() {
@@ -552,4 +542,19 @@ export function careerCheckSpecReinlist(check, characterName) {
 function careerCouncilor(upp) {
     //todo
     //idea is to suggest careers, first on survival, then on promo/position, finally on enlistent
+}
+
+export function applySkill(setSkills, setCharacterData, skill, opts = {}) {
+    const STATS = ['STR', 'DEX', 'END', 'INT', 'EDU', 'SOC'];
+    if (STATS.includes(skill)) {
+        setCharacterData(prev => ({ ...prev, [skill]: (prev[skill] ?? 0) + 1 }));
+        return;
+    }
+    setSkills(prev => {
+        const index = prev.findIndex(s => s.name === skill);
+        if (index === -1) {
+            return [...prev, { name: skill, level: opts.zeroIfNew ? 0 : 1 }];
+        }
+        return prev.map((s, i) => i === index ? { ...s, level: s.level + 1 } : s);
+    });
 }

@@ -1,3 +1,4 @@
+"use client";
 
 import SelectOrButton from "./SelectOrButton";
 import { generateEnlistmentChoices, careerCheck } from "../lib/helpers";
@@ -15,7 +16,6 @@ export default function CharacterEnlistment({
 }) {
     const enlistmentList = generateEnlistmentChoices(upp, characterData.homeworld);
     const approvedCareers = Object.keys(enlistmentList[0]);
-    //const banedCareers = Object.keys(enlistmentList[1]);
     const [enlistmentChoice, setEnlistmentChoice] = useState("");
     const [enlistOps, setEnlistOps] = useState(
         approvedCareers.map((value, index) => (
@@ -67,7 +67,7 @@ export default function CharacterEnlistment({
 
             setCharacterData((prev) => (
                 {
-                    ...prev, ["career"]: {
+                    ...prev, career: {
                         careername: careerName,
                         subcareername: subCareerName,
                         category: careerCategory,
@@ -103,7 +103,7 @@ export default function CharacterEnlistment({
             } else {
                 setCharacterData((prev) => (
                     {
-                        ...prev, ["career"]: {
+                        ...prev, career: {
                             careername: careerName,
                             subcareername: subCareerName,
                             category: careerCategory,
@@ -149,12 +149,6 @@ export default function CharacterEnlistment({
                         ))}
                     </ul>
                     <p className="mt-label">You can also submit to the draft - randomly assigned to Army, Navy, Marines, Scouts, Flyers, Sailors.</p>
-                    {/* <p>You are excluded from the following career paths:</p>
-                    <ul className="mt-label">
-                        {banedCareers.map((career, index) => (
-                            <li className="mt-cap" key={index}>{career}</li>
-                        ))}
-                    </ul> */}
                 </div>
             }
             <div>
@@ -165,28 +159,7 @@ export default function CharacterEnlistment({
                     setUserChoice={setEnlistmentChoice}
                     onSubmit={handleSubmission}
                 />
-                {/* <select
-                    style={{ marginBottom: "0.5rem" }}
-                    className="mt-select mt-cap"
-                    value={enlistmentChoice}
-                    onChange={(e) => setEnlistmentChoice(e.target.value)}
-                >
-                    <option value="" disabled>--Select--</option>
-                    <option value="draft">Submit to the draft</option>
-                    {enlistOps.length !== 0 ?
-
-                        enlistOps.map((career) => (
-                            <option key={career.id} value={career.value}>
-                                {career.value}
-                            </option>
-                        )) : null
-                    }
-                </select> */}
             </div>
-
-            {/* <button className="mt-btn" onClick={handleSubmission}>
-                Continue
-            </button> */}
         </div>
     );
 }

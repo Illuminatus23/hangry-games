@@ -43,6 +43,15 @@ function Section({ title, children }) {
     );
 }
 
+function InitialCreation({ onKeep }) {
+    return (
+        <div>
+            <p>Instructions and biography will appear on the left. Character stats and attributes generated will appear on the right. Character name has been provided but can be overridden on this step.</p>
+            <button className="mt-btn" onClick={onKeep}>Keep Character</button>
+        </div>
+    );
+}
+
 /**
  * Main MegaTraveller character sheet component.
  */
@@ -91,11 +100,7 @@ export default function CharacterCreation() {
         return order.map((key) => toTravellerHex(characterData[key])).join("");
     }, [characterData]);
 
-    const handleBasicInfoChangeInput = (field) => (e) => {
-        const value = e.target.value;
-        setCharacterData((prev) => ({ ...prev, [field]: value }));
-    };
-    const handleBasicInfoChange = function (field, value) {
+    const handleBasicInfoChange = (field, value) => {
         setCharacterData((prev) => ({ ...prev, [field]: value }));
     };
     const handleHistoryAdd = (entry) => {
@@ -120,8 +125,7 @@ export default function CharacterCreation() {
         handleBulkInfoChange(uppObj)
     }, []);
 
-    const generateFullName = function () {
-        let title = ""
+    const generateFullName = () => {
         const peerage = (characterData.SOC >= 10) ? `${datatables.Title.M[characterData.SOC - 9][1]} ` : "";
         const medgrad = (characterData.awards.includes("med school graduate")) ? " MD" : "";
         let rankName = "";
@@ -137,7 +141,7 @@ export default function CharacterCreation() {
 
         return fullName;
     }
-    const generateRankLong = function () {
+    const generateRankLong = () => {
         const ranktable = datatables.rank[characterData.career.careername];
         const rank = (characterData.career.officer) ? ranktable["O"] : ranktable["E"];
         const rankText = rank[characterData.career.rank][0];
@@ -150,7 +154,7 @@ export default function CharacterCreation() {
         return fullRankText;
     }
 
-    const performDraft = function () {
+    const performDraft = () => {
 
         if (characterData.career.subcareername !== "") {
 
@@ -187,33 +191,44 @@ export default function CharacterCreation() {
             default:
                 draftBranch = "Something went wrong";
         }
-        setCharacterData((prev) => (
-            {
-                ...prev, ["career"]: {
-                    careername: draftBranch,
-                    subcareername: (draftBranch === "navy") ? "imperial navy" : draftBranch,
-                    branch: "",
-                    terms: 0,
-                    rank: 0,
-                    officer: false,  //comission and branch assgn on next step
-                }
-            }
-        ));
+        setCharacterData((prev) => ({
+            ...prev,
+            career: {
+                careername: draftBranch,
+                subcareername: (draftBranch === "navy") ? "imperial navy" : draftBranch,
+                branch: "",
+                terms: 0,
+                rank: 0,
+                officer: false,
+            },
+        }));
 
         handleHistoryAdd(`Politics and war being what they are, the galaxy is ever changing conflict. ${characterName} was drafted into the ${draftBranch}`);
         setWarning(`Draft roll was ${draftRoll} placing ${characterName} in the ${draftBranch}.`)
     }
 
-    //Creation steps
-    function InitialCreation() {
-
-        return (
+    const stepContent = {
+        initial: <InitialCreation onKeep={keepCharacter} />,
+        education: <CharacterEducationEnlistmentDraft setStep={setStep} setSkills={setSkills} characterData={characterData} setCharacterData={setCharacterData} upp={upp} characterName={characterName} handleHistoryAdd={handleHistoryAdd} />,
+        enlistment: <CharacterEnlistment upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} />,
+        draft: (
             <div>
-                <p>Instructions and biography will appear on the left. Character stats and attributes generated will appear on the right.  Character name has been provided but can be overridden on this step.</p>
-                <button className="mt-btn" onClick={keepCharacter}>Keep Character</button>
+                <h2>The Draft</h2>
+                <p className="mt-label" style={{ marginBottom: "0.5rem" }}>
+                    Volunteering for the draft randomly assigns you to one of the 6 military careers: army, navy, marines, scouts, sailors or flyers.
+                </p>
+                {warning !== "" && <p className="mt-label" style={{ marginBottom: "0.5rem", color: "red" }}>{warning}</p>}
+                <button className="mt-btn" onClick={performDraft}>{(characterData.career.subcareername === "") ? "Get drafted" : `Begin your career in the ${characterData.career.subcareername}`}</button>
             </div>
-        )
-    }
+        ),
+        year1: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} />,
+        army: <p>Army career</p>,
+        navy: <p>Navy career</p>,
+        marines: <p>Marines career</p>,
+        scouts: <p>Scouts career</p>,
+        merchants: <p>Merchants career</p>,
+        retire: <MusterOut characterData={characterData} setCharacterData={setCharacterData} setSkills={setSkills} skills={skills} setGear={setGear} />,
+    };
 
     return (
         <div className="mt-sheet" id="modallyModal">
@@ -228,72 +243,7 @@ export default function CharacterCreation() {
                 {/* BIO */}
                 <div style={{ width: "50%" }}>
                     <Section title="Character Path Choices">
-                        {step === "initial" ?
-                            <InitialCreation />
-                            : null}
-                        {step === "education" ?
-                            <CharacterEducationEnlistmentDraft
-                                setStep={setStep}
-                                setSkills={setSkills}
-                                characterData={characterData}
-                                setCharacterData={setCharacterData}
-                                upp={upp}
-                                characterName={characterName}
-                                handleHistoryAdd={handleHistoryAdd}
-                            /> : null}
-
-                        {step === "enlistment" ?
-                            <CharacterEnlistment
-                                upp={upp}
-                                characterData={characterData}
-                                setCharacterData={setCharacterData}
-                                setStep={setStep}
-                                characterName={characterName}
-                                handleHistoryAdd={handleHistoryAdd}
-                            />
-                            : null}
-                        {step === "draft" ?
-                            <div>
-                                <h2>The Draft</h2>
-                                <p className="mt-label" style={{ marginBottom: "0.5rem" }}>
-                                    Volunteering for the draft ramdomly assigns you to one of the 6 military careers: army, navy, marines, scouts, sailors or flyers.
-                                </p>
-                                {warning !== "" ?
-                                    <p className="mt-label" style={{ marginBottom: "0.5rem", color: "red" }}>{warning}</p>
-                                    : null
-                                }
-                                <button className="mt-btn" onClick={performDraft}>{(characterData.career.subcareername === "") ? "Get drafted" : `Begin your career in the ${characterData.career.subcareername}`}</button>
-                            </div>
-                            : null}
-                        {step === "year1" ?
-                            <BasicTerm
-                                upp={upp}
-                                characterData={characterData}
-                                setCharacterData={setCharacterData}
-                                setStep={setStep}
-                                characterName={characterName}
-                                handleHistoryAdd={handleHistoryAdd}
-                                setSkills={setSkills}
-                            />
-                            : null}
-                        {step === "army" ?
-                            <p>Army career</p>
-                            : null}
-                        {step === "navy" ?
-                            <p>Navy career</p>
-                            : null}
-                        {step === "marines" ?
-                            <p>Marines career</p>
-                            : null}
-                        {step === "scouts" ?
-                            <p>Scouts career</p>
-                            : null}
-                        {step === "merchants" ?
-                            <p>Merchants career</p>
-                            : null}
-                        {step === "retire" ?
-                            <MusterOut characterData={characterData} setCharacterData={setCharacterData} setSkills={setSkills} skills={skills} setGear={setGear} />
-                            : null}
+                        {stepContent[step] ?? null}
                     </Section>
                     {characterData.history.length !== 0 ?
                         <Section title="Biography">
@@ -410,12 +360,8 @@ export default function CharacterCreation() {
                                 <tbody>
                                     {skills.map((skill, index) => (
                                         <tr key={index}>
-                                            <td>
-                                                {skill[0]}
-                                            </td>
-                                            <td>
-                                                {skill[1]}
-                                            </td>
+                                            <td>{skill.name}</td>
+                                            <td>{skill.level}</td>
                                         </tr>
                                     ))}
                                 </tbody>

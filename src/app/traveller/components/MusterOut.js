@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import { datatables } from "../lib/data";
-import { d6 } from "../lib/helpers";
+import { d6, applySkill } from "../lib/helpers";
 
 export default function MusterOut({ characterData, setCharacterData, skills, setSkills, setGear }) {
     const career = characterData.career.careername
@@ -22,8 +22,8 @@ export default function MusterOut({ characterData, setCharacterData, skills, set
 
     // Mods
     const hasCashSkill = useMemo(() => {
-        return skills.some(([name]) => {
-            const n = String(name).toLowerCase();
+        return skills.some(s => {
+            const n = String(s.name).toLowerCase();
             return n === "gambling" || n === "prospecting";
         });
     }, [skills]);
@@ -38,27 +38,6 @@ export default function MusterOut({ characterData, setCharacterData, skills, set
     const [resultLog, setResultLog] = useState([]);   // history of rolls shown to user
     const [cashTotal, setCashTotal] = useState(0);
 
-    function addSkillOrStat(newSkill) {
-        const statKeys = ["STR", "DEX", "END", "INT", "EDU", "SOC"];
-        const val = String(newSkill).trim();
-
-        if (statKeys.includes(val)) {
-            if (!setCharacterData) return; // avoid crashing if not provided
-            setCharacterData(prev => ({
-                ...prev,
-                [val]: (prev[val] ?? 0) + 1,
-            }));
-            return;
-        }
-
-        setSkills(prev => {
-            const index = prev.findIndex(([name]) => name === val);
-            if (index === -1) return [...prev, [val, 1]];
-            return prev.map((skill, i) =>
-                i === index ? [skill[0], skill[1] + 1] : skill
-            );
-        });
-    }
 
     const canRollCash = cashRollsUsed < CASH_CAP;
     const canRoll = rollsRemaining > 0;
@@ -115,18 +94,17 @@ export default function MusterOut({ characterData, setCharacterData, skills, set
         ]);
 
         if (gear.includes(benefit)) {
-            setCharacterData(prev => ({ ...prev, gear: prev.gear.push(benefit) }));
-            //} else if (benefit==="Weapon") {
-            //trigger weapon selection
+            setCharacterData(prev => ({ ...prev, gear: [...(prev.gear ?? []), benefit] }));
         } else if (ships.includes(benefit)) {
-            setCharacterData(prev => ({ ...prev, ship: amount, shipshares: (prev.shipshares ?? 0) + 1 }));
+            setCharacterData(prev => ({ ...prev, ship: benefit, shipshares: (prev.shipshares ?? 0) + 1 }));
         } else if (benefit === "EDU+2") {
-            addSkillOrStat("EDU");
-            addSkillOrStat("EDU");
+            applySkill(setSkills, setCharacterData, "EDU");
+            applySkill(setSkills, setCharacterData, "EDU");
         } else if (benefit === "SOC-1") {
             setCharacterData(prev => ({ ...prev, SOC: (prev.SOC ?? 0) - 1 }));
-
-        } else if (benefit) { addSkillOrStat(benefit) };
+        } else if (benefit) {
+            applySkill(setSkills, setCharacterData, benefit);
+        }
     };
 
     const effectiveChoice =

@@ -1,4 +1,6 @@
-import { d6, handleSchoolApp } from "../lib/helpers";
+"use client";
+
+import { d6, handleSchoolApp, applySkill } from "../lib/helpers";
 import React, { useState } from "react";
 import SelectOrButton from "./SelectOrButton";
 
@@ -39,22 +41,6 @@ export default function CharacterEducationEnlistmentDraft({
         return options;
     });
     const [warning, setWarning] = useState("");
-    function addSkill(newSkill) {
-        setSkills(prev => {
-            // Find if skill already exists
-            const index = prev.findIndex(([name]) => name === newSkill);
-
-            if (index === -1) {
-                // No match → add as new skill at level 1
-                return [...prev, [newSkill, 1]];
-            }
-
-            // Exists → increment level
-            return prev.map((skill, i) =>
-                i === index ? [skill[0], skill[1] + 1] : skill
-            );
-        });
-    }
     const handleSubmission = (val) => {
         setWarning("");
         const nextApplication = val ?? application;
@@ -66,53 +52,26 @@ export default function CharacterEducationEnlistmentDraft({
         }
         if (nextApplication === "enlistarmy") {
             setStep("army");
-            setCharacterData((prev) => (
-                {
-                    ...prev, ["career"]: {
-                        careername: "army",
-                        category: "army",
-                        subcareername: "",
-                        branch: "",
-                        terms: 0,
-                        rank: 1,
-                        officer: false,  //comission and branch assgn on next step
-                    }
-                }
-            ));
+            setCharacterData((prev) => ({
+                ...prev,
+                career: { careername: "army", category: "army", subcareername: "", branch: "", terms: 0, rank: 1, officer: false },
+            }));
             return;
         }
         if (nextApplication === "enlistnavy") {
             setStep("navy");
-            setCharacterData((prev) => (
-                {
-                    ...prev, ["career"]: {
-                        careername: "navy",
-                        category: "navy",
-                        subcareername: "imperial navy",
-                        branch: "",
-                        terms: 0,
-                        rank: 1,
-                        officer: false,  //comission and branch assgn on next step
-                    }
-                }
-            ));
+            setCharacterData((prev) => ({
+                ...prev,
+                career: { careername: "navy", category: "navy", subcareername: "imperial navy", branch: "", terms: 0, rank: 1, officer: false },
+            }));
             return;
         }
         if (nextApplication === "enlistmarines") {
             setStep("marines");
-            setCharacterData((prev) => (
-                {
-                    ...prev, ["career"]: {
-                        careername: "marines",
-                        category: "marines",
-                        subcareername: "",
-                        branch: "",
-                        terms: 0,
-                        rank: 1,
-                        officer: false,  //comission and branch assgn on next step
-                    }
-                }
-            ));
+            setCharacterData((prev) => ({
+                ...prev,
+                career: { careername: "marines", category: "marines", subcareername: "", branch: "", terms: 0, rank: 1, officer: false },
+            }));
             return;
         }
 
@@ -138,13 +97,10 @@ export default function CharacterEducationEnlistmentDraft({
                 friendlyName = "college"
         }
 
-        console.log(results)
-
         if (nextApplication === "autoflight" ||
             nextApplication === "flight" ||
             nextApplication === "medical"
         ) {
-            const results = handleSchoolApp(upp, nextApplication, characterName);
             if (!results.admission) {
                 handleHistoryAdd(`${characterName} applied to ${friendlyName} but was rejected.`);
                 //setStep("enlistment")
@@ -157,7 +113,7 @@ export default function CharacterEducationEnlistmentDraft({
 
                 handleHistoryAdd(`${characterName} applied to ${friendlyName} and was accepted but washed out of the program.`);
                 if (results.school === "medical") {
-                    setCharacterData((prev) => ({ ...prev, ["age"]: 23 }));
+                    setCharacterData((prev) => ({ ...prev, age: 23 }));
                 }
                 //setStep("enlistment")
                 setSchoolOptions([
@@ -171,13 +127,13 @@ export default function CharacterEducationEnlistmentDraft({
                 if (results.school === "flight" || results.school === "autoflight") {
                     const levelGained = d6(1, -4);
                     if (levelGained === 1) {
-                        addSkill("Pilot");
+                        applySkill(setSkills, setCharacterData,"Pilot");
                     }
                     if (levelGained === 2) {
-                        addSkill("Pilot");
-                        addSkill("Pilot");
+                        applySkill(setSkills, setCharacterData,"Pilot");
+                        applySkill(setSkills, setCharacterData,"Pilot");
                     }
-                    setCharacterData((prev) => ({ ...prev, ["age"]: 23 }));
+                    setCharacterData((prev) => ({ ...prev, age: 23 }));
                     //setStep("navy")
                     setSchoolOptions([
                         { id: 1, name: "Take a commision as a Navy pilot", value: "navy" },
@@ -189,8 +145,8 @@ export default function CharacterEducationEnlistmentDraft({
                     }));
                 } else {
                     const currentEDU = characterData.EDU;
-                    setCharacterData((prev) => ({ ...prev, ["age"]: 24 }));
-                    setCharacterData((prev) => ({ ...prev, ["EDU"]: currentEDU + 1 }));
+                    setCharacterData((prev) => ({ ...prev, age: 24 }));
+                    setCharacterData((prev) => ({ ...prev, EDU: currentEDU + 1 }));
                     setCharacterData(prev => ({
                         ...prev,
                         awards: [...prev.awards, `${(results.honors) ? "honors " : ""}med school graduate`],
@@ -204,7 +160,7 @@ export default function CharacterEducationEnlistmentDraft({
                 if (results.skills.length !== 0) {
                     historyStr = historyStr + ` At school ${characterName} learned the following skills: ${results.skills.join("; ")}`;
                     for (let i = 0; i < results.skills.length; i++) {
-                        addSkill(results.skills[i]);
+                        applySkill(setSkills, setCharacterData,results.skills[i]);
                     }
                 }
                 handleHistoryAdd(historyStr);
@@ -232,7 +188,7 @@ export default function CharacterEducationEnlistmentDraft({
             const draft = (results.school === "navy" || results.school === "military") ? ` and was immediately drafted into the ${results.school}` : "";
             const historyStr = `${characterName} applied to ${friendlyName} and was accepted but dropped out after 1 year${draft}.`;
             handleHistoryAdd(historyStr);
-            setCharacterData((prev) => ({ ...prev, ["age"]: 19 }));
+            setCharacterData((prev) => ({ ...prev, age: 19 }));
             if (results.school === "navy") {
                 //setStep("navy")
                 setSchoolOptions([
@@ -258,7 +214,7 @@ export default function CharacterEducationEnlistmentDraft({
             const honors = (results.honors) ? " with honors granting an opportunity to enter Medical college" : "";
             let historyStr = `${characterName} applied to ${friendlyName}, was accepted and graduated${honors}. Their education increased by ${increaseEDU}. `;
             //let historyStr = `${characterName} applied to ${friendlyName}, was accepted and graduated${honors}. `;
-            setCharacterData((prev) => ({ ...prev, ["EDU"]: currentEDU + increaseEDU }));
+            setCharacterData((prev) => ({ ...prev, EDU: currentEDU + increaseEDU }));
 
             let awardName = friendlyName;
             if (awardName === "the Naval Academy") { awardName = "Naval Academy" }
@@ -273,7 +229,7 @@ export default function CharacterEducationEnlistmentDraft({
             }));
 
             if (results.school === "college") {
-                setCharacterData((prev) => ({ ...prev, ["commission"]: results.commission }));
+                setCharacterData((prev) => ({ ...prev, commission: results.commission }));
                 if (results.commission !== "denied" && results.commission !== "none") {
                     historyStr = historyStr + ` ${characterName} was also accepted into officer candidate school, granting them the rank of officer in the ${results.commission} and guarantying enlistment.`;
                 } else if (results.commission === "denied") {
@@ -295,8 +251,7 @@ export default function CharacterEducationEnlistmentDraft({
                     }
                 } else {
 
-                    console.log("Begin enlistment CHOICE");
-                    setCharacterData((prev) => ({ ...prev, ["age"]: 22 }));
+                    setCharacterData((prev) => ({ ...prev, age: 22 }));
                     //setStep("enlistment")
                     setSchoolOptions([
                         { id: 1, name: "Enlist in a career", value: "skip" },
@@ -306,7 +261,7 @@ export default function CharacterEducationEnlistmentDraft({
 
             } else if (results.school === "navy") {
                 //marine or navy commission
-                setCharacterData((prev) => ({ ...prev, ["commission"]: "navy" }));
+                setCharacterData((prev) => ({ ...prev, commission: "navy" }));
 
                 if (results.honors) {
                     setWarning(`${characterName} applied to ${friendlyName}, was accepted and graduated with honors. Choose whether or not they go to a post graduate school.`);
@@ -328,7 +283,7 @@ export default function CharacterEducationEnlistmentDraft({
                 }
 
             } else if (results.school === "military") {
-                setCharacterData((prev) => ({ ...prev, ["commission"]: "army" }));
+                setCharacterData((prev) => ({ ...prev, commission: "army" }));
                 if (results.honors) {
                     setWarning(`${characterName} applied to ${friendlyName}, was accepted and graduated with honors. Choose whether or not they go to a post graduate school.`);
                     setSchoolOptions([
@@ -336,7 +291,7 @@ export default function CharacterEducationEnlistmentDraft({
                         { id: 2, name: "Apply to med school", value: "medical" },
                     ])
                 } else {
-                    setCharacterData((prev) => ({ ...prev, ["age"]: 22 }));
+                    setCharacterData((prev) => ({ ...prev, age: 22 }));
                     //setStep("army");
                     setSchoolOptions([
                         { id: 1, name: "Take a commision in the army", value: "enlistarmy" },
@@ -348,7 +303,7 @@ export default function CharacterEducationEnlistmentDraft({
             if (results.skills.length !== 0) {
                 historyStr = historyStr + ` At school ${characterName} learned the following skills: ${results.skills.join("; ")}`;
                 for (let i = 0; i < results.skills.length; i++) {
-                    addSkill(results.skills[i]);
+                    applySkill(setSkills, setCharacterData,results.skills[i]);
                 }
             }
             handleHistoryAdd(historyStr);
@@ -378,28 +333,7 @@ export default function CharacterEducationEnlistmentDraft({
                     setUserChoice={setApplication}
                     onSubmit={handleSubmission}
                 />
-                {/* <select
-                    style={{ marginBottom: "0.5rem" }}
-                    className="mt-select"
-                    value={application}
-                    onChange={(e) => setApplication(e.target.value)}
-                >
-                    <option value="">Select a pre-career option</option>
-
-                    {schoolOptions.length !== 0 ?
-
-                        schoolOptions.map((school) => (
-                            <option key={school.id} value={school.value}>
-                                {school.name}
-                            </option>
-                        )) : null
-                    }
-                </select> */}
             </div>
-
-            {/* <button className="mt-btn" onClick={handleSubmission}>
-                Continue
-            </button> */}
         </div>
     );
 }
