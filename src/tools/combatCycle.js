@@ -13,7 +13,7 @@ function attackPhrase(attackerName, defenderName, weapon) {
 }
 
 // Groups all living players by hex, then runs hexBattle for contested hexes and nonCombatCycle for solo players.
-export function combatCycleNew(livingPlayers, mapHexes, logContent, isFirstRound, roundCount = 1, betrayers = [], teamsArray = [], woundEvents = []) {
+export function combatCycleNew(livingPlayers, mapHexes, logContent, isFirstRound, roundCount = 1, betrayers = [], teamsArray = [], events = []) {
     const availableHexes = mapHexes.map(hex =>
         hex.hex.q.toString() + hex.hex.r.toString() + hex.hex.s.toString()
     );
@@ -39,7 +39,7 @@ export function combatCycleNew(livingPlayers, mapHexes, logContent, isFirstRound
         if (battle.length >= 2) {
             const currentHex = mapHexes.find(maphex => maphex.id === key);
             if (currentHex) {
-                const results = hexBattle(currentHex, currentHex.biome, battle, logContent, isFirstRound, roundCount, teamsArray, woundEvents);
+                const results = hexBattle(currentHex, currentHex.biome, battle, logContent, isFirstRound, roundCount, teamsArray, events);
                 playersMoving = playersMoving.concat(results.playersMoving);
                 playersNonCombat = playersNonCombat.concat(results.playersNonCombat);
             }
@@ -56,12 +56,12 @@ export function combatCycleNew(livingPlayers, mapHexes, logContent, isFirstRound
     }
 
     if (!isFirstRound) {
-        nonCombatCycle(playersMoving, playersNonCombat, mapHexes, logContent);
+        nonCombatCycle(playersMoving, playersNonCombat, mapHexes, logContent, events);
     }
 }
 
 // Resolves one round of combat for all players sharing a hex: hide rolls, attacks, hex capture, and post-combat alliance checks.
-export function hexBattle(currentHex, hexName, battle, logContent, isFirstRound, roundCount, teamsArray = [], woundEvents = []) {
+export function hexBattle(currentHex, hexName, battle, logContent, isFirstRound, roundCount, teamsArray = [], events = []) {
     let announced = false;
     const playersNonCombat = [];
     const playersMoving = [];
@@ -105,7 +105,7 @@ export function hexBattle(currentHex, hexName, battle, logContent, isFirstRound,
                 announced = true;
             }
 
-            const attackMessage = attackResults(attacker, targets, currentHex, roundCount, battle, woundEvents);
+            const attackMessage = attackResults(attacker, targets, currentHex, roundCount, battle, events);
             if (attackMessage) logContent.push(attackMessage);
 
             const outOfAmmo = ammoCheck(attacker.weapon);
@@ -148,10 +148,10 @@ function checkAllianceFormation(battle, logContent, teamsArray) {
 
     const interested = solos.filter(p => d10() <= p.lead);
 
-    logContent.push(logAllianceCheck(
-        '[Alliance check] ' + solos.length + ' solo(s) present. ' +
-        interested.length + '/' + solos.length + ' rolled under their lead.'
-    ));
+    /*  logContent.push(logAllianceCheck(
+         '[Alliance check] ' + solos.length + ' solo(s) present. ' +
+         interested.length + '/' + solos.length + ' rolled under their lead.'
+     )); */
 
     if (interested.length < 2) return;
 
@@ -173,7 +173,7 @@ function checkAllianceFormation(battle, logContent, teamsArray) {
 }
 
 // Resolves one attack: hit/miss roll, damage, grenade fumble chance. Updates kills, killLog, and death fields on the player objects in place.
-export function attackResults(attacker, targets, currentHex, roundCount, inBattle, woundEvents = null) {
+export function attackResults(attacker, targets, currentHex, roundCount, inBattle, events = null) {
     if (d10() > attacker.aggro && attacker.weapon === 'bare fist') {
         return null;
     }
@@ -190,9 +190,10 @@ export function attackResults(attacker, targets, currentHex, roundCount, inBattl
             attacker.kills = (attacker.kills || 0) + 1;
             attacker.killLog = [...(attacker.killLog || []), { victim: defender.name, weapon: attacker.weapon, round: roundCount + 1 }];
             defender.death = 'killed by ' + attacker.name + ' with ' + article(attacker.weapon) + ' ' + attacker.weapon + ' in the ' + currentHex.biome + ' on round ' + (roundCount + 1);
-            return logDeath(attackPhrase(attacker.name, defender.name, attacker.weapon) + '. ' + defender.name + ' dies.');
+            if (events) events.push({ type: 'attack', seq: events.length, attackerId: attacker.id, defenderId: defender.id, hexId: currentHex.id, result: 'death' });
+            return logDeath(attackPhrase(attacker.name, defender.name, attacker.weapon) + ' and kills ' + defender.name + '.');
         }
-        if (woundEvents) woundEvents.push({ attackerId: attacker.id, defenderId: defender.id });
+        if (events) events.push({ type: 'attack', seq: events.length, attackerId: attacker.id, defenderId: defender.id, hexId: currentHex.id, result: 'hit' });
         return logHit(attackPhrase(attacker.name, defender.name, attacker.weapon) + ' wounding them.');
 
     } else if (defender.health > 0) {
@@ -202,15 +203,18 @@ export function attackResults(attacker, targets, currentHex, roundCount, inBattl
                 oopsie.health = 0;
                 if (attacker.name === oopsie.name) {
                     oopsie.death = 'accidentally killed themselves with ' + article(attacker.weapon) + ' ' + attacker.weapon + ' in the ' + currentHex.biome + ' on round ' + (roundCount + 1);
+                    if (events) events.push({ type: 'attack', seq: events.length, attackerId: attacker.id, defenderId: attacker.id, hexId: currentHex.id, result: 'death' });
                     return logDeath(attackPhrase(attacker.name, defender.name, attacker.weapon) + ' but fumbles, blowing themselves up.');
                 } else {
                     attacker.kills = (attacker.kills || 0) + 1;
                     attacker.killLog = [...(attacker.killLog || []), { victim: oopsie.name, weapon: attacker.weapon, round: roundCount + 1 }];
                     oopsie.death = 'accidentally killed by ' + attacker.name + ' with ' + article(attacker.weapon) + ' ' + attacker.weapon + ' in the ' + currentHex.biome + ' on round ' + (roundCount + 1);
+                    if (events) events.push({ type: 'attack', seq: events.length, attackerId: attacker.id, defenderId: oopsie.id, hexId: currentHex.id, result: 'death' });
                     return logDeath(attackPhrase(attacker.name, defender.name, attacker.weapon) + ' but misses. An unlucky bounce catches ' + oopsie.name + ' in the blast, killing them.');
                 }
             }
         }
+        if (events) events.push({ type: 'attack', seq: events.length, attackerId: attacker.id, defenderId: defender.id, hexId: currentHex.id, result: 'miss' });
         return logMiss(attackPhrase(attacker.name, defender.name, attacker.weapon) + ' but misses.');
     }
 

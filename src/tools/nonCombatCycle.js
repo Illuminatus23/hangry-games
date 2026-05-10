@@ -12,7 +12,7 @@ export function nonCombatCycleDecisions(player) {
 }
 
 // Runs foraging actions (heal, find weapon, craft, fortify) for stationary players, then moves roaming players toward goals based on aggro.
-export function nonCombatCycle(playersMoving, playersNonCombat, mapHexes, logContent) {
+export function nonCombatCycle(playersMoving, playersNonCombat, mapHexes, logContent, events = []) {
     playersNonCombat.forEach(player => {
         const currentHex = hexLookup(player.location, mapHexes)[0];
         const intPassCheck = d10() <= player.int;
@@ -53,24 +53,27 @@ export function nonCombatCycle(playersMoving, playersNonCombat, mapHexes, logCon
         const busyHexes = validHexes.filter(hex => hex.pop.length > 0).sort((a, b) => b.pop.length - a.pop.length);
         const weaponCaches = validHexes.filter(hex => hex.styleName === 'old');
         const isAggressive = d10() <= player.aggro;
+        const currentHexBusy = currentHex.pop.length > 0;
 
         let reason = ' wandering';
         if (player.weapon === 'bare fist' && weaponCaches.length > 0) {
             reason = ' looking for a weapon';
             randomHex = selectRandom(weaponCaches);
-        } else if (isAggressive && busyHexes.length > 0) {
+        } else if (isAggressive && busyHexes.length > 0 && !currentHexBusy) {
             reason = ' looking for a fight';
             randomHex = busyHexes[0];
-        } else if (!isAggressive && emptyHexes.length > 0) {
-            reason = ' looking for a place to lay low';
-            randomHex = selectRandom(emptyHexes);
         } else if (emptyHexes.length > 0 && player.health < 2) {
+            reason = ' looking for a place to heal';
+            randomHex = selectRandom(emptyHexes);
+        } else if (!isAggressive && emptyHexes.length > 0) {
             reason = ' trying to escape';
             randomHex = selectRandom(emptyHexes);
         }
 
         if (randomHex) {
+            const fromHexId = currentHex.id;
             player = updateHexLocation(mapHexes, randomHex, player);
+            events.push({ type: 'move', seq: events.length, playerId: player.id, fromHexId, toHexId: randomHex.id });
             logContent.push(logMove(player.name + ' moves from the ' + currentHex.biome + ' to the ' + player.locationname + reason));
         } else {
             currentHex.pop = currentHex.pop.filter(id => id !== player.id);

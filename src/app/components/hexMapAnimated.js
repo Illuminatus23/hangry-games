@@ -7,10 +7,15 @@ import { IconContext } from 'react-icons';
 import { GiPerson, GiHastyGrave } from 'react-icons/gi';
 import { mapData } from '@/app/data/staticData';
 
-export default function HexMapAnimated({ mapHexes, players, round, woundEvents = [] }) {
+const STEP = 0.3;       // seconds between sequential attack events
+const COMBAT_DUR = 0.35; // duration of each combat animation
+
+export default function HexMapAnimated({ mapHexes, players, round, events = [] }) {
     const prevDeadIdsRef = useRef(new Set());
-    const attackerIds = new Set(woundEvents.map(e => e.attackerId));
-    const woundedIds  = new Set(woundEvents.map(e => e.defenderId));
+
+    const attackEvents = events.filter(e => e.type === 'attack');
+    const maxCombatSeq = attackEvents.length > 0 ? Math.max(...attackEvents.map(e => e.seq)) : -1;
+    const movePhaseStart = maxCombatSeq >= 0 ? maxCombatSeq * STEP + COMBAT_DUR + 0.2 : 0.2;
 
     useEffect(() => {
         prevDeadIdsRef.current = new Set(players.filter(p => p.health <= 0).map(p => p.id));
@@ -38,15 +43,21 @@ export default function HexMapAnimated({ mapHexes, players, round, woundEvents =
             const moveAnimate = { x: adjustedPosition[0], y: adjustedPosition[1] }
             const movetransition = {
                 type: "spring",
-                visualDuration: (player.health <= 0)? .5: 1,
+                visualDuration: player.health <= 0 ? 0.5 : 1,
                 bounce: 0.2,
-                delay: (player.health <= 0) ? 0 : (i * .1)+.5
+                delay: player.health <= 0 ? 0 : movePhaseStart + i * 0.05,
             }
 
-            const justDied = player.health <= 0 && !prevDeadIdsRef.current.has(player.id);
-            const isAttacker = player.health > 0 && attackerIds.has(player.id);
-            const isWounded  = player.health > 0 && woundedIds.has(player.id);
+            const playerAttackEvent = attackEvents.find(e => e.attackerId === player.id);
+            const playerDefendEvent = attackEvents.find(e => e.defenderId === player.id && (e.result === 'hit' || e.result === 'death'));
+            const playerFirstCombatEvent = [playerAttackEvent, playerDefendEvent].filter(Boolean).sort((a, b) => a.seq - b.seq)[0];
+            const isAttacker = player.health > 0 && !!playerAttackEvent;
+            const isWounded  = player.health > 0 && !!playerDefendEvent;
             const isInCombat = isAttacker || isWounded;
+            const combatDelay = playerFirstCombatEvent ? playerFirstCombatEvent.seq * STEP : 0;
+            const deathEvent = attackEvents.find(e => e.defenderId === player.id && e.result === 'death');
+            const justDied = player.health <= 0 && !prevDeadIdsRef.current.has(player.id);
+            const crossfadeDelay = deathEvent ? deathEvent.seq * STEP + COMBAT_DUR + 0.05 : 0.2;
             if (player.health <= 0) { deadCount++ } else { liveCount++ }
             hexPop.push(
                 <g key={hex.pop[i]} className='playerIcon'>
@@ -62,15 +73,15 @@ export default function HexMapAnimated({ mapHexes, players, round, woundEvents =
                                 isWounded  ? { opacity: [1, 0.2, 1] } :
                                              { scale: 1, opacity: 1 }
                             }
-                            transition={isInCombat ? { duration: 0.35, delay: 1.2, ease: 'easeInOut' } : { duration: 0 }}
+                            transition={isInCombat ? { duration: COMBAT_DUR, delay: combatDelay, ease: 'easeInOut' } : { duration: 0 }}
                         >
                             <IconContext.Provider value={{ attr: { fill: teamColor, stroke: 'gray', strokeWidth: '1' } }}>
                                 {justDied ? (
                                     <>
-                                        <motion.g initial={{ opacity: 1 }} animate={{ opacity: 0 }} transition={{ delay: 0.6, duration: 0.2 }}>
+                                        <motion.g initial={{ opacity: 1 }} animate={{ opacity: 0 }} transition={{ delay: crossfadeDelay, duration: 0.2 }}>
                                             <GiPerson size='3' />
                                         </motion.g>
-                                        <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6, duration: 0.2 }}>
+                                        <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: crossfadeDelay, duration: 0.2 }}>
                                             <GiHastyGrave size='2.5' />
                                         </motion.g>
                                     </>

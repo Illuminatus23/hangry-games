@@ -334,7 +334,7 @@ function logBatchedFailedSearches(failedSearchers, logContent) {
 }
 
 // Runs the opening round: solo players and team leaders scatter from the arena, search for weapons, then combat resolves.
-export function firstRound(mapHexes, players, logContent, roundCount, woundEvents = []) {
+export function firstRound(mapHexes, players, logContent, roundCount, events = []) {
     const validHexes = getValidTravelHexes([0, 0, 0], mapHexes);
     const soloPlayers = players.filter(player => player.teamleader === -1);
     const leaders = players.filter(player => player.teamleader === player.id);
@@ -389,11 +389,11 @@ export function firstRound(mapHexes, players, logContent, roundCount, woundEvent
     });
 
     logBatchedFailedSearches(failedSearchers, logContent);
-    combatCycleNew(players, mapHexes, logContent, true, 1, [], [], woundEvents);
+    combatCycleNew(players, mapHexes, logContent, true, 1, [], [], events);
 }
 
 // Runs one full game round: team loyalty checks and dissolves, combat, winner detection, then map shrink.
-export function startNewRound(teamsArray, mapHexes, players, logContent, roundCount, woundEvents = []) {
+export function startNewRound(teamsArray, mapHexes, players, logContent, roundCount, events = []) {
     const livingPlayers = players.filter(player => player.health > 0);
 
     // Iterate backwards so splice doesn't skip elements
@@ -435,7 +435,7 @@ export function startNewRound(teamsArray, mapHexes, players, logContent, roundCo
         }
     }
 
-    combatCycleNew(livingPlayers, mapHexes, logContent, false, roundCount, [], teamsArray, woundEvents);
+    combatCycleNew(livingPlayers, mapHexes, logContent, false, roundCount, [], teamsArray, events);
 
     if (players.filter(player => player.health > 0).length === 1) {
         crownWinner(players.filter(player => player.health > 0)[0], logContent);

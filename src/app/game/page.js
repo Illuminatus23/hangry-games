@@ -16,18 +16,18 @@ export default function Game() {
   const [buttonText, setButtonText] = useState('Begin');
   const [roundCount, setRoundCount] = useState(0);
   const [logArchive, setLogArchive] = useState([]);
-  const [woundEvents, setWoundEvents] = useState([]);
+  const [roundEvents, setRoundEvents] = useState([]);
 
   function advanceRound() {
     const newLog = [];
-    const woundEvts = [];
+    const events = [];
     if (roundCount === 0) {
       setButtonText('Advance Round');
       newLog.push(logRound(1));
-      firstRound(mapHexes, players, newLog, roundCount, woundEvts);
+      firstRound(mapHexes, players, newLog, roundCount, events);
     } else {
       newLog.push(logRound(roundCount + 1));
-      startNewRound(teamsArray, mapHexes, players, newLog, roundCount, woundEvts);
+      startNewRound(teamsArray, mapHexes, players, newLog, roundCount, events);
       if (players.filter(p => p.health > 0).length === 1) setButtonText('End');
     }
     players.forEach(p => {
@@ -35,7 +35,7 @@ export default function Game() {
         p.deathOrder = ++deathCounterRef.current;
       }
     });
-    setWoundEvents(woundEvts);
+    setRoundEvents(events);
     setLogArchive(prev => [...prev, newLog]);
     setRoundCount(r => r + 1);
     setPlayers([...players]);
@@ -77,7 +77,7 @@ export default function Game() {
       <main className="grid grid-cols-1 md:grid-cols-4 2xl:grid-cols-5 gap-3">
         {mapHexes &&
           <div className="md:col-span-3 2xl:col-span-4">
-            <HexMapAnimated mapHexes={mapHexes} players={players} round={roundCount} woundEvents={woundEvents} />
+            <HexMapAnimated mapHexes={mapHexes} players={players} round={roundCount} events={roundEvents} />
           </div>
         }
         {teamsArray &&
