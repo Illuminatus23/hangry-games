@@ -3,7 +3,11 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { datatables } from "../lib/data";
 import SkillSelector from "./SkillSelector";
-import { careerCheckSimple, careerCheckSpecReinlist, generateBattlename, d6, applySkill } from "../lib/helpers";
+import { careerCheckSimple, careerCheckSpecReinlist, generateBattlename, d6, applySkill, getAgingRolls } from "../lib/helpers";
+import { describeSkillGains } from "../lib/historyText";
+
+const ALWAYS_TWO_CAREERS = ['belter', 'rogue', 'hunter', 'doctor', 'scientist'];
+const PENSION_CAREERS = ['navy', 'marines', 'army', 'scouts', 'flyer', 'sailor'];
 
 export default function BasicTerm({
     upp,
@@ -16,6 +20,7 @@ export default function BasicTerm({
 }) {
     const [warning, setWarning] = useState("");
     const [termStep, setTermStep] = useState("init");
+    const [pendingTermStep, setPendingTermStep] = useState(null);
 
     const career = characterData.career?.careername;
     const careerData = datatables.Basics?.[career];
@@ -38,7 +43,10 @@ export default function BasicTerm({
     const [presetQueue, setPresetQueue] = useState([]);
 
     // How many *category* picks remain for init step
-    const [picksRemaining, setPicksRemaining] = useState(2);
+    const [picksRemaining, setPicksRemaining] = useState(() => {
+        const isFirstTerm = (characterData.career?.terms ?? 0) === 0;
+        return (isFirstTerm || ALWAYS_TWO_CAREERS.includes(characterData.career?.careername ?? '')) ? 2 : 1;
+    });
 
     // Show what was resolved
     const [resolvedPicks, setResolvedPicks] = useState([]);
@@ -49,7 +57,10 @@ export default function BasicTerm({
     const currentPreset = presetQueue.length > 0 ? presetQueue[0] : null;
 
     function addSkill(newSkill) {
-        applySkill(setSkills, setCharacterData, newSkill, { zeroIfNew: termStep === "init" && newSkill === "Vacc Suit" });
+        applySkill(setSkills, setCharacterData, newSkill, {
+            zeroIfNew: termStep === "init" && newSkill === "Vacc Suit",
+            maxSkills: characterData.INT + characterData.EDU,
+        });
     }
 
     // Apply FINAL skill only (already resolved from cascade if needed)
@@ -95,13 +106,18 @@ export default function BasicTerm({
         setPresetQueue(automaticSkills);
     }, [career, automaticSkills, characterName, handleHistoryAdd, allResolved, resolvedPicks]);
 
+    const CAREER_DISPLAY = { law: 'law enforcement officer' };
+    const careerDisplay = CAREER_DISPLAY[career] ?? career;
+
     const handleTerm = () => {
         let warningText = "";
         let historyText = "";
-        if (termStep === 'init')
-            handleHistoryAdd?.(
-                `Starting a career as a ${career}, ${characterName} gained experience with ${resolvedPicks.join(" and ")}.`
-            );
+        if (termStep === 'init') {
+            const narrative = resolvedPicks.length === 0
+                ? `${characterName} began their career as a ${careerDisplay}.`
+                : `${characterName} ${describeSkillGains(resolvedPicks, career)}.`;
+            handleHistoryAdd?.(`Starting a career as a ${careerDisplay}, ${narrative}`);
+        }
         let skillGained = false;
         const termResults = {
             charSurvival: careerCheckSimple(careerData.survival, upp, characterName),
@@ -136,20 +152,17 @@ export default function BasicTerm({
             setStep("End")
         } else {
             historyText = historyText + `${characterName} spent 4 years as a ${career}. `;
+            const isFirstTerm = characterData.career.terms === 0;
+            const isDraftedFirstTerm = characterData.career?.drafted && isFirstTerm;
             //lived!
-            if (termStep !== "init" && !characterData.career?.officer && canPromote) { // commish
+            if (isFirstTerm && !characterData.career?.officer && canPromote && !isDraftedFirstTerm) { // commish
                 warningText = warningText + `  Position: ${termResults.charPosition[1]}`;
                 if (termResults.charPosition[0]) {
                     skillGained = true;
                     const ranks = datatables.rank[career]["O"];
-                    if (termResults.charPosition[2]) {
-                        historyText = historyText + `${characterName} performed well and was made a ${ranks[1]} in recognition of their performance. `;
-                        setPicksRemaining((prev) => Math.max(0, prev + 2));
-                    } else {
-                        historyText = historyText + `${characterName} performed execellently and was made a ${ranks[1]} in recognition of their performance. `;
-                        setPicksRemaining((prev) => Math.max(0, prev + 1));
-                    }
-
+                    const commDesc = termResults.charPosition[2] ? "excelled and" : "performed well and";
+                    historyText = historyText + `${characterName} ${commDesc} was commissioned as ${ranks[1][0]}. `;
+                    setPicksRemaining((prev) => prev + 1);
                     setCharacterData((prev) => ({
                         ...prev,
                         career: { ...prev.career, rank: 1, officer: true },
@@ -157,20 +170,14 @@ export default function BasicTerm({
                 }
             }
             if (characterData.career?.officer && canPromote) { //promote
-                warningText = warningText + `  Promotion: ${termResults.charPromo}. `;
+                warningText = warningText + `  Promotion: ${termResults.charPromo[1]}. `;
                 if (termResults.charPromo[0]) {
                     const ranks = datatables.rank[career]["O"];
                     const newRank = characterData.career.rank + 1;
-                    //handleHistoryAdd?.(`${characterName} a good ${career} and was promoted to ${ranks[newRank]}.`);
                     skillGained = true;
-                    if (termResults.charPromo[2]) {
-                        historyText = historyText + `${characterName} an excellent ${career} and was promoted to ${ranks[newRank]}. `;
-                        setPicksRemaining((prev) => Math.max(0, prev + 2));
-                    } else {
-                        historyText = historyText + `${characterName} a good ${career} and was promoted to ${ranks[newRank]}. `;
-                        setPicksRemaining((prev) => Math.max(0, prev + 1));
-                    }
-
+                    const promoDesc = termResults.charPromo[2] ? "an excellent" : "a good";
+                    historyText = historyText + `${characterName} was ${promoDesc} ${career} and was promoted to ${ranks[newRank][0]}. `;
+                    setPicksRemaining((prev) => prev + 1);
                     setCharacterData((prev) => ({
                         ...prev,
                         career: { ...prev.career, rank: newRank },
@@ -183,52 +190,87 @@ export default function BasicTerm({
                 const rando = Math.floor((Math.random() * 5) + 1);
                 let descriptor = "";
                 if (career === "flyer" || career === "sailor") {
-                    const battleName = generateBattlename()
+                    const battleName = generateBattlename();
                     descriptor = `saw combat during the ${battleName}`;
                 } else {
                     descriptor = datatables.Basics[career].specDutyDesc[rando];
                 }
                 historyText = historyText + `During that time ${characterName} ${descriptor}. `;
                 skillGained = true;
-                if (termResults.charSpec[2]) {
-                    setPicksRemaining((prev) => prev + 2);
-                } else {
-                    setPicksRemaining((prev) => prev + 1);
-                }
+                setPicksRemaining((prev) => prev + 1);
             }
             warningText = warningText + `Reinlist: ${termResults.charReenlist[1]}. `;
 
+            let nextStep = 'reinlistChoice';
             if (termResults.charReenlist[3]) {
                 historyText = historyText + `At the end of 4 years, social and political presure kept them in their career. `
-                setTermStep('forced')
+                nextStep = 'forced';
             } else if (!termResults.charReenlist[0]) {
                 historyText = historyText + `At the end of 4 years, social and political presure forced them out of their career. `
-                setTermStep('retire')
-            } else {
+                nextStep = 'retire';
+            }
 
-                if (!skillGained) {
-                    setTermStep('reinlistChoice')
+            if (skillGained) {
+                setPendingTermStep(nextStep);
+                setTermStep('postTerm');
+            } else {
+                setTermStep(nextStep);
+            }
+
+            // Aging check at end of term
+            const endAge = characterData.age + 4;
+            if (endAge >= 34) {
+                const agingResult = getAgingRolls(endAge);
+                if (agingResult.decreases.length > 0) {
+                    setCharacterData(prev => {
+                        const updates = {};
+                        agingResult.decreases.forEach(stat => {
+                            updates[stat] = Math.max(1, (prev[stat] ?? 1) - 1);
+                        });
+                        return { ...prev, ...updates };
+                    });
+                    warningText += ` Aging: ${agingResult.decreases.join(', ')} decreased by 1.`;
+                    historyText += ` The years caught up with ${characterName}: ${agingResult.decreases.join(', ')} each reduced by 1.`;
                 }
             }
         }
-        //setTermStep('results');
         setWarning(warningText)
         handleHistoryAdd(historyText)
     }
     const handleRetire = () => {
-        const currentVal = characterData.career.terms + 1;
-        const currentAge = characterData.age + 4;
-        setCharacterData((prev) => ({
+        const newTerms = characterData.career.terms + 1;
+        const newAge = characterData.age + 4;
+        const pension = (newTerms >= 5 && PENSION_CAREERS.includes(career)) ? 2000 * newTerms : 0;
+        setCharacterData(prev => ({
             ...prev,
-            age: currentAge,
-            career: { ...prev.career, terms: currentVal },
+            age: newAge,
+            pension,
+            career: { ...prev.career, terms: newTerms },
         }));
         setStep('retire');
-    }
+    };
+
+    const handleReinlist = () => {
+        const newTerms = characterData.career.terms + 1;
+        const newAge = characterData.age + 4;
+        setCharacterData(prev => ({
+            ...prev,
+            age: newAge,
+            career: { ...prev.career, terms: newTerms },
+        }));
+        setTermStep("init");
+        setPendingTermStep(null);
+        setPicksRemaining(ALWAYS_TWO_CAREERS.includes(career) ? 2 : 1);
+        setResolvedPicks([]);
+        setPresetQueue([]);
+        setPickIndex(prev => prev + 1);
+        setWarning("");
+    };
 
     return (
         <div>
-            <h2 className="mt-section-title">Career Term {terms} {picksRemaining}</h2>
+            <h2 className="mt-section-title">Career Term {terms}</h2>
+            <h5>{picksRemaining} skill picks remaining</h5>
 
             {warning !== "" && (
                 <p className="mt-label" style={{ marginBottom: "0.5rem", color: "red" }}>
@@ -236,10 +278,10 @@ export default function BasicTerm({
                 </p>
             )}
 
-            {termStep === "init" && (currentPreset || canPickCategory) && (
+            {(termStep === "init" || termStep === "postTerm") && (currentPreset || canPickCategory) && (
                 <SkillSelector
                     key={pickIndex}
-                    presetSkill={currentPreset ?? undefined} // when present, skips dropdown
+                    presetSkill={currentPreset ?? undefined}
                     skillTables={skillTables}
                     characterData={characterData}
                     setWarning={setWarning}
@@ -253,9 +295,7 @@ export default function BasicTerm({
                     <p className="mt-label">You&apos;ve gained the following skills:</p>
                     <ul className="mt-label">
                         {resolvedPicks.map((s, i) => (
-                            <li key={i} className="mt-cap">
-                                {s}
-                            </li>
+                            <li key={i} className="mt-cap">{s}</li>
                         ))}
                     </ul>
                 </div>
@@ -266,41 +306,44 @@ export default function BasicTerm({
                     <button
                         className="mt-btn"
                         type="button"
-                        onClick={() => {
-                            handleTerm();
-                        }}
+                        onClick={handleTerm}
                     >
                         Continue term as a {career}
                     </button>
                 </div>
             )}
-            {(termStep === "retire" || termStep === 'forced' || termStep === 'reinlistChoice') ?
+
+            {termStep === "postTerm" && allResolved && (
                 <div>
-                    <p>{termStep}</p>
-                    {termStep !== 'retire' ?
-                        <button
-                            className="mt-btn"
-                            type="button"
-                            onClick={() => {
-                            }}
-                        >
+                    {pendingTermStep !== 'retire' && (
+                        <button className="mt-btn" type="button" onClick={handleReinlist}>
                             Reinlist as a {career}
-                        </button> : null
-                    }
+                        </button>
+                    )}
                     &nbsp;
-                    {termStep !== 'forced' ?
-                        <button
-                            className="mt-btn"
-                            type="button"
-                            onClick={() => {
-                                handleRetire();
-                            }}
-                        >
+                    {pendingTermStep !== 'forced' && (
+                        <button className="mt-btn" type="button" onClick={handleRetire}>
                             Retire
-                        </button> : null
-                    }
+                        </button>
+                    )}
                 </div>
-                : null}
+            )}
+
+            {(termStep === "retire" || termStep === "forced" || termStep === "reinlistChoice") && (
+                <div>
+                    {termStep !== 'retire' && (
+                        <button className="mt-btn" type="button" onClick={handleReinlist}>
+                            Reinlist as a {career}
+                        </button>
+                    )}
+                    &nbsp;
+                    {termStep !== 'forced' && (
+                        <button className="mt-btn" type="button" onClick={handleRetire}>
+                            Retire
+                        </button>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

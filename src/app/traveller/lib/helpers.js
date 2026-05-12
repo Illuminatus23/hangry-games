@@ -302,7 +302,26 @@ export function handleSchoolApp(upp, school, characterName) {
     let notc = school === "collegenotc";
     let commission = "none";
     let skillsGained = [];
-
+    let friendlyName = "college";
+    switch (school) {
+        case "military":
+            friendlyName = "a military academy";
+            break;
+        case "navy":
+            friendlyName = "the Naval Academy";
+            break;
+        case "medical":
+            friendlyName = "medical school";
+            break;
+        case "flight":
+            friendlyName = "flight school";
+            break;
+        case "autoflight":
+            friendlyName = "flight school";
+            break;
+        default:
+            friendlyName = "college"
+    }
     // ===============================
     //   🎓 OFFICER CANDIDATE BRANCHES
     // ===============================
@@ -329,11 +348,22 @@ export function handleSchoolApp(upp, school, characterName) {
     if (!admission) {
         const modStr = (admissionMod !== 0) ? `modified by their ${data.admission[1]}` : "";
         const logStr = `${characterName} needed a ${baseAdmissionTN} to succeed and rolled a ${admitRoll} (${admitRoll - admissionMod}+${admissionMod}) ${modStr} `;
+        let historyTxt = `${characterName} applied to ${friendlyName} but was rejected.`
+        if (admissionMod == 0 && admitRoll + data.admission[3] >= data.admission[0]) {
+            historyTxt = `${characterName} applied to ${friendlyName} but was rejected, probably due to their poor ${data.admission[1]}.`
+        }
+        else if ((admitRoll - baseAdmissionTN) <= -4) {
+            historyTxt = `${characterName} applied to ${friendlyName} but was rejected due to a disasterous interview.`
+        } else {
+            historyTxt = `${characterName} applied to ${friendlyName} but was rejected after a difficult decision by the school.`
+        }
+        console.log(historyTxt)
         return {
             school: schoolName,
             admission: false,
             success: false,
-            reason: logStr
+            reason: logStr,
+            history: historyTxt,
         };
     }
 
@@ -551,10 +581,32 @@ export function applySkill(setSkills, setCharacterData, skill, opts = {}) {
         return;
     }
     setSkills(prev => {
+        if (opts.maxSkills !== undefined) {
+            const total = prev.reduce((sum, s) => sum + s.level, 0);
+            if (total >= opts.maxSkills) return prev;
+        }
         const index = prev.findIndex(s => s.name === skill);
         if (index === -1) {
             return [...prev, { name: skill, level: opts.zeroIfNew ? 0 : 1 }];
         }
         return prev.map((s, i) => i === index ? { ...s, level: s.level + 1 } : s);
     });
+}
+
+export function getAgingRolls(age) {
+    let strTarget, dexTarget, endTarget;
+    if (age < 38) {
+        strTarget = 8; dexTarget = 7; endTarget = 8;
+    } else if (age < 46) {
+        strTarget = 9; dexTarget = 8; endTarget = 9;
+    } else {
+        strTarget = 9; dexTarget = 9; endTarget = 9;
+    }
+    const rolls = [
+        { stat: 'STR', roll: d6(2, 0), target: strTarget },
+        { stat: 'DEX', roll: d6(2, 0), target: dexTarget },
+        { stat: 'END', roll: d6(2, 0), target: endTarget },
+    ];
+    const decreases = rolls.filter(r => r.roll < r.target).map(r => r.stat);
+    return { rolls, decreases };
 }

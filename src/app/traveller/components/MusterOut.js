@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import { datatables } from "../lib/data";
 import { d6, applySkill } from "../lib/helpers";
 
-export default function MusterOut({ characterData, setCharacterData, skills, setSkills, setGear }) {
+export default function MusterOut({ characterData, setCharacterData, skills, setSkills, setGear, setStep }) {
     const career = characterData.career.careername
     const terms = characterData.career.terms;
     const rank = characterData.career.rank - 1;
@@ -15,20 +15,19 @@ export default function MusterOut({ characterData, setCharacterData, skills, set
         rank === 1 || rank === 2 ? 1 :
             rank === 3 || rank === 4 ? 2 :
                 rank === 0 ? 0 : 3;
-    //testing
-    const initialRolls = (6 * terms) + rollAdds;
+    const initialRolls = (2 * terms) + rollAdds;
     // Cash can be used at most 3 times total
     const CASH_CAP = 3;
 
+    const PENSION_CAREERS = ['navy', 'marines', 'army', 'scouts', 'flyer', 'sailor'];
+    const pension = characterData.pension ?? 0;
+
     // Mods
-    const hasCashSkill = useMemo(() => {
-        return skills.some(s => {
-            const n = String(s.name).toLowerCase();
-            return n === "gambling" || n === "prospecting";
-        });
+    const hasGamblingSkill = useMemo(() => {
+        return skills.some(s => String(s.name).toLowerCase() === "gambling" && s.level >= 1);
     }, [skills]);
 
-    const cashMod = hasCashSkill ? 1 : 0;
+    const cashMod = (hasGamblingSkill || terms >= 5) ? 1 : 0;
     const benefitMod = terms >= 5 ? 1 : 0;
 
     // State
@@ -116,9 +115,15 @@ export default function MusterOut({ characterData, setCharacterData, skills, set
             <p className="mt-label">
                 You get <b>{rollsRemaining}</b> roll(s) remaining on the retirement tables.
                 Cash can be used at most <b>{CASH_CAP}</b> time(s) total.
-                {cashMod ? " You have +1 to Cash rolls (Gambling/Prospecting)." : ""}
+                {cashMod ? " You have +1 to Cash rolls (Gambling-1+ or 5+ terms)." : ""}
                 {benefitMod ? " You have +1 to Benefit rolls (5+ terms)." : ""}
             </p>
+            {pension > 0 && (
+                <p className="mt-label">
+                    Retirement pension: <b>Cr{pension.toLocaleString()}/year</b>
+                    {PENSION_CAREERS.includes(career) ? "" : " (career not pension-eligible)"}
+                </p>
+            )}
             {rollsRemaining > 0 ?
                 <div style={{ margin: "0.75rem 0" }}>
                     <div className="mt-label" style={{ marginBottom: "0.35rem" }}>
@@ -155,7 +160,7 @@ export default function MusterOut({ characterData, setCharacterData, skills, set
                 <button
                     className="mt-btn"
                     type="button"
-
+                    onClick={() => setStep?.("complete")}
                 >
                     Complete Character
                 </button>

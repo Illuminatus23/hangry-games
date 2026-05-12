@@ -57,6 +57,7 @@ export default function CharacterEnlistment({
 
         if (
             characterData.commission === careerCategory || //auto officer
+            (characterData.commission === "navy" && careerCategory === "marines") || //naval commission covers marines
             (grad && nextEnlistmentChoice === "scouts") || //auto bureau
             (honorsgrad && nextEnlistmentChoice === "megacorp trader") || //auto enlist
             (medgrad && careerCategory !== "basic" && nextEnlistmentChoice !== "marines") || //special
@@ -90,7 +91,7 @@ export default function CharacterEnlistment({
             const result = careerCheck(enlist, upp, characterName);
             const descriptor = (result[0]) ? "and was admmitted" : "but was rejected";
             const failText = (result[0]) ? "succeeding. Begin your career." : "failing. Make another selection.";
-            const historyStr = `${characterName} applied for as a ${nextEnlistmentChoice} ${descriptor}.`;
+            const historyStr = `${characterName} applied to be a ${nextEnlistmentChoice} ${descriptor}.`;
             const info = `${result[1]}, ${failText}`
             setWarning(info);
             handleHistoryAdd(historyStr)
@@ -123,6 +124,7 @@ export default function CharacterEnlistment({
         }
     }
     const commisionStr = (characterData.commission === "navy") ? "navy or marines" : characterData.commission;
+
     return (
         <div>
             <h2>Enlistment choices</h2>
@@ -143,7 +145,6 @@ export default function CharacterEnlistment({
                         <p className="mt-label">Your social standing means the Noble career path can be selected and admission is automatic.</p> : null}
                     <p>You are eligible for the following career paths:</p>
                     <ul className="mt-label">
-
                         {approvedCareers.map((career, index) => (
                             <li className="mt-cap" key={index}>{career}</li>
                         ))}

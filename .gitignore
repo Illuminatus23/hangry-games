@@ -30,6 +30,9 @@ build/
 # production
 /build
 
+# local docs
+src/app/traveller/docs/
+
 # misc
 .DS_Store
 Thumbs.db

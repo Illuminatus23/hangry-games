@@ -6,7 +6,9 @@ import CharacterEducationEnlistmentDraft from "./components/CharacterEducationEn
 import CharacterEnlistment from "./components/CharacterEnlistment";
 import BasicTerm from "./components/BasicTerm";
 import MusterOut from "./components/MusterOut";
-import { datatables } from "./lib/data";
+import ArmyTerm from "./components/ArmyTerm";
+import { datatables } from "./lib/data"
+import { generateBiography } from "./lib/historyText";
 
 /**
  * Simple labeled input field.
@@ -52,6 +54,7 @@ function InitialCreation({ onKeep }) {
     );
 }
 
+
 /**
  * Main MegaTraveller character sheet component.
  */
@@ -86,12 +89,13 @@ export default function CharacterCreation() {
         grad: [false, false],
         medgrad: [false, false],
         cash: 0,
+        pension: 0,
         ship: "",
         shipshares: 0,
     });
-    const [skills, setSkills] = useState([]); //[skillname, value]
-    const [gear, setGear] = useState([]); //[skillname, value]
-    const [step, setStep] = useState("initial")
+    const [skills, setSkills] = useState([]);
+    const [gear, setGear] = useState([]);
+    const [step, setStep] = useState("initial");
     const [warning, setWarning] = useState("");
 
     // Derived UPP string from key characterData
@@ -200,6 +204,7 @@ export default function CharacterCreation() {
                 terms: 0,
                 rank: 0,
                 officer: false,
+                drafted: true,
             },
         }));
 
@@ -222,13 +227,23 @@ export default function CharacterCreation() {
             </div>
         ),
         year1: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} />,
-        army: <p>Army career</p>,
-        navy: <p>Navy career</p>,
-        marines: <p>Marines career</p>,
-        scouts: <p>Scouts career</p>,
-        merchants: <p>Merchants career</p>,
-        retire: <MusterOut characterData={characterData} setCharacterData={setCharacterData} setSkills={setSkills} skills={skills} setGear={setGear} />,
+        army: <ArmyTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} skills={skills} />,
+        marines: <ArmyTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} skills={skills} />,
+        navy: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} />,
+        scouts: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} />,
+        merchants: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} />,
+        retire: <MusterOut characterData={characterData} setCharacterData={setCharacterData} setSkills={setSkills} skills={skills} setGear={setGear} setStep={setStep} />,
+        complete: (
+            <div>
+                <p className="mt-label" style={{ marginBottom: "0.5rem" }}>
+                    Character creation complete. Your character sheet is finalized on the right.
+                </p>
+                <p className="mt-label">You can continue writing the biography sections below.</p>
+            </div>
+        ),
     };
+
+    const hasCareer = characterData.career.careername !== "";
 
     return (
         <div className="mt-sheet" id="modallyModal">
@@ -240,115 +255,93 @@ export default function CharacterCreation() {
                 </div>
             </header>
             <div style={{ display: "flex", gap: "25px" }}>
-                {/* BIO */}
+
+                {/* ── LEFT: Character Creation + Biography ── */}
                 <div style={{ width: "50%" }}>
-                    <Section title="Character Path Choices">
+
+                    {/* 1. CHARACTER CREATION — the active wizard step */}
+                    <Section title="Character Creation">
                         {stepContent[step] ?? null}
                     </Section>
-                    {characterData.history.length !== 0 ?
+
+                    {/* 2. BIOGRAPHY — programmatically generated narrative */}
+                    {characterData.history.length > 0 && (
                         <Section title="Biography">
-                            {characterData.history.map((p, index) => (
-                                <p key={index} className="mt-label">{p}</p>
+                            {generateBiography(characterData, skills, characterName).map((entry, index) => (
+                                <p key={index} style={{ fontSize: "0.78rem", color: "#999", fontStyle: "italic", marginBottom: "0.2rem" }}>
+                                    {entry}
+                                </p>
                             ))}
-                        </Section> : null
-                    }
+                        </Section>
+                    )}
                 </div>
+
+                {/* ── RIGHT: Character Sheet ── */}
                 <div style={{ width: "50%" }}>
-                    <Section title="General">
+
+                    {/* IDENTITY */}
+                    <Section title="Identity">
                         <LabeledInput
-                            label="Character Name"
+                            label="Full Name"
                             id="characterName"
-                            value={(characterData.age > 0) ? generateFullName(characterData, characterName) : characterName}
-                            onChange={(e) => {
-                                setCharacterName(e.target.value);
-                            }}
+                            value={characterData.age > 0 ? generateFullName() : characterName}
+                            onChange={(e) => setCharacterName(e.target.value)}
                             disabled={characterData.age > 0}
                         />
-                        {characterData.age > 0 ?
+                        {characterData.age > 0 ? (
                             <div>
-                                <div className="mt-grid mt-grid-4">
-                                    <LabeledInput
-                                        label="Age (actual)"
-                                        id="age"
-                                        value={characterData.age + characterData.negAge}
-                                        disabled={true}
-                                    />
-                                    <LabeledInput
-                                        label="Age (apparent)"
-                                        id="aAge"
-                                        disabled={true}
-                                        value={characterData.age}
-                                    />
+                                <div className="mt-grid mt-grid-4" style={{ marginTop: "0.5rem" }}>
+                                    <LabeledInput label="Age" id="age" value={characterData.age + characterData.negAge} disabled />
+                                    <LabeledInput label="Apparent Age" id="aAge" value={characterData.age} disabled />
                                 </div>
                                 <div style={{ marginTop: "0.5rem" }}>
-                                    <LabeledInput
-                                        label="Homeworld"
-                                        id="hName"
-                                        value={characterData.homeworldString}
-                                        disabled={true}
-                                    />
+                                    <LabeledInput label="Homeworld" id="hName" value={characterData.homeworldString} disabled />
                                 </div>
-                                {characterData.career.careername !== "" ?
-                                    <div className="mt-grid mt-grid-4" style={{ marginTop: "0.5rem" }}>
-                                        <LabeledInput
-                                            label="Career"
-                                            id="career"
-                                            value={`${characterData.career.careername} ${(characterData.career.subcareername !== "") ? `(${characterData.career.subcareername})` : ""}`}
-                                            disabled={true}
-                                        />
-                                        <LabeledInput
-                                            label="Branch"
-                                            id="branch"
-                                            disabled={true}
-                                            value={characterData.career.branch}
-                                        />
-                                        <LabeledInput
-                                            label="Rank"
-                                            id="rank"
-                                            value={generateRankLong()}
-                                            disabled={true}
-                                        />
-                                        <LabeledInput
-                                            label="Terms"
-                                            id="terms"
-                                            value={characterData.career.terms}
-                                            disabled={true}
-                                        />
-                                    </div> : null}
-                                {characterData.awards.length > 0 ?
-                                    <div style={{ marginTop: "0.5rem" }}>
-                                        <LabeledInput
-                                            label="awards"
-                                            id="awards"
-                                            value={characterData.awards.join(', ')}
-                                            disabled={true}
-                                        />
-                                    </div> : null
-                                }
-                            </div> :
-                            <p className="mt-help-text">
-                                Gender has no impact on character creation, so it does not appear in creation.
-                            </p>}
-
+                            </div>
+                        ) : (
+                            <p className="mt-help-text">Gender has no impact on character creation and does not appear here.</p>
+                        )}
                     </Section>
-                    <Section title="Characteristics">
+
+                    {/* CAREER */}
+                    {hasCareer && (
+                        <Section title="Career">
+                            <div className="mt-grid mt-grid-4">
+                                <LabeledInput label="Career" id="career"
+                                    value={`${characterData.career.careername}${characterData.career.subcareername ? ` (${characterData.career.subcareername})` : ""}`}
+                                    disabled />
+                                <LabeledInput label="Branch" id="branch" value={characterData.career.branch} disabled />
+                                <LabeledInput label="Rank" id="rank" value={generateRankLong()} disabled />
+                                <LabeledInput label="Terms" id="terms" value={characterData.career.terms} disabled />
+                            </div>
+                            {characterData.awards.length > 0 && (
+                                <div style={{ marginTop: "0.5rem" }}>
+                                    <p className="mt-label">Awards &amp; Decorations</p>
+                                    <ul style={{ margin: "0.25rem 0 0 1rem", padding: 0 }}>
+                                        {characterData.awards.map((award, i) => (
+                                            <li key={i} className="mt-label mt-cap" style={{ marginBottom: "0.15rem" }}>{award}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </Section>
+                    )}
+
+                    {/* ATTRIBUTES */}
+                    <Section title="Attributes">
                         <div className="mt-grid mt-grid-3">
                             {["STR", "DEX", "END", "INT", "EDU", "SOC"].map((key) => (
                                 <div key={key} className="mt-char-block">
-                                    <p className="mt-label" htmlFor={`char-${key}`}>
-                                        {key}
-                                    </p>
-                                    <div id={`char-${key}`} className="mt-char-hex">{toTravellerHex(characterData[key])}</div>
+                                    <p className="mt-label">{key}</p>
+                                    <div className="mt-char-hex">{toTravellerHex(characterData[key])}</div>
                                 </div>
                             ))}
                         </div>
-                        <p className="mt-help-text">
-                            UPP is calculated from STR, DEX, END, INT, EDU, SOC in Traveller
-                            hex. PSI is tracked separately.
-                        </p>
+                        <p className="mt-help-text">STR DEX END INT EDU SOC in Traveller hex. PSI tracked separately.</p>
                     </Section>
+
                     {/* SKILLS */}
-                    {skills.length !== 0 ?
+                    {skills.length > 0 && (
                         <Section title="Skills">
                             <table className="mt-table">
                                 <thead>
@@ -366,21 +359,39 @@ export default function CharacterCreation() {
                                     ))}
                                 </tbody>
                             </table>
-                        </Section> : null}
+                        </Section>
+                    )}
 
-                    <Section title="Gear">
+                    {/* RESOURCES */}
+                    <Section title="Resources">
                         <table className="mt-table">
                             <tbody>
+                                {characterData.pension > 0 && (
+                                    <tr>
+                                        <td className="mt-label">Annual Pension</td>
+                                        <td>Cr{characterData.pension.toLocaleString()}</td>
+                                    </tr>
+                                )}
                                 <tr>
-                                    <td>
-                                        Credits: {characterData.cash}
-                                    </td>
+                                    <td className="mt-label">Cash on Hand</td>
+                                    <td>Cr{characterData.cash.toLocaleString()}</td>
                                 </tr>
-                                {gear.map((gear, index) => (
+                                {characterData.ship && (
+                                    <tr>
+                                        <td className="mt-label">Ship</td>
+                                        <td className="mt-cap">{characterData.ship}</td>
+                                    </tr>
+                                )}
+                                {characterData.shipshares > 0 && (
+                                    <tr>
+                                        <td className="mt-label">Ship Shares</td>
+                                        <td>{characterData.shipshares}</td>
+                                    </tr>
+                                )}
+                                {gear.map((item, index) => (
                                     <tr key={index}>
-                                        <td>
-                                            {gear}
-                                        </td>
+                                        <td className="mt-label">Equipment</td>
+                                        <td className="mt-cap">{item}</td>
                                     </tr>
                                 ))}
                             </tbody>

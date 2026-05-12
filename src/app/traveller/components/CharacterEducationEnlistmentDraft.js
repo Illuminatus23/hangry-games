@@ -74,6 +74,23 @@ export default function CharacterEducationEnlistmentDraft({
             }));
             return;
         }
+        if (nextApplication === "enlistscouts") {
+            setStep("year1");
+            setCharacterData((prev) => ({
+                ...prev,
+                career: { careername: "scouts", category: "scouts", subcareername: "", branch: "", terms: 0, rank: 1, officer: false },
+            }));
+            return;
+        }
+        if (nextApplication === "navy") {
+            setStep("navy");
+            setCharacterData((prev) => ({
+                ...prev,
+                commission: "navy",
+                career: { careername: "navy", category: "navy", subcareername: "imperial navy", branch: "", terms: 0, rank: 1, officer: false },
+            }));
+            return;
+        }
 
         const results = handleSchoolApp(upp, nextApplication, characterName);
         let friendlyName = "college";
@@ -102,7 +119,7 @@ export default function CharacterEducationEnlistmentDraft({
             nextApplication === "medical"
         ) {
             if (!results.admission) {
-                handleHistoryAdd(`${characterName} applied to ${friendlyName} but was rejected.`);
+                handleHistoryAdd(results.history);
                 //setStep("enlistment")
                 setSchoolOptions([
                     { id: 1, name: "Enlist in a career", value: "skip" },
@@ -127,11 +144,11 @@ export default function CharacterEducationEnlistmentDraft({
                 if (results.school === "flight" || results.school === "autoflight") {
                     const levelGained = d6(1, -4);
                     if (levelGained === 1) {
-                        applySkill(setSkills, setCharacterData,"Pilot");
+                        applySkill(setSkills, setCharacterData, "Pilot");
                     }
                     if (levelGained === 2) {
-                        applySkill(setSkills, setCharacterData,"Pilot");
-                        applySkill(setSkills, setCharacterData,"Pilot");
+                        applySkill(setSkills, setCharacterData, "Pilot");
+                        applySkill(setSkills, setCharacterData, "Pilot");
                     }
                     setCharacterData((prev) => ({ ...prev, age: 23 }));
                     //setStep("navy")
@@ -151,16 +168,25 @@ export default function CharacterEducationEnlistmentDraft({
                         ...prev,
                         awards: [...prev.awards, `${(results.honors) ? "honors " : ""}med school graduate`],
                     }));
+                    setWarning(`${characterName} applied to ${friendlyName}, was accepted and graduated.`);
+                    // Add commission options from any prior college OTC/NOTC
+                    const medCommissionOpts = [];
+                    if (characterData.commission === "army") {
+                        medCommissionOpts.push({ id: 10, name: "Begin Army career with commission", value: "enlistarmy" });
+                    } else if (characterData.commission === "navy") {
+                        medCommissionOpts.push({ id: 10, name: "Begin Navy career with commission", value: "enlistnavy" });
+                        medCommissionOpts.push({ id: 11, name: "Begin Marines career with commission", value: "enlistmarines" });
+                    }
                     setSchoolOptions([
                         { id: 1, name: "Enlist in a career", value: "skip" },
+                        { id: 20, name: "Join Scouts (med graduate — guaranteed)", value: "enlistscouts" },
+                        ...medCommissionOpts,
                     ])
-                    setWarning(`${characterName} applied to ${friendlyName}, was accepted and graduated.`);
-                    //setStep("enlistment")
                 }
                 if (results.skills.length !== 0) {
                     historyStr = historyStr + ` At school ${characterName} learned the following skills: ${results.skills.join("; ")}`;
                     for (let i = 0; i < results.skills.length; i++) {
-                        applySkill(setSkills, setCharacterData,results.skills[i]);
+                        applySkill(setSkills, setCharacterData, results.skills[i]);
                     }
                 }
                 handleHistoryAdd(historyStr);
@@ -180,7 +206,7 @@ export default function CharacterEducationEnlistmentDraft({
                 );
             }
 
-            const historyStr = `${characterName} applied to ${friendlyName} but was rejected.`;
+            const historyStr = results.history;
             handleHistoryAdd(historyStr);
             setWarning(`${results.reason} ${historyStr} Make another selection.`);
             setApplication("");
@@ -235,6 +261,17 @@ export default function CharacterEducationEnlistmentDraft({
                 } else if (results.commission === "denied") {
                     historyStr = historyStr + ` ${characterName} was not accepted into Officer Candidate School.`;
                 }
+
+                // Build direct-enlist options earned by graduation
+                const commissionOpts = [];
+                if (results.commission === "army") {
+                    commissionOpts.push({ id: 10, name: "Begin Army career with OTC commission", value: "enlistarmy" });
+                } else if (results.commission === "navy") {
+                    commissionOpts.push({ id: 10, name: "Begin Navy career with NOTC commission", value: "enlistnavy" });
+                    commissionOpts.push({ id: 11, name: "Begin Marines career with NOTC commission", value: "enlistmarines" });
+                }
+                const scoutsOpt = { id: 20, name: "Join Scouts (college graduate — guaranteed)", value: "enlistscouts" };
+
                 if (results.honors) {
                     setWarning(`${characterName} applied to ${friendlyName}, was accepted and graduated with honors. Choose whether or not they go to a post graduate school.`);
                     if (results.commission !== "denied" && results.commission !== "none") {
@@ -242,19 +279,22 @@ export default function CharacterEducationEnlistmentDraft({
                             { id: 1, name: "Enlist in a career", value: "skip" },
                             { id: 2, name: "Apply to med school", value: "medical" },
                             { id: 3, name: "Apply to flight school", value: "autoflight" },
+                            scoutsOpt,
+                            ...commissionOpts,
                         ])
                     } else {
                         setSchoolOptions([
                             { id: 1, name: "Enlist in a career", value: "skip" },
                             { id: 2, name: "Apply to med school", value: "medical" },
+                            scoutsOpt,
                         ])
                     }
                 } else {
-
                     setCharacterData((prev) => ({ ...prev, age: 22 }));
-                    //setStep("enlistment")
                     setSchoolOptions([
                         { id: 1, name: "Enlist in a career", value: "skip" },
+                        scoutsOpt,
+                        ...commissionOpts,
                     ])
                     setWarning(historyStr)
                 }
@@ -303,7 +343,7 @@ export default function CharacterEducationEnlistmentDraft({
             if (results.skills.length !== 0) {
                 historyStr = historyStr + ` At school ${characterName} learned the following skills: ${results.skills.join("; ")}`;
                 for (let i = 0; i < results.skills.length; i++) {
-                    applySkill(setSkills, setCharacterData,results.skills[i]);
+                    applySkill(setSkills, setCharacterData, results.skills[i]);
                 }
             }
             handleHistoryAdd(historyStr);
