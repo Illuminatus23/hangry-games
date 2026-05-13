@@ -487,20 +487,20 @@ export const datatables = {
         'Gun Combat': ['Rifleman', 'Handguns', 'Laser Weapons', 'Neural Weapons', 'Energy Weapons', 'Submachineguns'],
         'Gunnery': ['Screens', 'Spinal Weapons', 'Turret Weapons'],
         'Hand Combat': ['Blade Combat', 'Brawling', 'END', 'STR'],
-        'Handguns': ['Body Pistol', 'Pistol', 'Revolver', 'Snub Pistol'],
-        'Heavy Weapons': ['Grenade Launcher', 'Light Assault Gun', 'Machine Gun', 'Autocannon', 'VRF Gauss Gun'],
+        'Handguns': ['Body Pistol', 'Gauss Pistol', 'Pistol', 'Revolver', 'Snub Pistol'],
+        'Heavy Weapons': ['Grenade Launcher', 'Light Assault Gun', 'Machine Gun', 'Autocannon', 'Flamethrower', 'VRF Gauss Gun'],
         'Inborn': ['Artisan', 'Carousing', 'Instruction', 'Jack-of-all-Trades', 'Leader'],
-        'Interpersonal': ['Admin', 'Interview', 'Linguistics', 'Liasan', 'Steward'],
+        'Interpersonal': ['Admin', 'Interview', 'Linguistics', 'Liasan', 'Recruiting', 'Steward'],
         'Science': ['Biology', 'Chemistry', 'Genetics', 'Forensics', 'Medical', 'Physics', 'Robotics'],
         'Space': ['Engineering', 'Sensor Ops', 'Navigation', 'Pilot', 'Ships Boat', 'Vacc Suit'],
         'Space Combat': ['Gunnery', 'Sensor Ops', 'Ship Tactics', 'Tactics'],
-        'Space Tech': ['Communications', 'Computer', 'Engineering', 'Gravitics', 'Vacc Suit'],
+        'Space Tech': ['Communications', 'Computer', 'Engineering', 'Gravitics', 'Naval Architect', 'Vacc Suit'],
         'Special Combat': ['Battle Dress', 'Combat Engineering', 'Combat Rifleman', 'Demolition', 'FA Gunnery', 'Forward Observer', 'Grav Belt', 'Heavy Weapons', 'High-Energy Weapons', 'High-G Environ', 'Stealth', 'Low-G Environ'],
         'Technical': ['Communications', 'Computer', 'Electronics', 'Gravitics', 'Robot Ops', 'Sensor Ops'],
         'Vehicle': ['Helicopter', 'Jet Aircraft', 'Lighter-than-Air Craft', 'Propeller Aircraft', 'Small Watercraft', 'Large Watercraft', 'Grav Vehicle', 'Ships Boat', 'Tracked Vehicles', 'Wheeled Vehicles', 'Hovercraft'],
         'Vice': ['Bribery', 'Disguise', 'Forgery', 'Gambling', 'Intrusion', 'Streetwise'],
     },
-    Weapons: ["Advanced Combat Rifle", "Assault Rifle", "Autocannon", "Battle Axe", "Bayonet", "Blade", "Blowgun", "Body Pistol", "Bola", "Boomerang", "Bow", "Broadsword", "Carbine", "Crossbow", "Cudgel", "Cutlass", "Dagger", "Archaic Firearm", "Foil", "Fusion Gun", "Gauss Rifle", "Grenade Launcher", "Halberd", "Hand Axe", "Laser Pistol", "Laser Rifle", "Light Assault Gun", "Machine Gun", "Neural Pistol", "Neural Rifle", "Pike", "Pistol", "Plasma Gun", "Revolver", "Rifle", "Sling", "Snub Pistol", "Spear", "Submachinegun", "Sword", "VRF Gauss Gun"],
+    Weapons: ["Advanced Combat Rifle", "Assault Rifle", "Autocannon", "Autoshotgun", "Battle Axe", "Bayonet", "Blade", "Blowgun", "Body Pistol", "Bola", "Boomerang", "Bow", "Broadsword", "Carbine", "Crossbow", "Cudgel", "Cutlass", "Dagger", "Archaic Firearm", "Flamethrower", "Foil", "Fusion Gun", "Gauss Pistol", "Gauss Rifle", "Grenade Launcher", "Halberd", "Hand Axe", "Laser Pistol", "Laser Rifle", "Light Assault Gun", "Machine Gun", "Neural Pistol", "Neural Rifle", "Pike", "Pistol", "Plasma Gun", "Revolver", "Rifle", "Shotgun", "Sling", "Snub Pistol", "Spear", "Submachinegun", "Sword", "VRF Gauss Gun"],
     Basics: {
         flyer: {
             survival: [5, 'DEX', 8, 2],
@@ -750,7 +750,7 @@ export const datatables = {
             "Decoration": ['None'],
             "Promotion": ['UUP', 'Education', 7, 1],
             "Assignement": ['Raid', 'Raid', 'Counter Insurgency', 'Counter Insurgency', 'Garrison', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Internal Security', 'Police Action'],
-            "MOS": ['Gun Combat', 'Gun Combat', 'Heavy Weapons', 'Heavy Weapons', 'Vehicle', 'Recon', 'Vacc Suit']
+            "MOS": ['Gun Combat', 'Special Combat', 'Heavy Weapons', 'Heavy Weapons', 'Vehicle', 'Recon', 'Vacc Suit']
         },
         Marines: {
             "Training": [0, 0, 6, 7, false],
@@ -764,7 +764,7 @@ export const datatables = {
             "Decoration": ['None'],
             "Promotion": ['UUP', 'Education', 7, 1],
             "Assignement": ['Raid', 'Raid', 'Counter Insurgency', 'Internal Security', "Ship's Troops", 'Garrison', "Ship's Troops", 'Training', 'Counter Insurgency', 'Police Action', 'Police Action'],
-            "MOS": ['Gun Combat', 'Gun Combat', 'Zero-G Combat', 'Zero-G Combat', 'Heavy Weapons', 'Foward Observer', 'Battle Dress']
+            "MOS": ['Gun Combat', 'Special Combat', 'Zero-G Combat', 'Zero-G Combat', 'Heavy Weapons', 'Foward Observer', 'Battle Dress']
         },
         Support: {
             "Training": [0, 0, 6, 8, false],
@@ -788,7 +788,7 @@ export const datatables = {
             "Decoration": ['None'],
             "Promotion": ['UUP', 'Endurance', 8, 1],
             "Assignement": ['Raid', 'Raid', 'Counter Insurgency', 'Police Action', 'Internal Security', 'Garrison', 'Training', 'Training', 'Counter Insurgency', 'Raid', 'Raid'],
-            "MOS": ['Gun Combat', 'Gun Combat', 'Heavy Weapons', 'Demolitions', 'Survival', 'Recon', 'Battle Dress']
+            "MOS": ['Gun Combat', 'Special Combat', 'Heavy Weapons', 'Demolitions', 'Survival', 'Recon', 'Battle Dress']
         },
         Artillery: {
             //Survival, Decoration, Promotion, Skill

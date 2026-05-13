@@ -57,6 +57,7 @@ export default function ArmyTerm({
     setSkills,
     setStep,
     skills,
+    setPageWarning,
 }) {
     const career = characterData.career?.careername; // "army" or "marines"
     const terms = characterData.career?.terms ?? 0;
@@ -107,7 +108,7 @@ export default function ArmyTerm({
         }
 
         const [survivalTarget, decoTarget, , skillThreshold, isCombat] = assignmentData;
-        let log = `Year ${currentYear}: ${assignmentName}. `;
+        let log = `Year ${currentYear}: rolled ${assignRoll} — ${assignmentName}. `;
 
         // Survival check
         let survived = true;
@@ -136,6 +137,7 @@ export default function ArmyTerm({
             handleHistoryAdd(deathMsg);
             setWarning(log);
             setYearLogs(prev => [...prev, log]);
+            setPageWarning?.(log);
             setStep("End");
             return;
         }
@@ -180,6 +182,7 @@ export default function ArmyTerm({
 
         setYearLogs(prev => [...prev, log]);
         setWarning(log);
+        handleHistoryAdd(log);
 
         if (currentYear < 4) {
             setCurrentYear(prev => prev + 1);
@@ -195,6 +198,7 @@ export default function ArmyTerm({
         applySkill(setSkills, setCharacterData, normalized, {
             maxSkills: characterData.INT + characterData.EDU,
         });
+        handleHistoryAdd(`${characterName} drew on their ${servicePool.name} experience, gaining ${normalized}.`);
         handleEndOfTerm();
     };
 

@@ -230,8 +230,8 @@ export default function CharacterCreation() {
             </div>
         ),
         year1: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} setPageWarning={setWarning} />,
-        army: <ArmyTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} skills={skills} />,
-        marines: <ArmyTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} skills={skills} />,
+        army: <ArmyTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} skills={skills} setPageWarning={setWarning} />,
+        marines: <ArmyTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} skills={skills} setPageWarning={setWarning} />,
         navy: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} setPageWarning={setWarning} />,
         scouts: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} setPageWarning={setWarning} />,
         merchants: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} setPageWarning={setWarning} />,

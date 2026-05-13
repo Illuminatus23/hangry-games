@@ -27,8 +27,12 @@ export default function MusterOut({ characterData, setCharacterData, skills, set
         return skills.some(s => String(s.name).toLowerCase() === "gambling" && s.level >= 1);
     }, [skills]);
 
-    const cashMod = (hasGamblingSkill || terms >= 5) ? 1 : 0;
-    const benefitMod = terms >= 5 ? 1 : 0;
+    const hasProspectingSkill = useMemo(() => {
+        return skills.some(s => String(s.name).toLowerCase() === "prospecting" && s.level >= 1);
+    }, [skills]);
+
+    const cashMod = (hasGamblingSkill || hasProspectingSkill) ? 1 : 0;
+    const benefitMod = rank >= 4 ? 1 : 0;
 
     // State
     const [rollsRemaining, setRollsRemaining] = useState(initialRolls);
@@ -45,7 +49,7 @@ export default function MusterOut({ characterData, setCharacterData, skills, set
 
     const rollOnTable = () => {
         const ships = ["Lab ship", "Seeker", "Corsair", "Safari ship", "Yacht"];
-        const gear = ["Low passage", "Mid passage", "High passage", "Traveller Aid Membership", "Forensics kit", "Medical instruments", "Letter of marque"]
+        const gear = ["Low passage", "Mid passage", "High passage", "Traveller Aid Membership", "Forensics kit", "Medical instruments", "Letter of marque", "Watch"]
 
         //Weapn, SOC-1, EDU+2, Watch
         if (!canRoll) return;
