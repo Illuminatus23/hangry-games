@@ -16,7 +16,8 @@ export default function BasicTerm({
     characterName,
     handleHistoryAdd,
     setSkills,
-    setStep, // optional if you use it to advance screens
+    setStep,
+    setPageWarning,
 }) {
     const [warning, setWarning] = useState("");
     const [termStep, setTermStep] = useState("init");
@@ -51,6 +52,9 @@ export default function BasicTerm({
     // Show what was resolved
     const [resolvedPicks, setResolvedPicks] = useState([]);
 
+    // Skills gained only during postTerm (commission/promotion/spec duty picks)
+    const [postTermPicks, setPostTermPicks] = useState([]);
+
     // Used to reset SkillSelector UI cleanly between picks
     const [pickIndex, setPickIndex] = useState(0);
 
@@ -73,6 +77,10 @@ export default function BasicTerm({
     // Called when SkillSelector resolves a final skill (preset or category)
     const onPickResolved = (finalSkill) => {
         setResolvedPicks((prev) => [...prev, finalSkill]);
+
+        if (termStep === 'postTerm') {
+            setPostTermPicks((prev) => [...prev, finalSkill]);
+        }
 
         // If we were resolving preset skills, consume one preset
         if (currentPreset) {
@@ -113,10 +121,14 @@ export default function BasicTerm({
         let warningText = "";
         let historyText = "";
         if (termStep === 'init') {
+            const isFirstInit = characterData.career.terms === 0;
             const narrative = resolvedPicks.length === 0
                 ? `${characterName} began their career as a ${careerDisplay}.`
                 : `${characterName} ${describeSkillGains(resolvedPicks, career)}.`;
-            handleHistoryAdd?.(`Starting a career as a ${careerDisplay}, ${narrative}`);
+            const prefix = isFirstInit
+                ? `Starting a career as a ${careerDisplay}`
+                : `Continuing their career as a ${careerDisplay}`;
+            handleHistoryAdd?.(`${prefix}, ${narrative}`);
         }
         let skillGained = false;
         const termResults = {
@@ -149,9 +161,10 @@ export default function BasicTerm({
             } else if (careerData.survival[0] >= 6) {
                 handleHistoryAdd?.(`Life as a ${career} can be brutal and violent. ${characterName} dies in the line of duty. The story ends here.`);
             }
+            setPageWarning?.(warningText);
             setStep("End")
         } else {
-            historyText = historyText + `${characterName} spent 4 years as a ${career}. `;
+            historyText = (termResults.charPosition || termResults.charPromo || termResults.charSpec) ? historyText + `${characterName} spent 4 years as a ${career}. ` : historyText + `${characterName} spent 4 uneventful years as a ${career}. `;
             const isFirstTerm = characterData.career.terms === 0;
             const isDraftedFirstTerm = characterData.career?.drafted && isFirstTerm;
             //lived!
@@ -159,29 +172,53 @@ export default function BasicTerm({
                 warningText = warningText + `  Position: ${termResults.charPosition[1]}`;
                 if (termResults.charPosition[0]) {
                     skillGained = true;
-                    const ranks = datatables.rank[career]["O"];
                     const commDesc = termResults.charPosition[2] ? "excelled and" : "performed well and";
-                    historyText = historyText + `${characterName} ${commDesc} was commissioned as ${ranks[1][0]}. `;
-                    setPicksRemaining((prev) => prev + 1);
-                    setCharacterData((prev) => ({
-                        ...prev,
-                        career: { ...prev.career, rank: 1, officer: true },
-                    }));
+                    if (career === 'noble') {
+                        const newSOC = characterData.SOC + 1;
+                        const newTitle = datatables.Title.M[newSOC - 9]?.[0] ?? 'noble';
+                        historyText = historyText + `${characterName} ${commDesc} was elevated to the rank of ${newTitle}. `;
+                        setPicksRemaining((prev) => prev + 1);
+                        setCharacterData((prev) => ({
+                            ...prev,
+                            SOC: newSOC,
+                            career: { ...prev.career, rank: 1, officer: true },
+                        }));
+                    } else {
+                        const ranks = datatables.rank[career]["O"];
+                        historyText = historyText + `${characterName} ${commDesc} was commissioned as ${ranks[1][0]}. `;
+                        setPicksRemaining((prev) => prev + 1);
+                        setCharacterData((prev) => ({
+                            ...prev,
+                            career: { ...prev.career, rank: 1, officer: true },
+                        }));
+                    }
                 }
             }
             if (characterData.career?.officer && canPromote) { //promote
                 warningText = warningText + `  Promotion: ${termResults.charPromo[1]}. `;
                 if (termResults.charPromo[0]) {
-                    const ranks = datatables.rank[career]["O"];
                     const newRank = characterData.career.rank + 1;
                     skillGained = true;
                     const promoDesc = termResults.charPromo[2] ? "an excellent" : "a good";
-                    historyText = historyText + `${characterName} was ${promoDesc} ${career} and was promoted to ${ranks[newRank][0]}. `;
-                    setPicksRemaining((prev) => prev + 1);
-                    setCharacterData((prev) => ({
-                        ...prev,
-                        career: { ...prev.career, rank: newRank },
-                    }));
+                    if (career === 'noble') {
+                        const newSOC = characterData.SOC + 1;
+                        const newTitle = datatables.Title.M[newSOC - 9]?.[0] ?? 'noble';
+                        historyText = historyText + `${characterName} was ${promoDesc} noble and was elevated to ${newTitle}. `;
+                        setPicksRemaining((prev) => prev + 1);
+                        setCharacterData((prev) => ({
+                            ...prev,
+                            SOC: prev.SOC + 1,
+                            career: { ...prev.career, rank: newRank },
+                        }));
+                    } else {
+                        const ranks = datatables.rank[career]["O"];
+                        historyText = historyText + `${characterName} was ${promoDesc} ${career} and was promoted to ${ranks[newRank][0]}. `;
+                        setPicksRemaining((prev) => prev + 1);
+                        setCharacterData((prev) => ({
+                            ...prev,
+                            career: { ...prev.career, rank: newRank },
+                        }));
+                    }
                 }
             }
             warningText = warningText + `Special Assignment: ${termResults.charSpec[1]}. `;
@@ -237,7 +274,14 @@ export default function BasicTerm({
         setWarning(warningText)
         handleHistoryAdd(historyText)
     }
+    const logPostTermSkills = () => {
+        if (postTermPicks.length === 0) return;
+        const skillNarrative = describeSkillGains(postTermPicks, career);
+        handleHistoryAdd(`${characterName}'s skill as a ${careerDisplay} created opportunities. ${characterName} ${skillNarrative}.`);
+    };
+
     const handleRetire = () => {
+        logPostTermSkills();
         const newTerms = characterData.career.terms + 1;
         const newAge = characterData.age + 4;
         const pension = (newTerms >= 5 && PENSION_CAREERS.includes(career)) ? 2000 * newTerms : 0;
@@ -251,6 +295,7 @@ export default function BasicTerm({
     };
 
     const handleReinlist = () => {
+        logPostTermSkills();
         const newTerms = characterData.career.terms + 1;
         const newAge = characterData.age + 4;
         setCharacterData(prev => ({
@@ -262,6 +307,7 @@ export default function BasicTerm({
         setPendingTermStep(null);
         setPicksRemaining(ALWAYS_TWO_CAREERS.includes(career) ? 2 : 1);
         setResolvedPicks([]);
+        setPostTermPicks([]);
         setPresetQueue([]);
         setPickIndex(prev => prev + 1);
         setWarning("");

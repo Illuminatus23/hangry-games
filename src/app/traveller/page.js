@@ -133,10 +133,8 @@ export default function CharacterCreation() {
         const peerage = (characterData.SOC >= 10) ? `${datatables.Title.M[characterData.SOC - 9][1]} ` : "";
         const medgrad = (characterData.awards.includes("med school graduate")) ? " MD" : "";
         let rankName = "";
-        if (characterData.career.careername !== "" && characterData.career.careername !== "noble") {
-            const ranktable = datatables.rank[characterData.career.careername];
-            //console.log(characterData)
-            //console.log(ranktable)
+        const ranktable = datatables.rank[characterData.career.careername];
+        if (characterData.career.careername !== "" && ranktable) {
             const rank = (characterData.career.officer) ? ranktable["O"] : ranktable["E"];
             rankName = `${rank[characterData.career.rank][1]} `
         }
@@ -146,7 +144,12 @@ export default function CharacterCreation() {
         return fullName;
     }
     const generateRankLong = () => {
+        if (characterData.career.careername === 'noble') {
+            const title = datatables.Title.M[characterData.SOC - 9]?.[0];
+            return title ?? "n/a";
+        }
         const ranktable = datatables.rank[characterData.career.careername];
+        if (!ranktable) return "n/a";
         const rank = (characterData.career.officer) ? ranktable["O"] : ranktable["E"];
         const rankText = rank[characterData.career.rank][0];
         const fullRank = `${(characterData.career.officer) ? "O" : (characterData.career.careername === "scouts") ? "IS-" : "E"}${characterData.career.rank}`
@@ -226,12 +229,20 @@ export default function CharacterCreation() {
                 <button className="mt-btn" onClick={performDraft}>{(characterData.career.subcareername === "") ? "Get drafted" : `Begin your career in the ${characterData.career.subcareername}`}</button>
             </div>
         ),
-        year1: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} />,
+        year1: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} setPageWarning={setWarning} />,
         army: <ArmyTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} skills={skills} />,
         marines: <ArmyTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} skills={skills} />,
-        navy: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} />,
-        scouts: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} />,
-        merchants: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} />,
+        navy: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} setPageWarning={setWarning} />,
+        scouts: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} setPageWarning={setWarning} />,
+        merchants: <BasicTerm upp={upp} characterData={characterData} setCharacterData={setCharacterData} setStep={setStep} characterName={characterName} handleHistoryAdd={handleHistoryAdd} setSkills={setSkills} setPageWarning={setWarning} />,
+        End: (
+            <div>
+                <h2>The story ends here.</h2>
+                {warning !== "" && (
+                    <p className="mt-label" style={{ marginBottom: "0.5rem", color: "red" }}>{warning}</p>
+                )}
+            </div>
+        ),
         retire: <MusterOut characterData={characterData} setCharacterData={setCharacterData} setSkills={setSkills} skills={skills} setGear={setGear} setStep={setStep} />,
         complete: (
             <div>
@@ -267,7 +278,7 @@ export default function CharacterCreation() {
                     {/* 2. BIOGRAPHY — programmatically generated narrative */}
                     {characterData.history.length > 0 && (
                         <Section title="Biography">
-                            {generateBiography(characterData, skills, characterName).map((entry, index) => (
+                            {generateBiography(characterData, skills, characterName, step).map((entry, index) => (
                                 <p key={index} style={{ fontSize: "0.78rem", color: "#999", fontStyle: "italic", marginBottom: "0.2rem" }}>
                                     {entry}
                                 </p>

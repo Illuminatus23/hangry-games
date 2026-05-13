@@ -63,8 +63,8 @@ export default function CharacterEnlistment({
             (medgrad && careerCategory !== "basic" && nextEnlistmentChoice !== "marines") || //special
             nextEnlistmentChoice === "noble" //auto enlist
         ) {
-            const info = "auto enlist";
-            const historyStr = "auto enlist";
+            const info = "enlistment cannot fail";
+            const historyStr = `${characterName}'s qualifications made enlistment in the ${careerName} automatic.`;
 
             setCharacterData((prev) => (
                 {
@@ -80,7 +80,10 @@ export default function CharacterEnlistment({
                 }
             ));
             setWarning(info);
-            handleHistoryAdd(historyStr)
+            handleHistoryAdd(historyStr);
+            setEnlistOps([
+                { id: 1, name: `Begin your career as a ${careerName}`, value: "year1" },
+            ]);
         } else {
             const stats = careers[nextEnlistmentChoice].enlist;
             const enlist = {

@@ -223,34 +223,75 @@ export function generateBiographyCareer(_characterData, _skills, _characterName)
     return [];
 }
 
-export function generateBiographyMusterOut(_characterData, _skills, _characterName) {
-    // Handles the mustering out phase — MusterOut.js does not currently call
-    // handleHistoryAdd, so this is net-new narrative to be written:
-    //   - How many rolls, what the character walked away with
-    //   - Pension (if eligible: navy/marines/army/scouts/flyer/sailor, 5+ terms)
-    //   - Cash on hand, gear, ship or ship shares acquired
-    //   - Transition to civilian life / what comes next
-    // Key data to derive from:
-    //   characterData.pension     — annual pension (Cr), 0 if none
-    //   characterData.cash        — cash on hand (Cr)
-    //   characterData.ship        — ship name (if any)
-    //   characterData.shipshares  — number of ship shares
-    //   characterData.gear        — array of benefit strings
-    //   characterData.career.terms / careername / rank
-    return [];
+const CAREER_DISPLAY_BIO = { law: 'law enforcement officer' };
+
+export function generateBiographyMusterOut(characterData, _skills, characterName) {
+    const { career, pension, cash, ship, shipshares, gear, age } = characterData;
+    const { careername, terms } = career;
+
+    const careerDisplay = CAREER_DISPLAY_BIO[careername] ?? careername;
+    const yearsServed = terms * 4;
+
+    let para1 = `After ${terms} term${terms !== 1 ? 's' : ''} and ${yearsServed} years as a ${careerDisplay}, ${characterName} mustered out at age ${age}.`;
+
+    if (pension > 0) {
+        para1 += ` Having served long enough to earn a pension, they will receive Cr${pension.toLocaleString()} per year for the rest of their life.`;
+    }
+
+    para1 += ` With their service behind them, ${characterName} stepped into civilian life ready to chart their own course among the stars.`;
+
+    // Para 2: what they walked away with
+    const parts = [];
+
+    if (ship) {
+        parts.push(`a ${ship.toLowerCase()}`);
+    } else if (shipshares > 0) {
+        parts.push(`${shipshares} ship share${shipshares !== 1 ? 's' : ''} toward a future vessel`);
+    }
+
+    if (cash > 0) {
+        parts.push(`Cr${cash.toLocaleString()} in savings`);
+    }
+
+    const passageTypes = new Set(['Low passage', 'Mid passage', 'High passage']);
+    const passages = (gear ?? []).filter(g => passageTypes.has(g));
+    const otherGear = (gear ?? []).filter(g => !passageTypes.has(g));
+
+    for (const item of otherGear) {
+        parts.push(`a ${item.toLowerCase()}`);
+    }
+
+    if (passages.length > 0) {
+        const counts = {};
+        for (const p of passages) counts[p] = (counts[p] ?? 0) + 1;
+        const passageStr = Object.entries(counts)
+            .map(([type, n]) => n > 1 ? `${n} ${type.toLowerCase()}s` : `a ${type.toLowerCase()}`)
+            .join(' and ');
+        parts.push(passageStr);
+    }
+
+    const para2 = parts.length === 0
+        ? `${characterName} left service with little beyond their experience and a lifetime of memories.`
+        : `${characterName} walked away from service with ${joinInline(parts)}.`;
+
+    return [para1, para2];
 }
 
-export function generateBiography(characterData, skills, characterName) {
+export function generateBiography(characterData, skills, characterName, step) {
     const origins = generateBiographyOrigins(characterData, skills, characterName);
     const education = generateBiographyEducation(characterData, skills, characterName);
     const career = generateBiographyCareer(characterData, skills, characterName);
-    const musterOut = generateBiographyMusterOut(characterData, skills, characterName);
+    const musterOut = step === 'complete'
+        ? generateBiographyMusterOut(characterData, skills, characterName)
+        : [];
 
-    const implemented = [...education, ...career, ...musterOut];
-    // Once any non-origins phase is implemented, stop using the raw history fallback
-    return implemented.length > 0
-        ? [...origins, ...implemented]
-        : characterData.history;
+    // While education and career stubs return [], bridge with the raw history
+    // entries beyond the 3 origin paragraphs generateBiographyOrigins covers.
+    const rawMiddle = (education.length === 0 && career.length === 0)
+        ? characterData.history.slice(3)
+        : [];
+
+    return [...origins, ...education, ...rawMiddle, ...career, ...musterOut];
 }
 
 // ────────────────────────────────────────────────────────────────────────────
