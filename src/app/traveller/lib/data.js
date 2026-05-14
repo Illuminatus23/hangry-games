@@ -749,6 +749,10 @@ export const datatables = {
             "Survival": ['Skill', 'MOS', 2, 1],
             "Decoration": ['None'],
             "Promotion": ['UUP', 'Education', 7, 1],
+            "Command": {
+                "marines": 7,
+                "army": 7
+            },
             "Assignement": ['Raid', 'Raid', 'Counter Insurgency', 'Counter Insurgency', 'Garrison', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Internal Security', 'Police Action'],
             "MOS": ['Gun Combat', 'Special Combat', 'Heavy Weapons', 'Heavy Weapons', 'Vehicle', 'Recon', 'Vacc Suit']
         },
@@ -763,6 +767,10 @@ export const datatables = {
             "Survival": ['Skill', 'MOS', 2, 1],
             "Decoration": ['None'],
             "Promotion": ['UUP', 'Education', 7, 1],
+            "Command": {
+                "marines": 7,
+                "army": 7
+            },
             "Assignement": ['Raid', 'Raid', 'Counter Insurgency', 'Internal Security', "Ship's Troops", 'Garrison', "Ship's Troops", 'Training', 'Counter Insurgency', 'Police Action', 'Police Action'],
             "MOS": ['Gun Combat', 'Special Combat', 'Zero-G Combat', 'Zero-G Combat', 'Heavy Weapons', 'Foward Observer', 'Battle Dress']
         },
@@ -776,6 +784,10 @@ export const datatables = {
             "Survival": ['None'],
             "Decoration": ['None'],
             "Promotion": ['UUP', 'Intelligence', 8, 1],
+            "Command": {
+                "marines": 10,
+                "army": 10
+            },
             "Assignement": ['Raid', 'Internal Security', 'Counter Insurgency', 'Garrison', 'Garrison', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Internal Security', 'Police Action'],
             "MOS": ['Vehicle', 'Combat Engineering', 'Vehicle', 'Mechanical', 'Electronic', 'Medical', 'Computer']
         },
@@ -787,6 +799,10 @@ export const datatables = {
             "Survival": ['Skill', 'MOS', 2, 1],
             "Decoration": ['None'],
             "Promotion": ['UUP', 'Endurance', 8, 1],
+            "Command": {
+                "marines": 7,
+                "army": 6
+            },
             "Assignement": ['Raid', 'Raid', 'Counter Insurgency', 'Police Action', 'Internal Security', 'Garrison', 'Training', 'Training', 'Counter Insurgency', 'Raid', 'Raid'],
             "MOS": ['Gun Combat', 'Special Combat', 'Heavy Weapons', 'Demolitions', 'Survival', 'Recon', 'Battle Dress']
         },
@@ -802,6 +818,10 @@ export const datatables = {
             "Survival": ['Skill', 'MOS', 2, 1],
             "Decoration": ['None'],
             "Promotion": ['UUP', 'Education', 7, 1],
+            "Command": {
+                "marines": 9,
+                "army": 8
+            },
             "Assignement": ['Raid', 'Training', 'Counter Insurgency', 'Police Action', 'Garrison', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Counter Insurgency', 'Training'],
             "MOS": ['Field Artillery Gunner', 'Field Artillery Gunner', 'Vehicle', 'Mechanical', 'Forward Observer', 'Computer', 'Electronics']
         },
@@ -817,6 +837,10 @@ export const datatables = {
             "Survival": ['Skill', 'MOS', 2, 1],
             "Decoration": ['None'],
             "Promotion": ['UUP', 'Education', 7, 1],
+            "Command": {
+                "marines": 7,
+                "army": 7
+            },
             "Assignement": ['Raid', 'Training', 'Counter Insurgency', 'Police Action', 'Garrison', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Internal Security', 'Police Action'],
             "MOS": ['Vehicle', 'Vehicle', 'Vehicle', 'Heavy Weapons', 'Heavy Weapons', 'Mechancal', 'Computer']
         },
@@ -831,7 +855,15 @@ export const datatables = {
         Special: {
             "E": ["Cross-Training", "Specialist School", "Commando School", "Protected Forces", "Recruiting", "Recruiting", "OCS", "OCS"],
             "O": ["Intelligence School", "Command College", "Staff College", "Commando School", "Recruiting", "Military Aide"],
-            "Schools": ['0', 'Admin', 'Medical', 'Communications', 'Computer', 'Mechanical', 'Electronics']
+            "Schools": ['Mechanical', 'Electronic', 'Gravitic', 'Comm', 'Vehicle', 'Ships Boat'],
+            "SmartSchools": ['Academic', 'Medical', 'Space', 'Environ', 'Computer', 'Liason']
+        },
+        SchoolSkills: {
+            Commando: [5, ["Brawling", "Gun Combat", "Demolitions", "Intrusion", "Stealth", "Survival", "Recon", "Vacc Suit", "Blade Combat", "Instruction"]],
+            Protected: [3, ["High-G Environ", "Zero-G Combat", "Vacc Suit"]],
+            Intelligence: [4, ["Forgery", "Bribery", "Streetwise", "Interogation", "Vice"]],
+            Staff: [4, ["Admin", "Combat Engineering", "Computer", "Robot Ops"]],
+            Command: [4, ["Tactics", "Leader", "Recon"]],
         }
 
     },
