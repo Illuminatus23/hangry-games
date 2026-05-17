@@ -1,61 +1,43 @@
 "use client";
 
-export default function SelectOrButton({
-    allOps,
-    userChoice,
-    setUserChoice,
-    onSubmit, // call this when user has made a choice
-}) {
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+export default function SelectOrButton({ allOps, userChoice, setUserChoice, onSubmit }) {
     const hasSingleOption = allOps.length === 1;
     const singleOption = hasSingleOption ? allOps[0] : null;
 
     if (hasSingleOption && singleOption) {
-        // === Single-option mode: show buttons instead of a <select> ===
         return (
-            <div>
-                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                    <button
-                        type="button"
-                        className="mt-btn"
-                        onClick={() => {
-                            onSubmit(singleOption.value);
-                        }}
-                    >
-                        {singleOption.name}
-                    </button>
-                </div>
+            <div className="flex flex-wrap gap-2">
+                <Button type="button" onClick={() => onSubmit(singleOption.value)}>
+                    {singleOption.name}
+                </Button>
             </div>
         );
     }
 
-    // === Normal mode: multiple options, show <select> + Continue button ===
+    const selectedOp = allOps.find(op => op.value === userChoice);
+
     return (
-        <div>
-            <div>
-                <select
-                    style={{ marginBottom: "0.5rem" }}
-                    className="mt-select mt-cap"
-                    value={userChoice}
-                    onChange={(e) => setUserChoice(e.target.value)}
-                >
-                    <option value="" disabled>
-                        --Select--
-                    </option>
-                    {allOps.length !== 0 &&
-                        allOps.map((op) => (
-                            <option key={op.id} value={op.value}>
-                                {op.name}
-                            </option>
-                        ))}
-                </select>
-            </div>
-            <button
-                className="mt-btn"
-                type="button"
-                onClick={() => onSubmit(userChoice)}
-            >
+        <div className="space-y-2">
+            <Select value={userChoice} onValueChange={setUserChoice}>
+                <SelectTrigger className="w-64">
+                    <SelectValue placeholder="--Select--">
+                        {selectedOp ? selectedOp.name : undefined}
+                    </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                    {allOps.map((op) => (
+                        <SelectItem key={op.id} value={op.value}>
+                            {op.name}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+            <Button type="button" onClick={() => onSubmit(userChoice)} disabled={!userChoice}>
                 Continue
-            </button>
+            </Button>
         </div>
     );
 }

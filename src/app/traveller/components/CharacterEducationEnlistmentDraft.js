@@ -153,7 +153,7 @@ export default function CharacterEducationEnlistmentDraft({
                     setCharacterData((prev) => ({ ...prev, age: 23 }));
                     //setStep("navy")
                     setSchoolOptions([
-                        { id: 1, name: "Take a commision as a Navy pilot", value: "navy" },
+                        { id: 1, name: "Take a commission as a Navy pilot", value: "navy" },
                     ])
                     setWarning(`${characterName} applied to flight school, was accepted and graduated.`);
                     setCharacterData(prev => ({
@@ -237,7 +237,7 @@ export default function CharacterEducationEnlistmentDraft({
         } else if (results.success) {
             const currentEDU = characterData.EDU;
             const increaseEDU = results.eduIncrease;
-            const honors = (results.honors) ? " with honors granting an opportunity to enter Medical college" : "";
+            const honors = (results.honors) ? " with honors granting an opportunity to enter medical school" : "";
             let historyStr = `${characterName} applied to ${friendlyName}, was accepted and graduated${honors}. Their education increased by ${increaseEDU}. `;
             //let historyStr = `${characterName} applied to ${friendlyName}, was accepted and graduated${honors}. `;
             setCharacterData((prev) => ({ ...prev, EDU: currentEDU + increaseEDU }));
@@ -257,7 +257,7 @@ export default function CharacterEducationEnlistmentDraft({
             if (results.school === "college") {
                 setCharacterData((prev) => ({ ...prev, commission: results.commission }));
                 if (results.commission !== "denied" && results.commission !== "none") {
-                    historyStr = historyStr + ` ${characterName} was also accepted into officer candidate school, granting them the rank of officer in the ${results.commission} and guarantying enlistment.`;
+                    historyStr = historyStr + ` ${characterName} was also accepted into officer candidate school, granting them the rank of officer in the ${results.commission} and guaranteeing enlistment.`;
                 } else if (results.commission === "denied") {
                     historyStr = historyStr + ` ${characterName} was not accepted into Officer Candidate School.`;
                 }
@@ -334,7 +334,7 @@ export default function CharacterEducationEnlistmentDraft({
                     setCharacterData((prev) => ({ ...prev, age: 22 }));
                     //setStep("army");
                     setSchoolOptions([
-                        { id: 1, name: "Take a commision in the army", value: "enlistarmy" },
+                        { id: 1, name: "Take a commission in the army", value: "enlistarmy" },
                     ])
                     setWarning(historyStr)
                 }
@@ -353,27 +353,24 @@ export default function CharacterEducationEnlistmentDraft({
     };
 
     return (
-        <div>
-            <h2>Pre-career choices</h2>
-            <p className="mt-label" style={{ marginBottom: "0.5rem" }}>
+        <div className="space-y-3">
+            <h2 className="text-lg font-semibold">Pre-career choices</h2>
+            <p className="text-xs text-muted-foreground">
                 You may apply to college or any other learning institution you are
                 eligible to attend. The Naval Academy is available to characters of SOC 8
                 or higher. A Military Academy is available to characters of SOC 6 or
-                higher. Successfully entering a NOTC or OTC program ensures comission in
+                higher. Successfully entering a NOTC or OTC program ensures commission in
                 the Navy or Army respectively.
             </p>
-            {warning !== "" ?
-                <p className="mt-label" style={{ marginBottom: "0.5rem", color: "red" }}>{warning}</p>
-                : null
-            }
-            <div>
-                <SelectOrButton
-                    allOps={schoolOptions}
-                    userChoice={application}
-                    setUserChoice={setApplication}
-                    onSubmit={handleSubmission}
-                />
-            </div>
+            {warning !== "" && (
+                <p className="text-xs text-destructive">{warning}</p>
+            )}
+            <SelectOrButton
+                allOps={schoolOptions}
+                userChoice={application}
+                setUserChoice={setApplication}
+                onSubmit={handleSubmission}
+            />
         </div>
     );
 }

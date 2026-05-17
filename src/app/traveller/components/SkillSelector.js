@@ -1,55 +1,26 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import ReactModal from "react-modal";
 import { datatables } from "../lib/data";
 import { d6 } from "../lib/helpers";
-
-// Avoid react-modal warning (Next.js-safe)
-if (typeof window !== "undefined") {
-    ReactModal.setAppElement("body");
-}
-
-const modalStyles = {
-    overlay: {
-        backgroundColor: "rgba(0, 0, 0, 0.6)",
-        backdropFilter: "blur(2px)",
-        zIndex: 1000,
-    },
-    content: {
-        maxWidth: "420px",
-        margin: "auto",
-        inset: "50% auto auto 50%",
-        transform: "translate(-50%, -50%)",
-        padding: "1.25rem 1.5rem",
-        borderRadius: "10px",
-        border: "1px solid #444",
-        background: "#f6f6f6",
-        color: "#111",
-        boxShadow: "0 12px 36px rgba(0,0,0,0.35)",
-    },
-};
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 export default function SkillSelector({
-    skillTables,          // object: { personal: [...], service: [...], ... }
-    characterData,        // needed for EDU>=8 gating
-    setWarning,           // (msg:string)=>void
-    skillIncrease,        // (finalSkill:string)=>void   <-- APPLY FINAL SKILL ONLY
-    onResolved,           // (finalSkill:string)=>void   <-- tells parent “this pick is done”
-    presetSkill,          // optional string: when set, skip dropdown and resolve this skill
+    skillTables,
+    characterData,
+    setWarning,
+    skillIncrease,
+    onResolved,
+    presetSkill,
 }) {
     const [category, setCategory] = useState("");
-
-    // cascade modal state
     const [pendingSkill, setPendingSkill] = useState("");
     const [cascadeOptions, setCascadeOptions] = useState([]);
     const [cascadeChoice, setCascadeChoice] = useState("");
     const [isCascadeOpen, setIsCascadeOpen] = useState(false);
-
-    // once resolved, hide dropdown + button and show result
     const [resolvedSkill, setResolvedSkill] = useState("");
-
-    // StrictMode guard so preset doesn’t run twice in dev
     const didPreset = useRef(false);
 
     const isCascadeSkill = (skill) =>
@@ -57,7 +28,6 @@ export default function SkillSelector({
 
     const skillOps = useMemo(() => {
         const ops = [
-            { id: 0, name: "Select a skill category", value: "" },
             { id: 1, name: "Personal Development Skills", value: "personal" },
             { id: 2, name: "Service Skills", value: "service" },
             { id: 3, name: "Advanced Skills", value: "advanced" },
@@ -68,7 +38,6 @@ export default function SkillSelector({
         return ops;
     }, [characterData.EDU]);
 
-    // ---------- PRESET MODE (rookie skill resolution) ----------
     useEffect(() => {
         if (!presetSkill) return;
         if (didPreset.current) return;
@@ -85,14 +54,12 @@ export default function SkillSelector({
             return;
         }
 
-        // Not cascade: resolve immediately
         skillIncrease(presetSkill);
         setResolvedSkill(presetSkill);
         setWarning?.(`Gained ${presetSkill}.`);
         onResolved?.(presetSkill);
     }, [presetSkill, skillIncrease, onResolved, setWarning]);
 
-    // ---------- CATEGORY MODE ----------
     const onSubmitCategory = () => {
         if (!category) {
             setWarning?.("Select a skill category before continuing.");
@@ -100,8 +67,6 @@ export default function SkillSelector({
         }
 
         const list = skillTables?.[category] ?? [];
-
-        // You said d6 is fine + validation handled elsewhere
         const roll = d6(1, 0);
         const rolled = list[roll];
 
@@ -121,7 +86,6 @@ export default function SkillSelector({
             return;
         }
 
-        // Not cascade: resolve
         skillIncrease(rolled);
         setResolvedSkill(rolled);
         setWarning?.(`Gained ${rolled}.`);
@@ -135,13 +99,21 @@ export default function SkillSelector({
             return;
         }
 
-        // Apply the user’s final selection
+        const nestedOpts = datatables.Skills?.[cascadeChoice];
+        if (Array.isArray(nestedOpts) && nestedOpts.length > 0) {
+            // Chosen option is itself a cascade — drill in, keep dialog open
+            setPendingSkill(cascadeChoice);
+            setCascadeOptions(nestedOpts);
+            setCascadeChoice("");
+            setWarning?.(`${cascadeChoice} is a cascade skill. Choose a specialization.`);
+            return;
+        }
+
         skillIncrease(cascadeChoice);
         setResolvedSkill(cascadeChoice);
         setWarning?.(`Gained ${cascadeChoice} (from ${pendingSkill}).`);
         onResolved?.(cascadeChoice);
 
-        // reset modal state
         setIsCascadeOpen(false);
         setCascadeOptions([]);
         setCascadeChoice("");
@@ -149,12 +121,11 @@ export default function SkillSelector({
         setCategory("");
     };
 
-    // If resolved, hide inputs and show result
     if (resolvedSkill) {
         return (
-            <div style={{ marginTop: "0.75rem" }}>
-                <p className="mt-label">
-                    Selected skill: <span className="mt-cap">{resolvedSkill}</span>
+            <div className="mt-3">
+                <p className="text-xs text-muted-foreground">
+                    Selected skill: <span className="capitalize font-medium">{resolvedSkill}</span>
                 </p>
             </div>
         );
@@ -163,76 +134,63 @@ export default function SkillSelector({
     const showCategoryUI = !presetSkill;
 
     return (
-        <div style={{ marginTop: "0.75rem" }}>
+        <div className="mt-3 space-y-2">
             {showCategoryUI && (
                 <>
-                    <select
-                        style={{ marginBottom: "0.5rem" }}
-                        className="mt-select mt-cap"
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        disabled={isCascadeOpen}
-                    >
-                        {skillOps.map((op) => (
-                            <option key={op.id} value={op.value}>
-                                {op.name}
-                            </option>
-                        ))}
-                    </select>
-                    &nbsp;
-                    <button
-                        className="mt-btn"
-                        type="button"
-                        onClick={onSubmitCategory}
-                        disabled={isCascadeOpen}
-                    >
+                    <Select value={category} onValueChange={setCategory} disabled={isCascadeOpen}>
+                        <SelectTrigger className="w-64">
+                            <SelectValue placeholder="Select a skill category">
+                                {skillOps.find(op => op.value === category)?.name}
+                            </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {skillOps.map((op) => (
+                                <SelectItem key={op.id} value={op.value}>
+                                    {op.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Button type="button" onClick={onSubmitCategory} disabled={isCascadeOpen || !category}>
                         Submit Category
-                    </button>
+                    </Button>
                 </>
             )}
 
-            <ReactModal
-                isOpen={isCascadeOpen}
-                style={modalStyles}
-                shouldCloseOnOverlayClick={false}
-                shouldCloseOnEsc={false}
-                contentLabel="Cascade Skill Choice"
-            >
-                <div className="mt-modal">
-                    <h3 className="mt-modal-title">Cascade Skill</h3>
-
-                    <p className="mt-label mt-rolled-skill">
-                        You gained a cascade skill. Make a selection: <span className="mt-cap">{pendingSkill}</span>
-                    </p>
-
-                    <p className="mt-label">Choose a specialization:</p>
-
-                    <select
-                        style={{ marginBottom: "0.5rem" }}
-                        className="mt-select mt-cap"
-                        value={cascadeChoice}
-                        onChange={(e) => setCascadeChoice(e.target.value)}
-                    >
-                        <option value="">--Select--</option>
-                        {cascadeOptions.map((s, i) => (
-                            <option key={i} value={s}>
-                                {s}
-                            </option>
-                        ))}
-                    </select>
-
-                    <div className="mt-modal-actions">
-                        <button
-                            className="mt-btn"
-                            type="button"
-                            onClick={onConfirmCascade}
-                            disabled={!cascadeChoice}
-                        >
-                            Confirm Skill
-                        </button>
+            <Dialog open={isCascadeOpen} onOpenChange={() => {}}>
+                <DialogContent
+                    className="max-w-md"
+                    onInteractOutside={(e) => e.preventDefault()}
+                    onEscapeKeyDown={(e) => e.preventDefault()}
+                >
+                    <DialogHeader>
+                        <DialogTitle>Cascade Skill</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                        <p className="text-xs text-muted-foreground bg-muted border-l-4 border-primary px-3 py-2 rounded-md">
+                            You rolled a cascade skill — choose a specialization:{" "}
+                            <span className="capitalize font-medium text-foreground">{pendingSkill}</span>
+                        </p>
+                        <Select value={cascadeChoice} onValueChange={setCascadeChoice}>
+                            <SelectTrigger className="capitalize">
+                                <SelectValue placeholder="--Select--">
+                                    {cascadeChoice || undefined}
+                                </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {cascadeOptions.map((s, i) => (
+                                    <SelectItem key={i} value={s} className="capitalize">{s}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
-                </div>
-            </ReactModal>
+                    <DialogFooter>
+                        <Button onClick={onConfirmCascade} disabled={!cascadeChoice}>
+                            Confirm Skill
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

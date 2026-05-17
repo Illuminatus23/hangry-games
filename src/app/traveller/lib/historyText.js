@@ -33,7 +33,7 @@ export function generateBirthText(uppArray, birthworld, name, homeworldName, ski
     //endurance and dex
     if (upp.END >= 9) {
         if (upp.DEX < 8) {
-            bPhys = "the all-star endurance of a competitive triathelete";
+            bPhys = "the all-star endurance of a competitive triathlete";
         } else {
             bPhys = "the outstanding athleticism of a GravBall champion";
         }

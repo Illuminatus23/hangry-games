@@ -4,6 +4,7 @@ import React, { useMemo, useState, useEffect, useRef } from "react";
 import { datatables } from "../lib/data";
 import SkillSelector from "./SkillSelector";
 import { careerCheckSimple, careerCheckSpecReinlist, generateBattlename, d6, applySkill, getAgingRolls } from "../lib/helpers";
+import { Button } from "@/components/ui/button";
 import { describeSkillGains } from "../lib/historyText";
 
 const ALWAYS_TWO_CAREERS = ['belter', 'rogue', 'hunter', 'doctor', 'scientist'];
@@ -143,7 +144,7 @@ export default function BasicTerm({
             //skillsGained = ['Vacc Suit'];
             const roll = d6(2, terms);
             const result = (roll >= 9);
-            const logStr = `${characterName} needed an 8 to succeed and rolled a ${roll} modified by their terms of service`;
+            const logStr = `${characterName} needed a 9 to succeed and rolled a ${roll} modified by their terms of service`;
             termResults.charSurvival = [result, logStr]
         }
         warningText = `Survival: ${termResults.charSurvival[1]}. `;
@@ -153,13 +154,13 @@ export default function BasicTerm({
                 handleHistoryAdd?.(`Even life as a ${career} is not without its risks. ${characterName} died in a freak accident. The story ends here.`);
             } else if (careerData.survival[0] === 5) {
                 if (career === "scientist") {
-                    handleHistoryAdd?.(`Perhaps labrotory safety was not a top priority. ${characterName} died in a laboratory accident. The story ends here.`);
+                    handleHistoryAdd?.(`Perhaps laboratory safety was not a top priority. ${characterName} died in a laboratory accident. The story ends here.`);
                 } else {
                     handleHistoryAdd?.(`Though ${characterName} took every precaution, they died in the line of duty. The story ends here.`);
                 }
 
             } else if (careerData.survival[0] >= 6) {
-                handleHistoryAdd?.(`Life as a ${career} can be brutal and violent. ${characterName} dies in the line of duty. The story ends here.`);
+                handleHistoryAdd?.(`Life as a ${career} can be brutal and violent. ${characterName} died in the line of duty. The story ends here.`);
             }
             setPageWarning?.(warningText);
             setStep("End")
@@ -240,10 +241,10 @@ export default function BasicTerm({
 
             let nextStep = 'reinlistChoice';
             if (termResults.charReenlist[3]) {
-                historyText = historyText + `At the end of 4 years, social and political presure kept them in their career. `
+                historyText = historyText + `At the end of 4 years, social and political pressure kept them in their career. `
                 nextStep = 'forced';
             } else if (!termResults.charReenlist[0]) {
-                historyText = historyText + `At the end of 4 years, social and political presure forced them out of their career. `
+                historyText = historyText + `At the end of 4 years, social and political pressure forced them out of their career. `
                 nextStep = 'retire';
             }
 
@@ -314,14 +315,12 @@ export default function BasicTerm({
     };
 
     return (
-        <div>
-            <h2 className="mt-section-title">Career Term {terms}</h2>
-            <h5>{picksRemaining} skill picks remaining</h5>
+        <div className="space-y-3">
+            <h2 className="text-lg font-semibold">Career Term {terms}</h2>
+            <p className="text-xs text-muted-foreground">{picksRemaining} skill pick{picksRemaining !== 1 ? "s" : ""} remaining</p>
 
             {warning !== "" && (
-                <p className="mt-label" style={{ marginBottom: "0.5rem", color: "red" }}>
-                    {warning}
-                </p>
+                <p className="text-xs text-destructive">{warning}</p>
             )}
 
             {(termStep === "init" || termStep === "postTerm") && (currentPreset || canPickCategory) && (
@@ -337,56 +336,48 @@ export default function BasicTerm({
             )}
 
             {resolvedPicks.length > 0 && (
-                <div style={{ marginTop: "0.75rem" }}>
-                    <p className="mt-label">You&apos;ve gained the following skills:</p>
-                    <ul className="mt-label">
+                <div className="mt-3">
+                    <p className="text-xs text-muted-foreground mb-1">Skills gained:</p>
+                    <ul className="text-xs text-muted-foreground list-disc list-inside">
                         {resolvedPicks.map((s, i) => (
-                            <li key={i} className="mt-cap">{s}</li>
+                            <li key={i} className="capitalize">{s}</li>
                         ))}
                     </ul>
                 </div>
             )}
 
             {termStep === "init" && allResolved && (
-                <div>
-                    <button
-                        className="mt-btn"
-                        type="button"
-                        onClick={handleTerm}
-                    >
-                        Continue term as a {career}
-                    </button>
-                </div>
+                <Button type="button" onClick={handleTerm}>
+                    Continue term as a {career}
+                </Button>
             )}
 
             {termStep === "postTerm" && allResolved && (
-                <div>
+                <div className="flex flex-wrap gap-2">
                     {pendingTermStep !== 'retire' && (
-                        <button className="mt-btn" type="button" onClick={handleReinlist}>
+                        <Button type="button" onClick={handleReinlist}>
                             Reinlist as a {career}
-                        </button>
+                        </Button>
                     )}
-                    &nbsp;
                     {pendingTermStep !== 'forced' && (
-                        <button className="mt-btn" type="button" onClick={handleRetire}>
+                        <Button type="button" variant="outline" onClick={handleRetire}>
                             Retire
-                        </button>
+                        </Button>
                     )}
                 </div>
             )}
 
             {(termStep === "retire" || termStep === "forced" || termStep === "reinlistChoice") && (
-                <div>
+                <div className="flex flex-wrap gap-2">
                     {termStep !== 'retire' && (
-                        <button className="mt-btn" type="button" onClick={handleReinlist}>
+                        <Button type="button" onClick={handleReinlist}>
                             Reinlist as a {career}
-                        </button>
+                        </Button>
                     )}
-                    &nbsp;
                     {termStep !== 'forced' && (
-                        <button className="mt-btn" type="button" onClick={handleRetire}>
+                        <Button type="button" variant="outline" onClick={handleRetire}>
                             Retire
-                        </button>
+                        </Button>
                     )}
                 </div>
             )}

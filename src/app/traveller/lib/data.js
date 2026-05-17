@@ -306,7 +306,7 @@ export const datatables = {
     },
     chanceToDescriptor: ["guarenteed", "guarenteed", "guaranteed", "nearly guaranteed", "very likely", "very high", "high", "average", "below average", "low", "very low", "unlikely", "near impossible", "non-existant", "impossible"],
     skillToDescriptor: ["average", "trained", "proficient", "adept", "expert", "a master"],
-    deocrationDescriptor: {
+    decorationDescriptor: {
         'MCUF': 'Meritorious Conduct Under Fire',
         'MCG': 'Medal for Conspicuous Gallantry',
         'SEH': 'Starburst for Extreme Heroism'
@@ -351,9 +351,9 @@ export const datatables = {
             E: [['Employee', ''], ['Crewman', ''], ['Crewman', ''], ['Crewman', ''], ['Crewman', ''], ['Crewman', ''], ['Crewman', ''], ['Crewman', ''], ['Crewman', ''], ['Crewman', ''], ['Crewman', '']],
             O: {
                 Deck: [['Apprentice', ''], ['4th Officer', ''], ['3rd Officer', ''], ['2nd Officer', ''], ['1st Officer', ''], ['Captain', 'Capt'], ['Senior Captain', 'Capt'], ['Line Commodore', 'Cmdr']],
-                Engineering: [['Assistant Drive Hand', ''], ['Drive Hand', ''], ['Assistant Engineer', ''], ['Engineer', ''], ['Cheif Engineer', '']],
-                Purser: [['Steward', ''], ['Junior Purser', ''], ['Assistant Purser', ''], ['Purser', ''], ['Cheif Purser', '']],
-                Medical: [['Steward', ''], ['Junior Purser', ''], ['Assistant Medic', ''], ['Medic', 'Dr'], ['Cheif Purser', 'Dr']],
+                Engineering: [['Assistant Drive Hand', ''], ['Drive Hand', ''], ['Assistant Engineer', ''], ['Engineer', ''], ['Chief Engineer', '']],
+                Purser: [['Steward', ''], ['Junior Purser', ''], ['Assistant Purser', ''], ['Purser', ''], ['Chief Purser', '']],
+                Medical: [['Steward', ''], ['Junior Purser', ''], ['Assistant Medic', ''], ['Medic', 'Dr'], ['Chief Purser', 'Dr']],
                 Administration: [['Clerk', ''], ['Assistant Manager', ''], ['Manager', ''], ['Assistant Station Head', ''], ['Station Head', '']],
                 Sales: [['Apprentice', ''], ['Clerk', ''], ['Assistant Broker', ''], ['Broker', ''], ['Senior Broker', '']],
                 Freetraders: ['', ['4th Officer', ''], ['3rd Officer', ''], ['2nd Officer', ''], ['1st Officer', ''], ['Captain', 'Capt'], ['Owner', 'Capt']]
@@ -374,14 +374,14 @@ export const datatables = {
                 'O2': ['Large Watercraft']
             }
         },
-        law: {
+        "law enforcement": {
             E: [['', ''], ['', '']],
-            O: [['', ''], ['Corporal', 'Cpl'], ['Sergeant', 'Sgt'], ['Lieutenant', 'Lt'], ['Detective', 'Det'], ['Cheif', 'Chf'], ['Commissioner', 'Commr']],
+            O: [['', ''], ['Corporal', 'Cpl'], ['Sergeant', 'Sgt'], ['Lieutenant', 'Lt'], ['Detective', 'Det'], ['Chief', 'Chf'], ['Commissioner', 'Commr']],
             skills: {
                 'E1': ['Streetwise'],
                 'O4': ['Interrogation'],
                 'O5': ['Admin'],
-                'O6': ['Liason'],
+                'O6': ['Liaison'],
             }
         },
         doctor: {
@@ -395,7 +395,7 @@ export const datatables = {
             E: [['', ''], ['', '']],
             O: [['', ''], ['3rd Secretary', 'Sec'], ['2nd Secretary', 'Sec'], ['1st Secretary', 'Sec'], ['Councilor', 'Councilor'], ['Minister', 'Minister'], ['Ambassador', 'Ambassador']],
             skills: {
-                'E1': ['Liason'],
+                'E1': ['Liaison'],
             }
         },
         bureaucrat: {
@@ -454,23 +454,24 @@ export const datatables = {
 
     },
     careerDesc: {
-        army: "",
-        marines: "",
-        navy: "",
-        scouts: "",
-        merchants: "",
+        army: "enlisted in the army, a ground-based military force. Soldiers serve on worlds throughout the Imperium, defending against external threats and maintaining order in times of conflict.",
+        marines: "enlisted in the marines, a combined-arms force trained for shipboard combat and planetary assault. Marines are among the most elite fighters in the Imperium, equally at home in a vacuum or on the ground.",
+        navy: "enlisted in the navy, the interstellar military arm responsible for patrolling space lanes and engaging hostile vessels. Naval personnel operate the great warships of the Imperium.",
+        scouts: "joined the Scout Service, an organization responsible for exploration, survey, and communications across the Imperium. Scouts are self-reliant individuals who often operate alone in uncharted territory.",
+        merchants: "signed on with a merchant line, working aboard commercial vessels that carry trade goods between star systems. Merchants develop broad practical skills from life aboard ship and on diverse worlds.",
         flyer: "began a career in the air force flyers. Flyers are members of the Close Orbit and Airspace Control (the Air Force) of a world. Flyers patrol the world from the air and from orbit, monitor traffic to and from the world, and protect the world from hostile spacecraft.",
         sailor: "began a military career in the Nautical Force Command (the wet navy) of a world. Sailors patrol a world’s hydrosphere, monitor traffic upon it, and protect those travelling the seaways from being preyed upon by lawless elements",
-        law: "became a law enforcement officer. Law enforcers typically have good investigative skills and tend to be familiar with the unsavory aspects of society.",
+        "law enforcement": "became a law enforcement officer, serving in the security and police services of a world. Law enforcers typically have good investigative skills and tend to be familiar with the unsavory aspects of society.",
         doctor: "started a career as a medical doctor, a trained individual conducting a medical practice. Doctors know and understand well the art and science of medical diagnosis and treatment.",
-        diplomat: "began a career as a diplomat, a member of the foreign service of a government. Diplomats may gain valuable interpersonal abiliies and academic knowledge during their careers.",
+        diplomat: "began a career as a diplomat, a member of the foreign service of a government. Diplomats may gain valuable interpersonal abilities and academic knowledge during their careers.",
         bureaucrat: "began a career as a bureaucrat, an individual in a government or organization in a management or executive capacity. Bureaucrats are often well-versed in the administrative and economic aspects of commerce.",
-        scientist: "began a career as a scientist, trained in the technological or research sciences. Scientists conduct scientific investigations into materials, situations, and phenomena",
+        scientist: "began a career as a scientist, trained in the technological or research sciences. Scientists conduct scientific investigations into materials, situations, and phenomena.",
         belter: "became a belter, an individual who prospects and mines asteroid belts in search of mineral deposits, artifacts, or salvageable materials. Being a belter is a difficult and often dangerous career, calling for individuals who are highly self-reliant, competent, and determined.",
-        pirate: "became a pirate and joined the crew of an interplanetary or interstellar vessel who makes a living attacking, hijacking, or plundering commerce. Pirates tend to be rugged individuals who depend heavily on their measure of cunning and skill, as well as a degree of luck to manage to net their livelihood.",
+        pirate: "became a pirate and joined the crew of an interplanetary or interstellar vessel making a living by attacking, hijacking, or plundering commerce. Pirates tend to be rugged individuals who depend heavily on cunning and skill, as well as a measure of luck.",
         rogue: "began a life of crime, familiar with the rougher and more illegal methods of accomplishing tasks. Rogues tend to be good at circumventing the law, which, unfortunately, also makes them somewhat likely to be wanted criminals on one or more worlds.",
-        hunter: "became a hunter who tracks and hunts animals for sport or profit. Hunters often become quite knowledgeable about the less urban aspects of visiting alien worlds",
-        barbarian: "became a barbarian, a rugged individual from a primitive world Barbarians are accustomed to hardship and are well versed in wilderness and survival situations.",
+        hunter: "became a hunter who tracks and hunts animals for sport or profit. Hunters often become quite knowledgeable about the less urban aspects of visiting alien worlds.",
+        barbarian: "became a barbarian, a rugged individual from a primitive world. Barbarians are accustomed to hardship and are well versed in wilderness and survival situations.",
+        noble: "took up the mantle of the nobility, entering a life of privilege and political influence. Nobles move in the highest social circles and often wield considerable power over the worlds beneath their station.",
     },
     Skills: { //cascade skills
         'Mental': ['INT', 'EDU'],
@@ -538,7 +539,7 @@ export const datatables = {
                 benefits: ['Low passage', 'INT', 'EDU', 'Weapon', 'SOC', 'High passage', 'Traveller Aid Membership']
             }
         },
-        law: {
+        "law enforcement": {
             survival: [6, 'INT', 7, 2],
             position: [6, 'EDU', 7, 1],
             promotion: [8, 'EDU', 8, 1],
@@ -584,7 +585,7 @@ export const datatables = {
                 personal: ['', 'Physical', 'EDU', 'Mental', 'Blade Combat', 'Gun Combat', 'Inborn'],
                 service: ['', 'Mental', 'Vacc Suit', 'Vehicle', 'Vehicle', 'Vice', 'Computer'],
                 advanced: ['', 'Vice', 'Streetwise', 'Interrogation', 'Recruiting', 'Inborn', 'Economic'],
-                education: ['', 'Liason', 'Interpersonal', 'Academic', 'Technical', 'Inborn', 'SOC'],
+                education: ['', 'Liaison', 'Interpersonal', 'Academic', 'Technical', 'Inborn', 'SOC'],
             },
             specDutyDesc: ['was part of a delegation that brokered an important peace treaty', 'was elected for a term as a local official', 'was mentored by a renowned politicial', 'helped draft major planetary reforms', 'served as an ambassador in a foriegn system'],
             muster: {
@@ -601,7 +602,7 @@ export const datatables = {
             skills: {
                 personal: ['', 'END', 'EDU', 'Mental', 'Brawling', 'DEX', 'Inborn'],
                 service: ['', 'Gun Combat', 'Vehicle', 'Hand Combat', 'Inborn', 'Vehicle', 'EDU'],
-                advanced: ['', 'Recruiting', 'Vehicle', 'Liason', 'Interrogation', 'Interpersonal', 'Economic'],
+                advanced: ['', 'Recruiting', 'Vehicle', 'Liaison', 'Interrogation', 'Interpersonal', 'Economic'],
                 education: ['', 'Economic', 'Academic', 'Computer', 'Admin', 'Inborn', 'Leader'],
             },
             specDutyDesc: ['brokered a major trade deal', 'served the board of directors of a megacorporation', 'served on a multi-system trade comission', 'was mentored by a highly successful investor', 'met all their KPIs and exceeded expectations'],
@@ -736,6 +737,7 @@ export const datatables = {
             }
         },
     },
+    //Courtmartial: ['Case dismissed','Reprimand -1 next promotion roll'],
     Army: {
         Infantry: {
             //Survival, Decoration, Promotion, Skill
@@ -758,9 +760,9 @@ export const datatables = {
         },
         Marines: {
             "Training": [0, 0, 6, 7, false],
-            "Internal Security": [4, 12, 6, 0, false],
+            //"Internal Security": [4, 12, 6, 0, false],
             "Police Action": [5, 8, 8, 7, true],
-            "Counter Insurgency": [5, 9, 9, 8, true],
+            //"Counter Insurgency": [5, 9, 9, 8, true],
             "Raid": [6, 5, 6, 5, true],
             "Ship's Troops": [4, 12, 6, 6, false],
             "Garrison": [0, 0, 7, 0, false],
@@ -772,7 +774,7 @@ export const datatables = {
                 "army": 7
             },
             "Assignement": ['Raid', 'Raid', 'Counter Insurgency', 'Internal Security', "Ship's Troops", 'Garrison', "Ship's Troops", 'Training', 'Counter Insurgency', 'Police Action', 'Police Action'],
-            "MOS": ['Gun Combat', 'Special Combat', 'Zero-G Combat', 'Zero-G Combat', 'Heavy Weapons', 'Foward Observer', 'Battle Dress']
+            "MOS": ['Gun Combat', 'Special Combat', 'Zero-G Combat', 'Zero-G Combat', 'Heavy Weapons', 'Forward Observer', 'Battle Dress']
         },
         Support: {
             "Training": [0, 0, 6, 8, false],
@@ -855,8 +857,8 @@ export const datatables = {
         Special: {
             "E": ["Cross-Training", "Specialist School", "Commando School", "Protected Forces", "Recruiting", "Recruiting", "OCS", "OCS"],
             "O": ["Intelligence School", "Command College", "Staff College", "Commando School", "Recruiting", "Military Aide"],
-            "Schools": ['Mechanical', 'Electronic', 'Gravitic', 'Comm', 'Vehicle', 'Ships Boat'],
-            "SmartSchools": ['Academic', 'Medical', 'Space', 'Environ', 'Computer', 'Liason']
+            "Schools": ['Mechanical', 'Electronic', 'Gravitics', 'Comm', 'Vehicle', 'Ships Boat'],
+            "SmartSchools": ['Academic', 'Medical', 'Space', 'Environ', 'Computer', 'Liaison']
         },
         SchoolSkills: {
             Commando: [5, ["Brawling", "Gun Combat", "Demolitions", "Intrusion", "Stealth", "Survival", "Recon", "Vacc Suit", "Blade Combat", "Instruction"]],
@@ -864,7 +866,17 @@ export const datatables = {
             Intelligence: [4, ["Forgery", "Bribery", "Streetwise", "Interogation", "Vice"]],
             Staff: [4, ["Admin", "Combat Engineering", "Computer", "Robot Ops"]],
             Command: [4, ["Tactics", "Leader", "Recon"]],
-        }
+        },
+        Muster: {
+            army: {
+                cash: [2, 5, 10, 10, 10, 20, 30],
+                benefits: ['Low passage', 'Weapon', 'High passage', 'Weapon', 'Mid passage', 'SOC', 'Traveller Aid Membership'],
+            },
+            marines: {
+                cash: [2, 5, 5, 10, 20, 30, 40],
+                benefits: ['Low passage', 'Weapon', 'High passage', 'EDU+2', 'High passage', 'SOC', 'Traveller Aid Membership'],
+            },
+        },
 
     },
     Navy: {
@@ -947,7 +959,7 @@ export const datatables = {
             "MOS": ['Forward Observer', 'Gun Combat', 'Communications', 'Computer', 'Gunnery', 'Gunnery', 'Gunnery', 'Gunnery'],
             "Command": 9
         },
-        Techical: {
+        Technical: {
             "Training": [0, 0, 7, 7, false],
             "Shore Duty": [3, 0, 8, 8, false],
             "Patrol": [3, 0, 9, 9, false],
@@ -957,7 +969,7 @@ export const datatables = {
             "Survival": ['None'],
             "Decoration": ['None'],
             "Promotion": ['Skill', 'MOS', 3, 1],
-            "MOS": ['Mechanical', 'Mechanical', 'Electronic', 'Electronic', 'Computer', 'Computer', 'Gravities', 'Jack-of-All-Trades'],
+            "MOS": ['Mechanical', 'Mechanical', 'Electronic', 'Electronic', 'Computer', 'Computer', 'Gravitics', 'Jack-of-All-Trades'],
             "Command": 12
         },
         BranchSelect: {
@@ -967,16 +979,18 @@ export const datatables = {
         ServiceSkills: {
             "Navy Life": ['Brawling', 'Strength', 'Carousing', 'Gambling', 'Endurance', 'Dexterity', 'Endurance', 'Education', 'Carousing', 'Vacc Suit'],
             "Shipboard Life": ['Gambling', 'Dexterity', 'Blade Combat', 'Mechanical', 'Ships Boat', 'Vacc Suit', 'Zero-G Combat', 'Communications', 'Administration', 'Jack-of-All-Trades'],
-            "Shore Duty Life": ['Carousing', 'Vehicle', 'Foward Observer', 'Vacc Suit', 'Liaison', 'Vehicle', 'Forward Observer', 'Survival', 'Vacc Suit', 'Battle Dress'],
+            "Shore Duty Life": ['Carousing', 'Vehicle', 'Forward Observer', 'Vacc Suit', 'Liaison', 'Vehicle', 'Forward Observer', 'Survival', 'Vacc Suit', 'Battle Dress'],
             "Petty Officer": ['Vacc Suit', 'Blade Combat', 'Gun Combat', 'Mechanical', 'Medical', 'Leadership', 'Zero-G Combat', 'Education', 'Instruction', 'Administration'],
             "Command": ['Vehicle', 'Endurance', 'Gun Combat', 'Ships Boat', 'Pilot', 'Ship Tactics', 'Leadership', 'Social', 'Leadership', 'Ship Tactics'],
             "Staff": ['Computer', 'Electronics', 'Gun Combat', 'Administration', 'Bribery', 'Ship Tactics', 'Fleet Tactics', 'Intelligence', 'Ship Tactics', 'Fleet Tactics']
         },
-        Assignments: ['Battle', 'Shore Duty', 'Siege', 'Strike', 'Patrol', 'Training', 'Patrol', 'Strike', 'Shore Duty', 'Special', 'Special'],
+        Assignments: ['Battle', 'Frozen Watch', 'Siege', 'Strike', 'Patrol', 'Training', 'Patrol', 'Strike', 'Shore Duty', 'Special', 'Special', 'Special'],
         Special: {
             "E": ['', 'Cross-Training', 'Specialist', 'Recruiting', 'Gunnery', 'Engineering', 'OCS', 'OCS'],
             "O": ['', 'Cross-Training', 'Intelligence', 'Recruiting', 'Aide', 'Command College', 'Staff College', 'Staff College']
-        }
+        },
+        Training: ['', 'Mechanical', 'Electronic', 'Gravitics', 'Communications', 'Engineering', 'Ships Boat'],
+        Schooling: ['', 'Academic', 'Medical', 'Space', 'Space Tech', 'Computer', 'Liaison'],
     },
     Scouts: {
         Survey: {
@@ -1036,7 +1050,7 @@ export const datatables = {
             "Skill": ['None'],
             "Decoration": ['None'],
             "Promotion": ['None'],
-            "MOS": ['Electronic', 'Admin', 'Communications', 'Computer', 'Computer', 'Broker', 'Intelligence', 'Education', 'Liason', 'Admin'],
+            "MOS": ['Electronic', 'Admin', 'Communications', 'Computer', 'Computer', 'Broker', 'Intelligence', 'Education', 'Liaison', 'Admin'],
             "School": ['Specialist', 'Specialist', 'Specialist', 'Ship', 'Field Training', 'Administrator']
         },
         Operations: {
@@ -1066,7 +1080,7 @@ export const datatables = {
             "Skill": ['None'],
             "Decoration": ['None'],
             "Promotion": ['UUP', 'Education', 10, 1],
-            "MOS": ['Strength', 'Mechanical', 'Vehicle', 'Vacc Suit', 'Electronic', 'Gravities', 'Engineering', 'Education', 'Computer', 'Medic'],
+            "MOS": ['Strength', 'Mechanical', 'Vehicle', 'Vacc Suit', 'Electronic', 'Gravitics', 'Engineering', 'Education', 'Computer', 'Medic'],
             "School": ['Specialist', 'Specialist', 'Technical', 'Technical', 'Technical', 'Administrator']
         },
         Detached: {
@@ -1093,7 +1107,7 @@ export const datatables = {
             "Wartime": ['Hunting', 'Bribery', 'Equestrian', 'Forgery', 'Streetwise', 'Liaison', 'Survival', 'Gun Combat', 'Space', 'Social'],
             "Field": ['Jack-of-All-Trades', 'Education', 'Gun Combat', 'Carousing', 'Gun Combat', 'Gambling', 'Education', 'Jack-of-All-Trades', 'Streetwise'],
             "Bureaucracy": ['Intelligence', 'Gambling', 'Carousing', 'Education', 'Computer', 'Vehicle', 'Intelligence', 'Education', 'Streetwise', 'Intelligence'],
-            "Administrator": ['Admin', 'Admin', 'Computer', 'Vacc Suit', 'Gun Combat', 'Space', 'Liason', 'Education', 'Leadership', 'Social'],
+            "Administrator": ['Admin', 'Admin', 'Computer', 'Vacc Suit', 'Gun Combat', 'Space', 'Liaison', 'Education', 'Leadership', 'Social'],
         },
         ServiceSchools: {
             "Ship": [2, ['Pilot', 'Navigation', 'Engineering', 'Gunnery', 'Space', 'Space']],
@@ -1157,7 +1171,7 @@ export const datatables = {
             "Charter": [0, 5, 16],
             "Exploratory": [3, 8, 12],
             "Speculative": [3, 7, 11],
-            "SurvivalSkills": ['Admin', 'Liason', 'Bribery', 'Admin', 'Admin', 'Streetwise'],
+            "SurvivalSkills": ['Admin', 'Liaison', 'Bribery', 'Admin', 'Admin', 'Streetwise'],
             "Exam": [
                 ['Route'],
                 ['Admin-1'],
@@ -1202,11 +1216,11 @@ export const datatables = {
             "Charter": [0, 6, 16],
             "Exploratory": [4, 5, 12],
             "Speculative": [3, 6, 11],
-            "SurvivalSkills": ['Mechanical', 'Electronic', 'Engineering', 'Admin', 'Engineering', 'Gravities'],
+            "SurvivalSkills": ['Mechanical', 'Electronic', 'Engineering', 'Admin', 'Engineering', 'Gravitics'],
             "Exam": [
                 ['Route'],
-                ['Mechanical-1', 'Electronic-1', 'Gravities-1'],
-                ['Engineering-1', 'Gravities-2'],
+                ['Mechanical-1', 'Electronic-1', 'Gravitics-1'],
+                ['Engineering-1', 'Gravitics-2'],
                 ['Engineering-2'],
                 ['Engineering-3+Admin-1']
             ],
@@ -1252,15 +1266,15 @@ export const datatables = {
         ServiceSkills: {
             "Merchants Life": ['Brawling', 'Carousing', 'Gambling', 'Trader', 'Education', 'Carousing'],
             "Shipboard Life": ['Gambling', 'Blade Combat', 'Vacc Suit', 'Zero-G Combat', 'Communications', 'Jack-of-All-Trades'],
-            "Officer Skills": ['Brawling', 'Vehicle', 'Ship&#39;s Boat', 'Gun Combat', 'Liason', 'Liason'],
-            "Mercantile Skills": ['Steetwise', 'Broker', 'Trader', 'Liason', 'Admin', 'Legal'],
+            "Officer Skills": ['Brawling', 'Vehicle', 'Ship&#39;s Boat', 'Gun Combat', 'Liaison', 'Liaison'],
+            "Mercantile Skills": ['Streetwise', 'Broker', 'Trader', 'Liaison', 'Admin', 'Legal'],
             "Master Skills": ['Admin', 'Computer', 'Navigation', 'Pilot', 'Leadership', 'Bribery'],
             "Deck": ['Navigation', 'Admin', 'Pilot', 'Legal', 'Ship&#39;s Boat', 'Leadership'],
-            "Engineering": ['Mechanical', 'Electronic', 'Engineering', 'Admin', 'Engineering', 'Gravities'],
-            "Purser": ['Steward', 'Medical', 'Liason', 'Gunnery', 'Steward', 'Liason'],
+            "Engineering": ['Mechanical', 'Electronic', 'Engineering', 'Admin', 'Engineering', 'Gravitics'],
+            "Purser": ['Steward', 'Medical', 'Liaison', 'Gunnery', 'Steward', 'Liaison'],
             "Medic": ['Steward', 'Medical', 'Medical', 'Medical', 'Computer', 'Medical'],
-            "Admin": ['Admin', 'Liason', 'Bribery', 'Admin', 'Admin', 'Streetwise'],
-            "Sales": ['Trader', 'Broker', 'Computer', 'Liason', 'Trader', 'Broker'],
+            "Admin": ['Admin', 'Liaison', 'Bribery', 'Admin', 'Admin', 'Streetwise'],
+            "Sales": ['Trader', 'Broker', 'Computer', 'Liaison', 'Trader', 'Broker'],
             "Planet Bound Life": ['Gun Combat', 'Streetwise', 'Vacc Suit', 'Vacc Suit', 'Gun Combat', 'Brawling'],
             "Free Trader Life": ['Dexterity', 'Brawling', 'Streetwise', 'Forgery', 'Bribery', 'Legal'],
             "Free Trader Service": ['Steward', 'Trader', 'Broker', 'Admin', 'Gunnery', 'Leadership'],

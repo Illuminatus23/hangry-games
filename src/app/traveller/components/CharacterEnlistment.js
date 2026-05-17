@@ -18,9 +18,11 @@ export default function CharacterEnlistment({
     const approvedCareers = Object.keys(enlistmentList[0]);
     const [enlistmentChoice, setEnlistmentChoice] = useState("");
     const [enlistOps, setEnlistOps] = useState(
-        approvedCareers.map((value, index) => (
-            { id: index, value: value, name: value }
-        ))
+        approvedCareers.map((value, index) => ({
+            id: index,
+            value,
+            name: value.replace(/\b\w/g, c => c.toUpperCase()),
+        }))
     )
 
     const [warning, setWarning] = useState("");
@@ -92,9 +94,15 @@ export default function CharacterEnlistment({
                 skill2: [stats[3], stats[4]]
             }
             const result = careerCheck(enlist, upp, characterName);
-            const descriptor = (result[0]) ? "and was admmitted" : "but was rejected";
+            const descriptor = (result[0]) ? "and was accepted" : "but was rejected";
             const failText = (result[0]) ? "succeeding. Begin your career." : "failing. Make another selection.";
-            const historyStr = `${characterName} applied to be a ${nextEnlistmentChoice} ${descriptor}.`;
+            const MILITARY_CAREERS = new Set(['army', 'marines', 'navy', 'scouts', 'flyer', 'sailor']);
+            const NOBLE_CAREERS = new Set(['noble']);
+            const historyStr = MILITARY_CAREERS.has(careerCategory)
+                ? `${characterName} enlisted in the ${nextEnlistmentChoice} ${descriptor}.`
+                : NOBLE_CAREERS.has(careerCategory)
+                    ? `${characterName} sought a position among the nobility ${descriptor}.`
+                    : `${characterName} applied to be a ${nextEnlistmentChoice} ${descriptor}.`;
             const info = `${result[1]}, ${failText}`
             setWarning(info);
             handleHistoryAdd(historyStr)
@@ -129,34 +137,34 @@ export default function CharacterEnlistment({
     const commisionStr = (characterData.commission === "navy") ? "navy or marines" : characterData.commission;
 
     return (
-        <div>
-            <h2>Enlistment choices</h2>
+        <div className="space-y-3">
+            <h2 className="text-lg font-semibold">Enlistment choices</h2>
 
             {warning !== "" ?
-                <p className="mt-label" style={{ marginBottom: "0.5rem", color: "red" }}>{warning}</p>
+                <p className="text-xs text-destructive">{warning}</p>
                 :
-                <div>
-                    {characterData.commission !== "none" && characterData.commission !== "denied" ?
-                        <p className="mt-label">You have a {commisionStr} commision waiting for you</p> : null}
-                    {grad ?
-                        <p className="mt-label">As a college grad enlistment in the Scouts is automatic.</p> : null}
-                    {honorsgrad ?
-                        <p className="mt-label">As a honors grad you may select your assignment in the Scouts bureaucracy. Enlisting in a Megacorp Trader is automatic.</p> : null}
-                    {medgrad ?
-                        <p className="mt-label">As a medical grad enlistment in the Navy, Army, Scouts or Traders is automatic and comes with an instant promotion.</p> : null}
-                    {characterData.SOC >= 10 ?
-                        <p className="mt-label">Your social standing means the Noble career path can be selected and admission is automatic.</p> : null}
-                    <p>You are eligible for the following career paths:</p>
-                    <ul className="mt-label">
+                <div className="space-y-1">
+                    {characterData.commission !== "none" && characterData.commission !== "denied" &&
+                        <p className="text-xs text-muted-foreground">You have a {commisionStr} commission waiting for you.</p>}
+                    {grad &&
+                        <p className="text-xs text-muted-foreground">As a college grad enlistment in the Scouts is automatic.</p>}
+                    {honorsgrad &&
+                        <p className="text-xs text-muted-foreground">As an honors grad you may select your assignment in the Scouts bureaucracy. Enlisting in a Megacorp Trader is automatic.</p>}
+                    {medgrad &&
+                        <p className="text-xs text-muted-foreground">As a medical grad enlistment in the Navy, Army, Scouts or Traders is automatic and comes with an instant promotion.</p>}
+                    {characterData.SOC >= 10 &&
+                        <p className="text-xs text-muted-foreground">Your social standing means the Noble career path can be selected and admission is automatic.</p>}
+                    <p className="text-xs text-muted-foreground">You are eligible for the following career paths:</p>
+                    <ul className="text-xs text-muted-foreground list-disc list-inside">
                         {approvedCareers.map((career, index) => (
-                            <li className="mt-cap" key={index}>{career}</li>
+                            <li className="capitalize" key={index}>{career}</li>
                         ))}
                     </ul>
-                    <p className="mt-label">You can also submit to the draft - randomly assigned to Army, Navy, Marines, Scouts, Flyers, Sailors.</p>
+                    <p className="text-xs text-muted-foreground">You can also submit to the draft — randomly assigned to Army, Navy, Marines, Scouts, Flyers, Sailors.</p>
                 </div>
             }
-            <div>
-                <p style={{ margin: "1rem 0 0.5rem" }}>Submit your application to a career:</p>
+            <div className="pt-2">
+                <p className="text-sm mb-2">Submit your application to a career:</p>
                 <SelectOrButton
                     allOps={enlistOps}
                     userChoice={enlistmentChoice}

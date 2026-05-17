@@ -3,14 +3,17 @@
 import React, { useMemo, useState } from "react";
 import { datatables } from "../lib/data";
 import { d6, applySkill } from "../lib/helpers";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function MusterOut({ characterData, setCharacterData, skills, setSkills, setGear, setStep }) {
     const career = characterData.career.careername
     const terms = characterData.career.terms;
     const rank = characterData.career.rank - 1;
 
-    const cashTable = datatables.Basics?.[career]?.muster?.cash ?? [];
-    const benefitTable = datatables.Basics?.[career]?.muster?.benefits ?? [];
+    const musterData = datatables.Basics?.[career]?.muster ?? datatables.Army?.Muster?.[career] ?? {};
+    const cashTable = musterData.cash ?? [];
+    const benefitTable = musterData.benefits ?? [];
     const rollAdds =
         rank === 1 || rank === 2 ? 1 :
             rank === 3 || rank === 4 ? 2 :
@@ -114,76 +117,76 @@ export default function MusterOut({ characterData, setCharacterData, skills, set
         normalizedChoice === "cash" && !canRollCash ? "benefits" : normalizedChoice;
 
     return (
-        <div>
-            <p>Mustering out</p>
-            <p className="mt-label">
-                You get <b>{rollsRemaining}</b> roll(s) remaining on the retirement tables.
-                Cash can be used at most <b>{CASH_CAP}</b> time(s) total.
-                {cashMod ? " You have +1 to Cash rolls (Gambling-1+ or 5+ terms)." : ""}
-                {benefitMod ? " You have +1 to Benefit rolls (5+ terms)." : ""}
+        <div className="space-y-3">
+            <p className="text-lg font-semibold">Mustering out</p>
+            <p className="text-xs text-muted-foreground">
+                You get <span className="font-semibold text-foreground">{rollsRemaining}</span> roll(s) remaining on the retirement tables.
+                Cash can be used at most <span className="font-semibold text-foreground">{CASH_CAP}</span> time(s) total.
+                {cashMod ? " You have +1 to Cash rolls (Gambling-1+ or Prospecting-1+)." : ""}
+                {benefitMod ? " You have +1 to Benefit rolls (rank 5+)." : ""}
             </p>
             {pension > 0 && (
-                <p className="mt-label">
-                    Retirement pension: <b>Cr{pension.toLocaleString()}/year</b>
+                <p className="text-xs text-muted-foreground">
+                    Retirement pension: <span className="font-semibold text-foreground">Cr{pension.toLocaleString()}/year</span>
                     {PENSION_CAREERS.includes(career) ? "" : " (career not pension-eligible)"}
                 </p>
             )}
-            {rollsRemaining > 0 ?
-                <div style={{ margin: "0.75rem 0" }}>
-                    <div className="mt-label" style={{ marginBottom: "0.35rem" }}>
-                        Choose a table:
+            {rollsRemaining > 0 ? (
+                <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">Choose a table:</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Select
+                            value={effectiveChoice}
+                            onValueChange={setChoice}
+                            disabled={!canRoll}
+                        >
+                            <SelectTrigger className="w-40">
+                                <SelectValue placeholder="Select">
+                                    {effectiveChoice === "benefits" ? "Benefits"
+                                        : effectiveChoice === "cash" ? (canRollCash ? "Cash" : "Cash (maxed out)")
+                                        : undefined}
+                                </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="benefits">Benefits</SelectItem>
+                                <SelectItem value="cash" disabled={!canRollCash}>
+                                    Cash {canRollCash ? "" : "(maxed out)"}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Button
+                            type="button"
+                            onClick={rollOnTable}
+                            disabled={!canRoll || (effectiveChoice === "cash" && !canRollCash)}
+                        >
+                            Roll
+                        </Button>
                     </div>
-                    <select
-                        className="mt-select mt-cap"
-                        value={effectiveChoice}
-                        onChange={(e) => setChoice(e.target.value)}
-                        disabled={!canRoll}
-                        style={{ marginBottom: "0.5rem" }}
-                    >
-                        <option value="">Select</option>
-                        <option value="benefits">Benefits</option>
-                        <option value="cash" disabled={!canRollCash}>
-                            Cash {canRollCash ? "" : "(maxed out)"}
-                        </option>
-                    </select>&nbsp;
-                    <button
-                        className="mt-btn"
-                        type="button"
-                        onClick={rollOnTable}
-                        disabled={!canRoll || (effectiveChoice === "cash" && !canRollCash)}
-                    >
-                        Roll
-                    </button>
-
-                    <div className="mt-label" style={{ marginTop: "0.5rem" }}>
+                    <p className="text-xs text-muted-foreground">
                         Cash rolls used: {cashRollsUsed}/{CASH_CAP} &nbsp;|&nbsp; Cash total:{" "}
-                        <b>{cashTotal.toLocaleString()}</b>
-                    </div>
+                        <span className="font-semibold text-foreground">{cashTotal.toLocaleString()}</span>
+                    </p>
                 </div>
-                :
-                <button
-                    className="mt-btn"
-                    type="button"
-                    onClick={() => setStep?.("complete")}
-                >
+            ) : (
+                <Button type="button" onClick={() => setStep?.("complete")}>
                     Complete Character
-                </button>
-            }
+                </Button>
+            )}
             {resultLog.length > 0 && (
-                <div style={{ marginTop: "1rem" }}>
-                    <h3 className="mt-section-title">Results</h3>
-                    <ul className="mt-label">
+                <div className="mt-4 space-y-1">
+                    <h3 className="text-sm font-semibold">Results</h3>
+                    <ul className="text-xs text-muted-foreground space-y-1">
                         {resultLog.map((r, i) => (
                             <li key={i}>
                                 {r.type === "cash" ? (
                                     <>
                                         Cash roll {r.roll} (mod {r.mod >= 0 ? `+${r.mod}` : r.mod}):{" "}
-                                        <b>{Number(r.result).toLocaleString()}</b>
+                                        <span className="font-semibold text-foreground">{Number(r.result).toLocaleString()}</span>
                                     </>
                                 ) : (
                                     <>
                                         Benefit roll {r.roll} (mod {r.mod >= 0 ? `+${r.mod}` : r.mod}):{" "}
-                                        <b className="mt-cap">{String(r.result)}</b>
+                                        <span className="capitalize font-semibold text-foreground">{String(r.result)}</span>
                                     </>
                                 )}
                             </li>
@@ -191,25 +194,23 @@ export default function MusterOut({ characterData, setCharacterData, skills, set
                     </ul>
                 </div>
             )}
-            {rollsRemaining > 0 &&
-                <div style={{ marginTop: "1.25rem" }}>
-                    <h3 className="mt-section-title">Tables</h3>
-
-                    <p className="mt-label" style={{ marginTop: "0.5rem" }}>Benefit table</p>
+            {rollsRemaining > 0 && (
+                <div className="mt-5 space-y-2">
+                    <h3 className="text-sm font-semibold">Tables</h3>
+                    <p className="text-xs text-muted-foreground font-medium mt-2">Benefit table</p>
                     {benefitTable.map((benefit, inx) => (
-                        <p className="mt-label" key={`b-${inx}`}>
-                            {inx + 1} - {benefit}
+                        <p className="text-xs text-muted-foreground" key={`b-${inx}`}>
+                            {inx + 1} — {benefit}
                         </p>
                     ))}
-
-                    <p className="mt-label" style={{ marginTop: "0.75rem" }}>Cash table</p>
+                    <p className="text-xs text-muted-foreground font-medium mt-3">Cash table</p>
                     {cashTable.map((amt, inx) => (
-                        <p className="mt-label" key={`c-${inx}`}>
-                            {inx + 1} - {(Number(amt) || 0) * 1000}
+                        <p className="text-xs text-muted-foreground" key={`c-${inx}`}>
+                            {inx + 1} — {(Number(amt) || 0) * 1000}
                         </p>
                     ))}
                 </div>
-            }
+            )}
         </div>
     )
 }
