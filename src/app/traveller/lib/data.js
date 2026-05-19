@@ -866,6 +866,7 @@ export const datatables = {
             Intelligence: [4, ["Forgery", "Bribery", "Streetwise", "Interogation", "Vice"]],
             Staff: [4, ["Admin", "Combat Engineering", "Computer", "Robot Ops"]],
             Command: [4, ["Tactics", "Leader", "Recon"]],
+            Engineering: [4, ["Mechanical", "Electronic", "Engineering", "Vacc Suit", "Computer", "Gravitics"]],
         },
         Muster: {
             army: {
@@ -991,6 +992,9 @@ export const datatables = {
         },
         Training: ['', 'Mechanical', 'Electronic', 'Gravitics', 'Communications', 'Engineering', 'Ships Boat'],
         Schooling: ['', 'Academic', 'Medical', 'Space', 'Space Tech', 'Computer', 'Liaison'],
+        SchoolSkills: {
+            Engineering: [5, ["Mechanical", "Electronics", "Gravitics", "Engineering"]],
+        }
     },
     Scouts: {
         Survey: {
@@ -2314,5 +2318,19 @@ export const datatables = {
             ['T', '', '', ''],
             ['V', '', '', ''],
             ['Vr', '', '', ''],
-        ]
+        ],
+    CourtMartial: {
+        "-1": "Case dismissed.",
+        "0":  "Reprimand (-1 to next promotion).",
+        "1":  "Reprimand (-3 to next promotion).",
+        "2":  "Reduce rank -1.",
+        "3":  "Reduce rank -2.",
+        "4":  "Jail (2D months), reduce rank -2.",
+        "5":  "Jail (1D years), DD.",
+        "6":  "Jail (2D years), DD.",
+        "7":  "Jail (2D years), DD.",
+        "8":  "Death. Escape; 10000 CR reward.",
+        "9":  "Death. Escape; 10000 CR reward.",
+        "10": "Death. Escape, killing 1D guards; 100000 CR reward.",
+    },
 };

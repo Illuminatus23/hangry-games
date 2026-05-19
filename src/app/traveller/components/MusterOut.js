@@ -18,7 +18,8 @@ export default function MusterOut({ characterData, setCharacterData, skills, set
         rank === 1 || rank === 2 ? 1 :
             rank === 3 || rank === 4 ? 2 :
                 rank === 0 ? 0 : 3;
-    const initialRolls = (2 * terms) + rollAdds;
+    const musterPenalty = characterData.career?.musterPenalty ?? 0;
+    const initialRolls = Math.max(0, (2 * terms) + rollAdds + musterPenalty);
     // Cash can be used at most 3 times total
     const CASH_CAP = 3;
 

@@ -171,6 +171,132 @@ export function describeSkillGains(skills, career) {
     return clauses.length > 0 ? `${joinClauses(clauses)}, ${pickUp}` : `picked up ${joinInline(personal)} in their spare time`;
 }
 
+// ─── Year History Builder ────────────────────────────────────────────────────
+
+function buildBaseAssignmentText(assignment, characterName, worldName, battleName) {
+    switch (assignment) {
+        case "Training":
+            return `${characterName} spent a year in training.`;
+        case "Internal Security":
+            return `${characterName} was stationed as security for a spaceport on ${worldName}.`;
+        case "Ship's Troops":
+            return `${characterName} served as security on a military ship.`;
+        case "Raid":
+            return `Armed conflict broke out and ${characterName} participated in ${battleName}`;
+        case "Counter Insurgency":
+            return `Revolution erupted and ${characterName} fought in the ${battleName}`;
+        case "Police Action":
+            return `The ${battleName} broke out and ${characterName} was deployed into the heart of the conflict`;
+        default:
+            return `${characterName} spent an uneventful year on garrison duty.`;
+    }
+}
+
+export function buildYearHistoryArmy(flags, characterName, career) {
+    const {
+        term, year, assignment, worldName, battleName, isCombat, kia,
+        decoration, special, specialCommission,
+        commissionedAuto, commissionedRolled, commissionedRankName,
+        promoted, promotedToRankName,
+    } = flags;
+
+    const prefix = `Term ${term}, Year ${year}: `;
+
+    if (kia) {
+        if (isCombat) {
+            const base = buildBaseAssignmentText(assignment, characterName, worldName, battleName);
+            return `${prefix}${base} and was killed in action.`;
+        }
+        const deathMsg = career === "marines"
+            ? `The perils of service claimed ${characterName} during a ${assignment} assignment. The story ends here.`
+            : `${characterName} was killed in action during a ${assignment} assignment. The story ends here.`;
+        return `${prefix}${deathMsg}`;
+    }
+
+    let text;
+    if (special) {
+        text = `${characterName} was granted a special assignment and sent to ${special.name}.`;
+        if (specialCommission) {
+            text += ` ${characterName} was commissioned as ${specialCommission}.`;
+        }
+    } else {
+        const base = buildBaseAssignmentText(assignment, characterName, worldName, battleName);
+        if (isCombat) {
+            text = decoration
+                ? `${base}, where ${characterName} performed heroically under fire and was awarded the ${decoration.full}.`
+                : `${base}.`;
+        } else {
+            text = base;
+            if (decoration) text += ` ${characterName} performed heroically and was awarded the ${decoration.full}.`;
+        }
+    }
+
+    if (commissionedAuto) {
+        text += ` ${characterName}'s commission was confirmed as ${commissionedRankName}.`;
+    } else if (commissionedRolled) {
+        text += ` ${characterName} received a commission as ${commissionedRankName}.`;
+    }
+
+    if (promoted) text += ` ${characterName} was promoted to ${promotedToRankName}.`;
+
+    return `${prefix}${text}`;
+}
+
+function buildNavyAssignmentText(assignment, characterName, worldName, battleName, operationName) {
+    switch (assignment) {
+        case "Training":     return `${characterName} spent a year in training`;
+        case "Shore Duty":   return `${characterName} was posted to shore duty on ${worldName}`;
+        case "Patrol":       return `${characterName} served aboard a patrol vessel in the ${worldName} system`;
+        case "Siege":        return `${characterName} participated in the siege of ${worldName}`;
+        case "Strike":       return `${characterName} took part in ${operationName} at ${worldName}`;
+        case "Battle":       return `${characterName} served in ${battleName ?? "a major fleet engagement"}`;
+        default:             return `${characterName} spent the year on assignment`;
+    }
+}
+
+export function buildYearHistoryNavy(flags, characterName) {
+    const {
+        term, year, assignment, worldName, battleName, operationName, isCombat, kia,
+        special, specialOCS, frozenWatch, routineDuty,
+        decoration, combatCluster, courtMartialHistory,
+        commissionedAuto, commissionedRolled, commissionedRankName,
+        promoted, promotedToRankName,
+    } = flags;
+
+    const prefix = `Term ${term}, Year ${year}: `;
+
+    if (frozenWatch) return `${prefix}${characterName} spent the year in frozen watch aboard a transit vessel.`;
+    if (routineDuty) return `${prefix}${characterName} spent the year on routine duty.`;
+
+    if (special) {
+        let text = `${characterName} was selected for special duty${special.result ? ` — ${special.result}` : ""}.`;
+        if (specialOCS) text += ` ${characterName} completed OCS and was commissioned.`;
+        if (courtMartialHistory) text += ` ${courtMartialHistory}`;
+        if (commissionedAuto) text += ` ${characterName}'s commission came through as ${commissionedRankName}.`;
+        else if (commissionedRolled) text += ` ${characterName} received a commission as ${commissionedRankName}.`;
+        if (promoted) text += ` ${characterName} was promoted to ${promotedToRankName}.`;
+        return `${prefix}${text}`;
+    }
+
+    const base = buildNavyAssignmentText(assignment, characterName, worldName, battleName, operationName);
+
+    if (kia) {
+        return isCombat
+            ? `${prefix}${base} and was killed in action.`
+            : `${prefix}${characterName} was killed during a ${assignment} assignment. The story ends here.`;
+    }
+
+    let text = `${base}.`;
+    if (decoration) text += ` ${characterName} was decorated for their service.`;
+    if (courtMartialHistory) text += ` ${courtMartialHistory}`;
+    if (combatCluster) text += ` ${characterName} received a Combat Cluster for their conduct.`;
+    if (commissionedAuto) text += ` ${characterName}'s commission came through as ${commissionedRankName}.`;
+    else if (commissionedRolled) text += ` ${characterName} received a commission as ${commissionedRankName}.`;
+    if (promoted) text += ` ${characterName} was promoted to ${promotedToRankName}.`;
+
+    return `${prefix}${text}`;
+}
+
 // ─── Biography Generator ────────────────────────────────────────────────────
 // Each phase function receives (characterData, skills, characterName) and
 // returns an array of paragraph strings. These functions are the canonical

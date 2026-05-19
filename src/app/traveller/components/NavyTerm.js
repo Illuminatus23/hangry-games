@@ -2,10 +2,15 @@
 
 import React, { useState } from "react";
 import { datatables } from "../lib/data";
-import { d6, applySkill, getAgingRolls, generateBattlename, generateSystemName } from "../lib/helpers";
+import { d6, applySkill, getAgingRolls, generateBattlename, generateSystemName, getDecorationFromRoll, resolveCourtMartialResult } from "../lib/helpers";
+import { buildYearHistoryNavy } from "../lib/historyText";
+import { useCascade } from "../lib/useCascade";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { CascadeSkillDialog } from "./shared/CascadeSkillDialog";
+import { SkillPickSection } from "./shared/SkillPickSection";
+import { ServiceLogSection } from "./shared/ServiceLogSection";
+import { ReinlistRetireSection } from "./shared/ReinlistRetireSection";
 
 const PENSION_CAREERS = ['navy', 'marines', 'army', 'scouts', 'flyer', 'sailor'];
 
@@ -24,14 +29,6 @@ function normalizeNavySkill(skill) {
         "Leadership": "Leader",
     };
     return map[skill] ?? skill;
-}
-
-function getDecorationFromRoll(roll, threshold) {
-    if (threshold <= 0) return null;
-    if (roll >= threshold + 4) return "SEH";
-    if (roll >= threshold + 2) return "MCG";
-    if (roll >= threshold) return "MCUF";
-    return null;
 }
 
 function getFleetType(subcareername) {
@@ -83,24 +80,6 @@ function rollOnPool(pool, rank, isOfficer) {
     };
 }
 
-function buildAssignmentHistory(assignmentName, year, characterName, worldName, battleName) {
-    switch (assignmentName) {
-        case "Training":
-            return `Year ${year}: ${characterName} spent a year in training.`;
-        case "Shore Duty":
-            return `Year ${year}: ${characterName} was posted to shore duty on ${worldName}`;
-        case "Patrol":
-            return `Year ${year}: ${characterName} served aboard a patrol vessel in the ${worldName} system`;
-        case "Siege":
-            return `Year ${year}: ${characterName} participated in the siege of ${worldName}`;
-        case "Strike":
-            return `Year ${year}: ${characterName} took part in a strike mission at ${worldName}`;
-        case "Battle":
-            return `Year ${year}: ${characterName} served in ${battleName ?? "a major fleet engagement"}`;
-        default:
-            return `Year ${year}: ${characterName} spent the year on assignment.`;
-    }
-}
 
 export default function NavyTerm({
     characterData,
@@ -122,7 +101,7 @@ export default function NavyTerm({
     const fleetType = getFleetType(subcareername);
     const fleetDisplay =
         fleetType === "reserve" ? "Reserve Fleet" :
-        fleetType === "system" ? "System Squadron" : "Imperial Navy";
+            fleetType === "system" ? "System Squadron" : "Imperial Navy";
 
     const [navyStep, setNavyStep] = useState(branch ? "yearStart" : "branchAssign");
     const [currentYear, setCurrentYear] = useState(1);
@@ -140,40 +119,15 @@ export default function NavyTerm({
 
     // Year assignment tracking
     const [forcedNextAssignment, setForcedNextAssignment] = useState(null);
-    const [lastYearWasRepeat, setLastYearWasRepeat] = useState(false);
 
     // Per-year state
     const [availablePools, setAvailablePools] = useState([]);
-    const [yearSkillAvailable, setYearSkillAvailable] = useState(false);
     const [pendingSkillResult, setPendingSkillResult] = useState(null);
     const [promotedThisTerm, setPromotedThisTerm] = useState(false);
+    const [crossTrainOptions, setCrossTrainOptions] = useState([]);
 
-    // Cascade dialog
-    const [pendingCascade, setPendingCascade] = useState(null);
-    const [cascadeChoice, setCascadeChoice] = useState("");
-
-    const triggerCascade = (parentSkill, options, onConfirm) => {
-        setPendingCascade({ parentSkill, options, onConfirm });
-        setCascadeChoice("");
-    };
-
-    const handleCascadeConfirm = () => {
-        if (!cascadeChoice || !pendingCascade) return;
-        const callback = pendingCascade.onConfirm;
-        const nestedRaw = datatables.Skills?.[cascadeChoice];
-        if (Array.isArray(nestedRaw) && nestedRaw.length > 0) {
-            setPendingCascade({
-                parentSkill: cascadeChoice,
-                options: nestedRaw.map(s => normalizeNavySkill(s)),
-                onConfirm: callback,
-            });
-            setCascadeChoice("");
-        } else {
-            setPendingCascade(null);
-            setCascadeChoice("");
-            callback(cascadeChoice);
-        }
-    };
+    const { pendingCascade, cascadeChoice, setCascadeChoice, triggerCascade, handleCascadeConfirm } =
+        useCascade(normalizeNavySkill);
 
     const maxSkills = characterData.INT + characterData.EDU;
     const applyNavySkill = (skill) => applySkill(setSkills, setCharacterData, skill, { maxSkills });
@@ -262,6 +216,34 @@ export default function NavyTerm({
 
     // ─── Year Roll ──────────────────────────────────────────────────────────
 
+    const applyNavySchoolSkills = (schoolKey) => {
+        const entry = datatables.Navy.SchoolSkills?.[schoolKey];
+        if (!entry) return [];
+        const [threshold, skillList] = entry;
+        const gained = [];
+        skillList.forEach(skill => {
+            if (d6(1, 0) >= threshold) {
+                const normalized = normalizeNavySkill(skill);
+                applyWithCascadeCheck(normalized, null);
+                gained.push(normalized);
+            }
+        });
+        return gained;
+    };
+
+    const handleCrossTrainSelect = (branchKey) => {
+        const crossMos = datatables.Navy?.[branchKey]?.["MOS"] ?? [];
+        if (crossMos.length) {
+            const crossSkill = normalizeNavySkill(crossMos[Math.min(d6(1, 0) - 1, crossMos.length - 1)]);
+            const displayName = branchKey === "Technical" ? "Technical Services" : branchKey;
+            setCharacterData(prev => ({ ...prev, awards: [...(prev.awards ?? []), `Cross-trained: ${displayName}`] }));
+            applyWithCascadeCheck(crossSkill, null);
+            setWarning(prev => `${prev} | Cross-trained in ${displayName}: ${crossSkill}.`);
+        }
+        setCrossTrainOptions([]);
+        advanceYearOrEnd();
+    };
+
     const advanceYearOrEnd = () => {
         if (currentYear < 4) {
             setCurrentYear(prev => prev + 1);
@@ -277,9 +259,16 @@ export default function NavyTerm({
         const branchData = datatables.Navy?.[dataKey];
         if (!branchData) { setWarning(`No data for branch: ${currentBranch}`); return; }
 
-        let log = `Year ${currentYear}: `;
-        let historyLog = "";
+        let log = `Term ${displayTerm}, Year ${currentYear}: `;
         let commissionedThisYear = false;
+        const flags = {
+            term: displayTerm, year: currentYear, assignment: null,
+            worldName: null, battleName: null, operationName: null, isCombat: false,
+            kia: false, special: null, specialOCS: false, frozenWatch: false, routineDuty: false,
+            decoration: null, combatCluster: false, courtMartialHistory: "",
+            commissionedAuto: false, commissionedRolled: false, commissionedRankName: null,
+            promoted: false, promotedToRankName: null,
+        };
 
         // Step 1 — Command check (officers only)
         let hasCommand = null;
@@ -313,30 +302,23 @@ export default function NavyTerm({
             displayAssignment = datatables.Navy.Assignments[assignIdx];
             log += `Assignment: rolled ${assignRoll}${assignDM ? ` DM+${assignDM}` : ""} → ${displayAssignment}. `;
         }
-        setLastYearWasRepeat(wasRepeat);
-
         // Special sub-table
         let dataAssignment = displayAssignment;
+        flags.assignment = displayAssignment;
+        let hasCrossTrainPending = false;
         if (displayAssignment === "Special") {
             const specTable = isOfficer ? datatables.Navy.Special["O"] : datatables.Navy.Special["E"];
             const specDM = characterData.EDU >= 8 ? 1 : 0;
             const specRoll = Math.min(7, Math.max(1, d6(1, specDM)));
             const specialResult = specTable[specRoll] ?? "";
             log += `Special: rolled ${specRoll}${specDM ? " DM+1" : ""} → ${specialResult || "no event"}. `;
-            historyLog = `Year ${currentYear}: ${characterName} was selected for special duty${specialResult ? ` — ${specialResult}` : ""}.`;
-
+            flags.special = { result: specialResult };
             if (specialResult === "Cross-Training") {
-                const allDataKeys = ["Line", "Crew", "Flight", "Engineering", "Medical", "Gunnery", "Techical"];
+                const allDataKeys = ["Line", "Crew", "Flight", "Engineering", "Medical", "Gunnery", "Technical"];
                 const otherKeys = allDataKeys.filter(k => k !== dataKey);
-                const crossKey = otherKeys[Math.floor(Math.random() * otherKeys.length)];
-                const crossMos = datatables.Navy?.[crossKey]?.["MOS"] ?? [];
-                if (crossMos.length) {
-                    const crossSkill = normalizeNavySkill(crossMos[Math.min(d6(1, 0) - 1, crossMos.length - 1)]);
-                    const displayKey = crossKey === "Techical" ? "Technical Services" : crossKey;
-                    log += `Cross-trained in ${displayKey}: ${crossSkill}. `;
-                    setCharacterData(prev => ({ ...prev, awards: [...(prev.awards ?? []), `Cross-trained: ${displayKey}`] }));
-                    applyWithCascadeCheck(crossSkill, null);
-                }
+                log += `Cross-Training: branch selection pending. `;
+                setCrossTrainOptions(otherKeys);
+                hasCrossTrainPending = true;
             } else if (specialResult === "Specialist") {
                 const useSchooling = (characterData.INT + characterData.EDU) > 16;
                 const list = useSchooling ? datatables.Navy.Schooling : datatables.Navy.Training;
@@ -344,6 +326,7 @@ export default function NavyTerm({
                 const school = normalizeNavySkill(list[idx] ?? "");
                 if (school) {
                     log += `${useSchooling ? "Schooling" : "Training"}: ${school}. `;
+                    setCharacterData(prev => ({ ...prev, awards: [...(prev.awards ?? []), `Specialist School: ${school}`] }));
                     applyWithCascadeCheck(school, null);
                 }
             } else if (specialResult === "Recruiting") {
@@ -351,18 +334,18 @@ export default function NavyTerm({
                 log += "Gained Recruiting. ";
             } else if (specialResult === "Gunnery") {
                 const gMos = datatables.Navy.Gunnery?.["MOS"] ?? [];
-                if (gMos.length) {
-                    const s = normalizeNavySkill(gMos[Math.min(d6(1, 0) - 1, gMos.length - 1)]);
-                    log += `Gunnery school: ${s}. `;
-                    applyWithCascadeCheck(s, null);
+                let gunCount = 0;
+                for (let i = 0; i < 4; i++) {
+                    if (d6(1, 0) >= 5 && gMos.length) {
+                        const s = normalizeNavySkill(gMos[Math.min(d6(1, 0) - 1, gMos.length - 1)]);
+                        applyWithCascadeCheck(s, null);
+                        gunCount++;
+                    }
                 }
+                log += `Gunnery School: ${gunCount} skill${gunCount !== 1 ? "s" : ""} gained. `;
             } else if (specialResult === "Engineering") {
-                const eMos = datatables.Navy.Engineering?.["MOS"] ?? [];
-                if (eMos.length) {
-                    const s = normalizeNavySkill(eMos[Math.min(d6(1, 0) - 1, eMos.length - 1)]);
-                    log += `Engineering school: ${s}. `;
-                    applyWithCascadeCheck(s, null);
-                }
+                const gained = applyNavySchoolSkills("Engineering");
+                log += `Engineering School: gained ${gained.length ? gained.join(", ") : "no skills"}. `;
             } else if (specialResult === "OCS") {
                 const overAge = characterData.age > 38;
                 const waiverOk = !overAge || d6(1, specDM) >= 5;
@@ -386,40 +369,28 @@ export default function NavyTerm({
                         }
                     }
                     log += `Commissioned O${oR}. `;
-                    historyLog += ` ${characterName} completed OCS and was commissioned.`;
+                    flags.specialOCS = true;
                 } else {
                     log += "OCS waiver denied — over age 38. ";
                 }
             } else if (specialResult === "Intelligence") {
-                const staffPool = datatables.Navy.ServiceSkills["Staff"] ?? [];
-                if (staffPool.length) {
-                    const s = normalizeNavySkill(staffPool[Math.min(d6(1, 0) - 1, staffPool.length - 1)]);
-                    log += `Intelligence duty: ${s}. `;
-                    applyWithCascadeCheck(s, null);
-                }
+                const gained = applyNavySchoolSkills("Intelligence");
+                log += `Intelligence School: gained ${gained.length ? gained.join(", ") : "no skills"}. `;
             } else if (specialResult === "Aide") {
                 const aideRoll = d6(1, 0);
                 setCharacterData(prev => ({ ...prev, SOC: (prev.SOC ?? 0) + 1 }));
-                if (aideRoll <= 3) {
+                if (aideRoll <= 4) {
                     setCharacterData(prev => ({ ...prev, career: { ...prev.career, rank: (prev.career?.rank ?? 0) + 1 } }));
-                    log += "Military Aide: SOC +1, rank +1. ";
+                    log += "Naval Aide → Naval Attaché: SOC +1, rank promoted. ";
                 } else {
-                    log += "Military Aide: SOC +1. ";
+                    log += "Naval Aide: SOC +1. ";
                 }
             } else if (specialResult === "Command College") {
-                const cmdPool = datatables.Navy.ServiceSkills["Command"] ?? [];
-                if (cmdPool.length) {
-                    const s = normalizeNavySkill(cmdPool[Math.min(d6(1, 0) - 1, cmdPool.length - 1)]);
-                    log += `Command College: ${s}. `;
-                    applyWithCascadeCheck(s, null);
-                }
+                const gained = applyNavySchoolSkills("Command");
+                log += `Command College: gained ${gained.length ? gained.join(", ") : "no skills"}. `;
             } else if (specialResult === "Staff College") {
-                const stPool = datatables.Navy.ServiceSkills["Staff"] ?? [];
-                if (stPool.length) {
-                    const s = normalizeNavySkill(stPool[Math.min(d6(1, 0) - 1, stPool.length - 1)]);
-                    log += `Staff College: ${s}. `;
-                    applyWithCascadeCheck(s, null);
-                }
+                const gained = applyNavySchoolSkills("Staff");
+                log += `Staff College: gained ${gained.length ? gained.join(", ") : "no skills"}. `;
             }
 
             dataAssignment = "Training"; // Special uses Training targets for step 3
@@ -428,7 +399,8 @@ export default function NavyTerm({
         // Frozen Watch — safe transit year
         if (displayAssignment === "Frozen Watch") {
             log += "Frozen Watch — safe transit, no events.";
-            handleHistoryAdd(`Year ${currentYear}: ${characterName} spent the year in frozen watch aboard a transit vessel.`);
+            flags.frozenWatch = true;
+            handleHistoryAdd(buildYearHistoryNavy(flags, characterName));
             setYearLogs(prev => [...prev, log]);
             setWarning(log);
             if (currentYear < 4 && !wasRepeat) {
@@ -442,7 +414,8 @@ export default function NavyTerm({
         const assignmentData = branchData[dataAssignment];
         if (!Array.isArray(assignmentData)) {
             log += `Unknown assignment "${dataAssignment}" — treated as safe duty.`;
-            handleHistoryAdd(`Year ${currentYear}: ${characterName} spent the year on routine duty.`);
+            flags.routineDuty = true;
+            handleHistoryAdd(buildYearHistoryNavy(flags, characterName));
             setYearLogs(prev => [...prev, log]);
             setWarning(log);
             advanceYearOrEnd();
@@ -452,10 +425,11 @@ export default function NavyTerm({
         const [survivalTarget, decoTarget, promoTarget, skillThreshold, isCombat] = assignmentData;
         const worldName = generateSystemName();
         const battleName = isCombat ? generateBattlename() : null;
-
-        if (!historyLog) {
-            historyLog = buildAssignmentHistory(displayAssignment, currentYear, characterName, worldName, battleName);
-        }
+        const operationName = isCombat ? generateOperationName() : null;
+        flags.worldName = worldName;
+        flags.battleName = battleName;
+        flags.operationName = operationName;
+        flags.isCombat = isCombat;
 
         // Survival
         let survived = true;
@@ -468,16 +442,11 @@ export default function NavyTerm({
             const survRoll = d6(2, survDM);
             survived = survRoll >= survivalTarget;
             log += `Survival (${survivalTarget}+): rolled ${survRoll}${survDM ? ` DM+${survDM}` : ""} — ${survived ? "Survived" : "KIA"}. `;
-            historyLog += isCombat && !survived ? " and was killed in action." : ".";
-        } else {
-            historyLog += ".";
+            if (!survived) flags.kia = true;
         }
 
         if (!survived) {
-            handleHistoryAdd(isCombat
-                ? historyLog
-                : `${characterName} was killed during a ${displayAssignment} assignment. The story ends here.`
-            );
+            handleHistoryAdd(buildYearHistoryNavy(flags, characterName));
             setWarning(log);
             setYearLogs(prev => [...prev, log]);
             setPageWarning?.(log);
@@ -493,11 +462,54 @@ export default function NavyTerm({
                 const decoFull = datatables.decorationDescriptor?.[decoKey] ?? decoKey;
                 const withBattle = battleName ? `${decoFull} (${battleName})` : decoFull;
                 log += `Decoration: ${decoFull} (rolled ${decoRoll} vs ${decoTarget}+). `;
-                historyLog += ` ${characterName} was decorated for their service.`;
+                flags.decoration = { full: decoFull };
                 setCharacterData(prev => ({ ...prev, awards: [...(prev.awards ?? []), withBattle] }));
             } else {
                 log += `No decoration (rolled ${decoRoll} vs ${decoTarget}+). `;
+                if (decoRoll <= decoTarget - 6) {
+                    let mod = 0;
+                    if (!isOfficer && rank >= 7) mod += 1;
+                    if (isCombat) mod += 2;
+                    if (displayAssignment === "Training") mod -= 2;
+                    if (isOfficer && rank >= 7) mod -= 1;
+                    if (hasCommand) mod += 2;
+                    const cmRoll = d6(1, mod);
+                    const cmResult = Math.max(-1, Math.min(10, cmRoll));
+                    const dmStr = mod !== 0 ? ` DM${mod > 0 ? "+" : ""}${mod}` : "";
+                    log += `Court Martial! 1d6${dmStr} = ${cmRoll}. `;
+
+                    const effects = resolveCourtMartialResult(cmResult, { characterName });
+                    log += effects.logText + " ";
+                    flags.courtMartialHistory = effects.historyText;
+
+                    setCharacterData(prev => {
+                        const next = { ...prev, career: { ...prev.career } };
+                        if (effects.rankChange) next.career.rank = Math.max(1, next.career.rank + effects.rankChange);
+                        if (effects.ageIncrease) next.age = (next.age ?? 18) + effects.ageIncrease;
+                        if (effects.promotionDMPenalty) next.career.promotionDMPenalty = (next.career.promotionDMPenalty ?? 0) + effects.promotionDMPenalty;
+                        if (effects.musterPenalty) next.career.musterPenalty = (next.career.musterPenalty ?? 0) + effects.musterPenalty;
+                        if (effects.extraAwards.length) next.awards = [...(next.awards ?? []), ...effects.extraAwards];
+                        if (effects.forcedRetire) next.career.terms = next.career.terms + 1;
+                        return next;
+                    });
+
+                    if (effects.forcedRetire || effects.jailNoService) {
+                        handleHistoryAdd(buildYearHistoryNavy(flags, characterName));
+                        setYearLogs(prev => [...prev, log]);
+                        setWarning(log);
+                        if (effects.forcedRetire) setStep("retire");
+                        return;
+                    }
+                }
             }
+        }
+
+        // Combat Cluster (combat assignment + command check passed)
+        if (isCombat && hasCommand) {
+            const clusterName = battleName ? `Combat Cluster (${battleName})` : "Combat Cluster";
+            setCharacterData(prev => ({ ...prev, awards: [...(prev.awards ?? []), clusterName] }));
+            log += `Combat Cluster (${battleName ?? "combat action"}) awarded. `;
+            flags.combatCluster = true;
         }
 
         // Promotion / Commission
@@ -505,20 +517,22 @@ export default function NavyTerm({
             const maxRank = fleetType === "system" ? 7 : fleetType === "reserve" ? 8 : 99;
             const currentIsOfficer = isOfficer || commissionedThisYear;
 
+            const reprimandDM = characterData.career?.promotionDMPenalty ?? 0;
             const promoDM = (() => {
-                if (currentBranch === "Line" || currentBranch === "Crew") return characterData.EDU >= 7 ? 1 : 0;
-                if (currentBranch === "Flight" || currentBranch === "Engineering" || currentBranch === "Medical") return characterData.INT >= 8 ? 1 : 0;
-                if (currentBranch === "Gunnery") return characterData.END >= 8 ? 1 : 0;
-                return 0;
+                let base = 0;
+                if (currentBranch === "Line" || currentBranch === "Crew") base = characterData.EDU >= 7 ? 1 : 0;
+                else if (currentBranch === "Flight" || currentBranch === "Engineering" || currentBranch === "Medical") base = characterData.INT >= 8 ? 1 : 0;
+                else if (currentBranch === "Gunnery") base = characterData.END >= 8 ? 1 : 0;
+                return base + reprimandDM;
             })();
-            const dmStr = promoDM ? ` DM+${promoDM}` : "";
+            const dmStr = promoDM !== 0 ? ` DM${promoDM > 0 ? "+" : ""}${promoDM}` : "";
 
             if (!currentIsOfficer) {
                 const hasPending = characterData.commission === "navy";
                 if (hasPending) {
                     const o1Name = datatables.rank?.navy?.["O"]?.[1]?.[0] ?? "Ensign";
                     log += `Auto-commissioned as ${o1Name} (pending commission). `;
-                    historyLog += ` ${characterName}'s commission came through as ${o1Name}.`;
+                    flags.commissionedAuto = true; flags.commissionedRankName = o1Name;
                     setCharacterData(prev => ({ ...prev, career: { ...prev.career, rank: 1, officer: true } }));
                 } else {
                     const posRoll = d6(2, promoDM);
@@ -526,8 +540,10 @@ export default function NavyTerm({
                     log += `Commission (${promoTarget}+${dmStr}): rolled ${posRoll} — ${commissioned ? "Commissioned!" : "Not commissioned"}. `;
                     if (commissioned) {
                         const o1Name = datatables.rank?.navy?.["O"]?.[1]?.[0] ?? "Ensign";
-                        historyLog += ` ${characterName} received a commission as ${o1Name}.`;
-                        setCharacterData(prev => ({ ...prev, career: { ...prev.career, rank: 1, officer: true } }));
+                        flags.commissionedRolled = true; flags.commissionedRankName = o1Name;
+                        setCharacterData(prev => ({ ...prev, career: { ...prev.career, rank: 1, officer: true, promotionDMPenalty: 0 } }));
+                    } else if (reprimandDM !== 0) {
+                        setCharacterData(prev => ({ ...prev, career: { ...prev.career, promotionDMPenalty: 0 } }));
                     }
                 }
             } else if (!promotedThisTerm && !commissionedThisYear) {
@@ -538,12 +554,14 @@ export default function NavyTerm({
                     const newRank = rank + 1;
                     if (newRank <= maxRank) {
                         const rankName = datatables.rank?.navy?.["O"]?.[newRank]?.[0] ?? `O${newRank}`;
-                        historyLog += ` ${characterName} was promoted to ${rankName}.`;
-                        setCharacterData(prev => ({ ...prev, career: { ...prev.career, rank: newRank } }));
+                        flags.promoted = true; flags.promotedToRankName = rankName;
+                        setCharacterData(prev => ({ ...prev, career: { ...prev.career, rank: newRank, promotionDMPenalty: 0 } }));
                         setPromotedThisTerm(true);
                     } else {
                         log += `(max rank for ${fleetDisplay} reached) `;
                     }
+                } else if (reprimandDM !== 0) {
+                    setCharacterData(prev => ({ ...prev, career: { ...prev.career, promotionDMPenalty: 0 } }));
                 }
             }
         }
@@ -573,7 +591,6 @@ export default function NavyTerm({
             pools.push({ name: tableName, skills: ss[tableName] });
         }
         setAvailablePools(pools);
-        setYearSkillAvailable(skillsPassed);
 
         // Year-end same-assignment roll (not on year 4, not if this was already a repeat)
         if (currentYear < 4 && !wasRepeat) {
@@ -584,10 +601,12 @@ export default function NavyTerm({
 
         setYearLogs(prev => [...prev, log]);
         setWarning(log);
-        handleHistoryAdd(historyLog);
+        handleHistoryAdd(buildYearHistoryNavy(flags, characterName));
 
         if (skillsPassed) {
             setNavyStep("yearSkillPick");
+        } else if (hasCrossTrainPending) {
+            setNavyStep("crossTrainPick");
         } else {
             advanceYearOrEnd();
         }
@@ -610,12 +629,15 @@ export default function NavyTerm({
         if (!pendingSkillResult) return;
         applyNavySkill(pendingSkillResult.skill);
         handleHistoryAdd(
-            `Year ${currentYear}: ${characterName} gained ${pendingSkillResult.skill} from ${pendingSkillResult.tableName} training.`
+            `Term ${displayTerm}, Year ${currentYear}: ${characterName} gained ${pendingSkillResult.skill} from ${pendingSkillResult.tableName} training.`
         );
         setPendingSkillResult(null);
-        setYearSkillAvailable(false);
         setAvailablePools([]);
-        advanceYearOrEnd();
+        if (crossTrainOptions.length > 0) {
+            setNavyStep("crossTrainPick");
+        } else {
+            advanceYearOrEnd();
+        }
     };
 
     // ─── End of Term ────────────────────────────────────────────────────────
@@ -681,10 +703,8 @@ export default function NavyTerm({
         setYearLogs([]);
         setWarning("");
         setPendingSkillResult(null);
-        setYearSkillAvailable(false);
         setAvailablePools([]);
         setForcedNextAssignment(null);
-        setLastYearWasRepeat(false);
         setPromotedThisTerm(false);
         setBootPickNum(1);
     };
@@ -700,7 +720,9 @@ export default function NavyTerm({
             </h2>
 
             {warning && (
-                <p className="text-xs text-destructive">{warning}</p>
+                <p className="text-xs text-destructive whitespace-pre-line">
+                    {warning.replace(/\. (?=[A-Z])/g, ".\n").trim()}
+                </p>
             )}
 
             {/* BRANCH ASSIGNMENT */}
@@ -785,106 +807,49 @@ export default function NavyTerm({
                 </div>
             )}
 
-            {/* YEAR SKILL PICK */}
             {navyStep === "yearSkillPick" && (
+                <SkillPickSection
+                    availablePools={availablePools}
+                    pendingSkillResult={pendingSkillResult}
+                    currentYear={currentYear}
+                    onTableSelect={handleTableSelect}
+                    onSkillConfirm={handleSkillConfirm}
+                />
+            )}
+
+            {/* CROSS-TRAINING BRANCH PICK */}
+            {navyStep === "crossTrainPick" && (
                 <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground">Skills check passed. Choose a table:</p>
+                    <p className="text-xs text-muted-foreground">
+                        Select a branch to cross-train in. You will gain one random skill from that branch.
+                    </p>
                     <div className="flex flex-wrap gap-2">
-                        {availablePools.map(pool => (
-                            <Button
-                                key={pool.name}
-                                onClick={() => handleTableSelect(pool)}
-                                disabled={pendingSkillResult !== null}
-                            >
-                                {pool.name}
+                        {crossTrainOptions.map(key => (
+                            <Button key={key} onClick={() => handleCrossTrainSelect(key)}>
+                                {key === "Technical" ? "Technical Services" : key}
                             </Button>
                         ))}
                     </div>
-                    {pendingSkillResult && (
-                        <div className="space-y-2">
-                            <p className="text-xs text-muted-foreground">
-                                Rolled <span className="font-semibold text-foreground">{pendingSkillResult.roll}</span>
-                                {pendingSkillResult.mod > 0 && <span> (DM+{pendingSkillResult.mod})</span>}
-                                {" "}on {pendingSkillResult.tableName}:{" "}
-                                <span className="font-semibold text-foreground">{pendingSkillResult.skill}</span>
-                            </p>
-                            <Button onClick={handleSkillConfirm}>
-                                {currentYear < 4
-                                    ? `Accept & Continue to Year ${currentYear + 1}`
-                                    : "Accept & Resolve Term"}
-                            </Button>
-                        </div>
-                    )}
                 </div>
             )}
 
-            {/* REINLIST / RETIRE */}
             {(navyStep === "reinlistChoice" || navyStep === "forced" || navyStep === "retire") && (
-                <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground">
-                        {navyStep === "forced"
-                            ? `${characterName} is compelled to remain in service.`
-                            : navyStep === "retire"
-                                ? `${characterName} has been discharged from service.`
-                                : "Service term complete. Reinlist or retire?"}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                        {navyStep !== "retire" && (
-                            <Button onClick={handleReinlist}>Reinlist ({fleetDisplay})</Button>
-                        )}
-                        {navyStep !== "forced" && (
-                            <Button variant="outline" onClick={handleRetire}>Retire</Button>
-                        )}
-                    </div>
-                </div>
+                <ReinlistRetireSection
+                    step={navyStep}
+                    characterName={characterName}
+                    reinlistLabel={`Reinlist (${fleetDisplay})`}
+                    onReinlist={handleReinlist}
+                    onRetire={handleRetire}
+                />
             )}
 
-            {/* YEAR LOG */}
-            {yearLogs.length > 0 && (
-                <div className="mt-3 space-y-1">
-                    <p className="text-xs font-semibold text-foreground">
-                        Service Record — Term {displayTerm}:
-                    </p>
-                    {yearLogs.map((log, i) => (
-                        <p key={i} className="text-xs text-muted-foreground">• {log}</p>
-                    ))}
-                </div>
-            )}
-
-            {/* CASCADE MODAL */}
-            <Dialog open={!!pendingCascade} onOpenChange={() => {}}>
-                <DialogContent
-                    className="max-w-md"
-                    onInteractOutside={(e) => e.preventDefault()}
-                    onEscapeKeyDown={(e) => e.preventDefault()}
-                >
-                    <DialogHeader>
-                        <DialogTitle>Cascade Skill</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-3">
-                        <p className="text-xs text-muted-foreground bg-muted border-l-4 border-primary px-3 py-2 rounded-md">
-                            You rolled <span className="font-medium text-foreground">{pendingCascade?.parentSkill}</span> — choose a specialization:
-                        </p>
-                        <Select value={cascadeChoice} onValueChange={setCascadeChoice}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="-- Select --">
-                                    {cascadeChoice || undefined}
-                                </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {(pendingCascade?.options ?? []).map((s, i) => (
-                                    <SelectItem key={i} value={s}>{s}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <DialogFooter>
-                        <Button onClick={handleCascadeConfirm} disabled={!cascadeChoice}>
-                            Confirm Skill
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <ServiceLogSection yearLogs={yearLogs} displayTerm={displayTerm} />
+            <CascadeSkillDialog
+                pendingCascade={pendingCascade}
+                cascadeChoice={cascadeChoice}
+                setCascadeChoice={setCascadeChoice}
+                onConfirm={handleCascadeConfirm}
+            />
         </div>
     );
 }

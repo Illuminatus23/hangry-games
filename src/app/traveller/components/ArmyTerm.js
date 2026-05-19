@@ -2,10 +2,15 @@
 
 import React, { useState } from "react";
 import { datatables } from "../lib/data";
-import { d6, applySkill, getAgingRolls, careerCheckSpecReinlist, generateBattlename, generateOperationName, generateSystemName } from "../lib/helpers";
+import { d6, applySkill, getAgingRolls, careerCheckSpecReinlist, generateBattlename, generateOperationName, generateSystemName, getDecorationFromRoll, resolveCourtMartialResult } from "../lib/helpers";
+import { buildYearHistoryArmy } from "../lib/historyText";
+import { useCascade } from "../lib/useCascade";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { CascadeSkillDialog } from "./shared/CascadeSkillDialog";
+import { SkillPickSection } from "./shared/SkillPickSection";
+import { ServiceLogSection } from "./shared/ServiceLogSection";
+import { ReinlistRetireSection } from "./shared/ReinlistRetireSection";
 
 const PENSION_CAREERS = ['navy', 'marines', 'army', 'scouts', 'flyer', 'sailor'];
 
@@ -23,14 +28,6 @@ function normalizeServiceSkill(skill, career) {
     const normalized = map[skill] ?? skill;
     if (normalized === "Blade Combat" && career === "marines") return "Large Blade";
     return normalized;
-}
-
-function getDecorationFromRoll(roll, threshold) {
-    if (threshold <= 0) return null;
-    if (roll >= threshold + 4) return "SEH";
-    if (roll >= threshold + 2) return "MCG";
-    if (roll >= threshold) return "MCUF";
-    return null;
 }
 
 // All skill tables available this year based on status.
@@ -165,34 +162,8 @@ export default function ArmyTerm({
     // Officers can only be promoted once per term; reset on reinlist
     const [promotedThisTerm, setPromotedThisTerm] = useState(false);
 
-    // Cascade skill selection
-    const [pendingCascade, setPendingCascade] = useState(null);
-    // { parentSkill: string, options: string[], onConfirm: (skill: string) => void }
-    const [cascadeChoice, setCascadeChoice] = useState("");
-
-    const triggerCascade = (parentSkill, options, onConfirm) => {
-        setPendingCascade({ parentSkill, options, onConfirm });
-        setCascadeChoice("");
-    };
-
-    const handleCascadeConfirm = () => {
-        if (!cascadeChoice || !pendingCascade) return;
-        const callback = pendingCascade.onConfirm;
-        const nestedRaw = datatables.Skills?.[cascadeChoice];
-        if (Array.isArray(nestedRaw) && nestedRaw.length > 0) {
-            // The chosen option is itself a cascade — show a new dialog, keep the same callback
-            setPendingCascade({
-                parentSkill: cascadeChoice,
-                options: nestedRaw.map(s => normalizeServiceSkill(s, career)),
-                onConfirm: callback,
-            });
-            setCascadeChoice("");
-        } else {
-            setPendingCascade(null);
-            setCascadeChoice("");
-            callback(cascadeChoice);
-        }
-    };
+    const { pendingCascade, cascadeChoice, setCascadeChoice, triggerCascade, handleCascadeConfirm } =
+        useCascade(s => normalizeServiceSkill(s, career));
 
     // Career-level check arrays — army/marines not in Basics, use fallbacks
     const basicsData = datatables.Basics?.[career];
@@ -273,28 +244,24 @@ export default function ArmyTerm({
         const battleName = (isCombat) ? (assignmentName === "Raid") ? generateOperationName() : generateBattlename("ground") : null;
 
         const reassigned = assignmentName !== rolledAssignment;
-        let log = `Year ${currentYear}: rolled ${assignRoll} — ${rolledAssignment}${reassigned ? ` → ${assignmentName}` : ""}. `;
-        let historyLog = `Year ${currentYear}: ${characterName} spent an uneventful year on garrison duty. `;
-        switch (assignmentName) {
-            case "Training":
-                historyLog = `Year ${currentYear}: ${characterName} spent a year in training.`
-                break;
-            case "Internal Security":
-                historyLog = `Year ${currentYear}: ${characterName} was stationed as security for a spaceport on the world ${worldName}.`;
-                break;
-            case "Ship's Troops":
-                historyLog = `Year ${currentYear}: ${characterName} served as security on a military ship.`
-                break;
-            case "Raid":
-                historyLog = `Year ${currentYear}: Armed conflict broke out and ${characterName} participated in ${battleName}`;
-                break;
-            case "Counter Insurgency":
-                historyLog = `Year ${currentYear}: Revolution erupted and ${characterName} fought in the ${battleName}`;
-                break;
-            case "Police Action":
-                historyLog = `Year ${currentYear}: The ${battleName} broke out and ${characterName} was deployed into the heart of the conflict`;
-                break;
-        }
+        let log = `Term ${displayTerm}, Year ${currentYear}: rolled ${assignRoll} — ${rolledAssignment}${reassigned ? ` → ${assignmentName}` : ""}. `;
+        const flags = {
+            term: displayTerm,
+            year: currentYear,
+            assignment: assignmentName,
+            worldName,
+            battleName,
+            isCombat,
+            kia: false,
+            decoration: null,
+            special: null,
+            specialCommission: null,
+            commissionedAuto: false,
+            commissionedRolled: false,
+            commissionedRankName: null,
+            promoted: false,
+            promotedToRankName: null,
+        };
 
         //(isCombat) ? `${currentYear} years in to their service term armed conflict errupted and ${characterName} as deployed and participated ib a ${assignmentName}.` : ``;
 
@@ -309,20 +276,13 @@ export default function ArmyTerm({
             const survRoll = d6(2, survivalDM);
             survived = survRoll >= survivalTarget;
             log += `Survival (${survivalTarget}+): rolled ${survRoll}${survivalDM ? ` DM+${survivalDM}` : ""} — ${survived ? "Survived" : "KIA"}. `;
-            if (isCombat && !survived) {
-                historyLog += " and was killed in action.";
-            } else {
-                historyLog += ".";
-            }
         } else {
             log += `Safe duty. `;
         }
 
         if (!survived) {
-            const deathMsg = career === "marines"
-                ? `The perils of service claimed ${characterName} during a ${assignmentName} assignment. The story ends here.`
-                : `${characterName} was killed in action during a ${assignmentName} assignment. The story ends here.`;
-            handleHistoryAdd((isCombat) ? historyLog : deathMsg);
+            flags.kia = true;
+            handleHistoryAdd(buildYearHistoryArmy(flags, characterName, career));
             setWarning(log);
             setYearLogs(prev => [...prev, log]);
             setPageWarning?.(log);
@@ -331,6 +291,7 @@ export default function ArmyTerm({
         }
 
         // Decoration (combat assignments only)
+        let courtMartialTriggered = false;
         if (isCombat && decoTarget > 0) {
             const decoRoll = d6(2, 0);
             const decoKey = getDecorationFromRoll(decoRoll, decoTarget);
@@ -342,9 +303,10 @@ export default function ArmyTerm({
                     ...prev,
                     awards: [...(prev.awards ?? []), decoFullWBattle],
                 }));
-                historyLog += ` where they performed heroically under fire and were awarded the ${decoFull}.`
+                flags.decoration = { key: decoKey, full: decoFull };
             } else {
                 log += `No decoration (rolled ${decoRoll} vs ${decoTarget}+). `;
+                if (decoRoll <= decoTarget - 6) courtMartialTriggered = true;
             }
         }
 
@@ -378,7 +340,7 @@ export default function ArmyTerm({
                 });
                 return gained;
             };
-            historyLog = `Year ${currentYear}: ${characterName} was granted a special assignment and sent to ${specialAssignment}.`;
+            flags.special = { name: specialAssignment };
 
             switch (specialAssignment) {
                 case "Cross-Training": {
@@ -450,6 +412,7 @@ export default function ArmyTerm({
                         const eRank = characterData.career?.rank ?? 0;
                         const oRank = eRank >= 8 ? 3 : eRank >= 7 ? 2 : 1;
                         setCharacterData(prev => ({ ...prev, career: { ...prev.career, rank: oRank, officer: true } }));
+                        flags.specialCommission = datatables.rank[career]?.["O"]?.[oRank]?.[0] ?? `O${oRank}`;
                         // One Command skill roll
                         const cmdPool = datatables.Army.ServiceSkills["Command"] ?? [];
                         if (cmdPool.length) {
@@ -539,16 +502,56 @@ export default function ArmyTerm({
         }
         setCommandCheckResult(hasCommand);
 
+        // Court martial (decoration failed by 6+)
+        let cmHistoryText = "";
+        if (courtMartialTriggered) {
+            let mod = 0;
+            if (!isOfficer && rank >= 7) mod += 1;
+            if (isCombat) mod += 2;
+            if (assignmentName === "Training") mod -= 2;
+            if (isOfficer && rank >= 7) mod -= 1;
+            if (hasCommand) mod += 2;
+            const cmRoll = d6(1, mod);
+            const cmResult = Math.max(-1, Math.min(10, cmRoll));
+            const dmStr = mod !== 0 ? ` DM${mod > 0 ? "+" : ""}${mod}` : "";
+            log += `Court Martial! 1d6${dmStr} = ${cmRoll}. `;
+
+            const effects = resolveCourtMartialResult(cmResult, { characterName });
+            log += effects.logText + " ";
+
+            setCharacterData(prev => {
+                const next = { ...prev, career: { ...prev.career } };
+                if (effects.rankChange) next.career.rank = Math.max(1, next.career.rank + effects.rankChange);
+                if (effects.ageIncrease) next.age = (next.age ?? 18) + effects.ageIncrease;
+                if (effects.promotionDMPenalty) next.career.promotionDMPenalty = (next.career.promotionDMPenalty ?? 0) + effects.promotionDMPenalty;
+                if (effects.musterPenalty) next.career.musterPenalty = (next.career.musterPenalty ?? 0) + effects.musterPenalty;
+                if (effects.extraAwards.length) next.awards = [...(next.awards ?? []), ...effects.extraAwards];
+                if (effects.forcedRetire) next.career.terms = next.career.terms + 1;
+                return next;
+            });
+
+            if (effects.forcedRetire || effects.jailNoService) {
+                handleHistoryAdd(buildYearHistoryArmy(flags, characterName, career) + " " + effects.historyText);
+                setYearLogs(prev => [...prev, log]);
+                setWarning(log);
+                if (effects.forcedRetire) setStep("retire");
+                return;
+            }
+
+            cmHistoryText = effects.historyText;
+        }
+
         // Commission / Promotion (years 2–4 only; year 1 is initial training)
         // promoTarget === 0 means this assignment has no promotion opportunity
         if (currentYear > 1 && promoTarget > 0) {
             // +1 DM: Support arm + INT 8+, Commando + END 8+, all other arms + EDU 7+
             const currentBranchForPromo = characterData.career?.branch ?? "";
+            const reprimandDM = characterData.career?.promotionDMPenalty ?? 0;
             const promoDM =
-                currentBranchForPromo === "Support" ? (characterData.INT >= 8 ? 1 : 0) :
+                (currentBranchForPromo === "Support" ? (characterData.INT >= 8 ? 1 : 0) :
                     currentBranchForPromo === "Commando" ? (characterData.END >= 8 ? 1 : 0) :
-                        characterData.EDU >= 7 ? 1 : 0;
-            const dmStr = promoDM ? ` DM+${promoDM}` : "";
+                        characterData.EDU >= 7 ? 1 : 0) + reprimandDM;
+            const dmStr = promoDM !== 0 ? ` DM${promoDM > 0 ? "+" : ""}${promoDM}` : "";
 
             const currentIsOfficer = isOfficer || commissionedThisYear;
             const hasPendingCommission =
@@ -560,7 +563,8 @@ export default function ArmyTerm({
                 if (hasPendingCommission) {
                     const o1Name = datatables.rank[career]?.["O"]?.[1]?.[0] ?? "Officer";
                     log += `Auto-commissioned as ${o1Name} (pending commission). `;
-                    historyLog += ` ${characterName}'s commission was confirmed as ${o1Name}.`;
+                    flags.commissionedAuto = true;
+                    flags.commissionedRankName = o1Name;
                     setCharacterData(prev => ({ ...prev, career: { ...prev.career, rank: 1, officer: true } }));
                 } else {
                     const posRoll = d6(2, promoDM);
@@ -568,8 +572,11 @@ export default function ArmyTerm({
                     log += `Commission (${promoTarget}+${dmStr}): rolled ${posRoll} — ${commissioned ? "Commissioned!" : "Not commissioned"}. `;
                     if (commissioned) {
                         const o1Name = datatables.rank[career]?.["O"]?.[1]?.[0] ?? "Officer";
-                        historyLog += ` ${characterName} received a commission as ${o1Name}.`;
-                        setCharacterData(prev => ({ ...prev, career: { ...prev.career, rank: 1, officer: true } }));
+                        flags.commissionedRolled = true;
+                        flags.commissionedRankName = o1Name;
+                        setCharacterData(prev => ({ ...prev, career: { ...prev.career, rank: 1, officer: true, promotionDMPenalty: 0 } }));
+                    } else if (reprimandDM !== 0) {
+                        setCharacterData(prev => ({ ...prev, career: { ...prev.career, promotionDMPenalty: 0 } }));
                     }
                 }
             } else if (!promotedThisTerm && !commissionedThisYear) {
@@ -580,9 +587,12 @@ export default function ArmyTerm({
                 if (promoted) {
                     const newRank = (characterData.career.rank ?? 0) + 1;
                     const rankName = datatables.rank[career]?.["O"]?.[newRank]?.[0] ?? `Rank ${newRank}`;
-                    historyLog += ` ${characterName} was promoted to ${rankName}.`;
-                    setCharacterData(prev => ({ ...prev, career: { ...prev.career, rank: newRank } }));
+                    flags.promoted = true;
+                    flags.promotedToRankName = rankName;
+                    setCharacterData(prev => ({ ...prev, career: { ...prev.career, rank: newRank, promotionDMPenalty: 0 } }));
                     setPromotedThisTerm(true);
+                } else if (reprimandDM !== 0) {
+                    setCharacterData(prev => ({ ...prev, career: { ...prev.career, promotionDMPenalty: 0 } }));
                 }
             }
         }
@@ -602,7 +612,7 @@ export default function ArmyTerm({
 
         setYearLogs(prev => [...prev, log]);
         setWarning(log);
-        handleHistoryAdd(historyLog);
+        handleHistoryAdd(buildYearHistoryArmy(flags, characterName, career) + (cmHistoryText ? " " + cmHistoryText : ""));
 
         if (skillsPassed) {
             setArmStep("yearSkillPick");
@@ -637,7 +647,7 @@ export default function ArmyTerm({
             maxSkills: characterData.INT + characterData.EDU,
         });
         handleHistoryAdd(
-            `Year ${currentYear}: ${characterName} gained ${pendingSkillResult.skill} from ${pendingSkillResult.tableName} training.`
+            `Term ${displayTerm}, Year ${currentYear}: ${characterName} gained ${pendingSkillResult.skill} from ${pendingSkillResult.tableName} training.`
         );
 
         // Reset per-year state
@@ -772,7 +782,9 @@ export default function ArmyTerm({
             </h2>
 
             {warning && (
-                <p className="text-xs text-destructive">{warning}</p>
+                <p className="text-xs text-destructive whitespace-pre-line">
+                    {warning.replace(/\. (?=[A-Z])/g, ".\n").trim()}
+                </p>
             )}
 
             {/* ARM SELECTION */}
@@ -831,104 +843,33 @@ export default function ArmyTerm({
                 </div>
             )}
 
-            {/* YEARS 2–4: SKILL TABLE PICK */}
             {armStep === "yearSkillPick" && (
-                <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground">Skills check passed. Choose a table to roll on:</p>
-                    <div className="flex flex-wrap gap-2">
-                        {availablePools.map(pool => (
-                            <Button
-                                key={pool.name}
-                                onClick={() => handleTableSelect(pool)}
-                                disabled={pendingSkillResult !== null}
-                            >
-                                {pool.name}
-                            </Button>
-                        ))}
-                    </div>
-                    {pendingSkillResult && (
-                        <div className="space-y-2">
-                            <p className="text-xs text-muted-foreground">
-                                Rolled <span className="font-semibold text-foreground">{pendingSkillResult.roll}</span>
-                                {pendingSkillResult.mod > 0 && <span> (DM+{pendingSkillResult.mod})</span>}
-                                {" "}on {pendingSkillResult.tableName}:{" "}
-                                <span className="font-semibold text-foreground">{pendingSkillResult.skill}</span>
-                            </p>
-                            <Button onClick={handleSkillConfirm}>
-                                {currentYear < 4
-                                    ? `Accept & Continue to Year ${currentYear + 1}`
-                                    : "Accept & Resolve Term"}
-                            </Button>
-                        </div>
-                    )}
-                </div>
+                <SkillPickSection
+                    availablePools={availablePools}
+                    pendingSkillResult={pendingSkillResult}
+                    currentYear={currentYear}
+                    onTableSelect={handleTableSelect}
+                    onSkillConfirm={handleSkillConfirm}
+                />
             )}
 
-            {/* RE-ENLIST / RETIRE */}
             {(armStep === "reinlistChoice" || armStep === "forced" || armStep === "retire") && (
-                <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground">
-                        {armStep === "forced"
-                            ? `${characterName} is compelled to remain in service.`
-                            : armStep === "retire"
-                                ? `${characterName} has been discharged from service.`
-                                : "Service term complete. Reinlist or retire?"}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                        {armStep !== "retire" && (
-                            <Button onClick={handleReinlist}>Reinlist as {career}</Button>
-                        )}
-                        {armStep !== "forced" && (
-                            <Button variant="outline" onClick={handleRetire}>Retire</Button>
-                        )}
-                    </div>
-                </div>
+                <ReinlistRetireSection
+                    step={armStep}
+                    characterName={characterName}
+                    reinlistLabel={`Reinlist as ${career}`}
+                    onReinlist={handleReinlist}
+                    onRetire={handleRetire}
+                />
             )}
 
-            {/* YEAR LOG */}
-            {yearLogs.length > 0 && (
-                <div className="mt-3 space-y-1">
-                    <p className="text-xs font-semibold text-foreground">Service Record — Term {displayTerm}:</p>
-                    {yearLogs.map((log, i) => (
-                        <p key={i} className="text-xs text-muted-foreground">• {log}</p>
-                    ))}
-                </div>
-            )}
-
-            {/* CASCADE SKILL MODAL */}
-            <Dialog open={!!pendingCascade} onOpenChange={() => { }}>
-                <DialogContent
-                    className="max-w-md"
-                    onInteractOutside={(e) => e.preventDefault()}
-                    onEscapeKeyDown={(e) => e.preventDefault()}
-                >
-                    <DialogHeader>
-                        <DialogTitle>Cascade Skill</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-3">
-                        <p className="text-xs text-muted-foreground bg-muted border-l-4 border-primary px-3 py-2 rounded-md">
-                            You rolled <span className="font-medium text-foreground">{pendingCascade?.parentSkill}</span> — choose a specialization:
-                        </p>
-                        <Select value={cascadeChoice} onValueChange={setCascadeChoice}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="-- Select --">
-                                    {cascadeChoice || undefined}
-                                </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {(pendingCascade?.options ?? []).map((s, i) => (
-                                    <SelectItem key={i} value={s}>{s}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <DialogFooter>
-                        <Button onClick={handleCascadeConfirm} disabled={!cascadeChoice}>
-                            Confirm Skill
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <ServiceLogSection yearLogs={yearLogs} displayTerm={displayTerm} />
+            <CascadeSkillDialog
+                pendingCascade={pendingCascade}
+                cascadeChoice={cascadeChoice}
+                setCascadeChoice={setCascadeChoice}
+                onConfirm={handleCascadeConfirm}
+            />
         </div>
     );
 }

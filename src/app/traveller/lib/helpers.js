@@ -569,6 +569,107 @@ export function careerCheckSpecReinlist(check, characterName) {
     return [result, logStr, crit, (roll === 12)]
 }
 
+export function getDecorationFromRoll(roll, threshold) {
+    if (threshold <= 0) return null;
+    if (roll >= threshold + 4) return "SEH";
+    if (roll >= threshold + 2) return "MCG";
+    if (roll >= threshold) return "MCUF";
+    return null;
+}
+
+export function resolveCourtMartialResult(cmResult, { characterName }) {
+    const yrs = (n) => `${n} year${n !== 1 ? 's' : ''}`;
+    switch (cmResult) {
+        case -1:
+            return {
+                logText: `Charges dismissed — no penalty.`,
+                historyText: `${characterName} faced a court martial, but the charges were dismissed.`,
+                rankChange: 0, ageIncrease: 0, promotionDMPenalty: 0,
+                musterPenalty: 0, extraAwards: [], forcedRetire: false, jailNoService: false,
+            };
+        case 0:
+            return {
+                logText: `Reprimand issued — DM-1 to next promotion roll.`,
+                historyText: `${characterName} received a formal reprimand that will hinder their next promotion.`,
+                rankChange: 0, ageIncrease: 0, promotionDMPenalty: -1,
+                musterPenalty: 0, extraAwards: [], forcedRetire: false, jailNoService: false,
+            };
+        case 1:
+            return {
+                logText: `Severe reprimand issued — DM-3 to next promotion roll.`,
+                historyText: `${characterName} received a severe reprimand that will greatly hinder their next promotion.`,
+                rankChange: 0, ageIncrease: 0, promotionDMPenalty: -3,
+                musterPenalty: 0, extraAwards: [], forcedRetire: false, jailNoService: false,
+            };
+        case 2:
+            return {
+                logText: `Reduced in rank by 1.`,
+                historyText: `${characterName} was reduced one grade in rank as punishment.`,
+                rankChange: -1, ageIncrease: 0, promotionDMPenalty: 0,
+                musterPenalty: 0, extraAwards: [], forcedRetire: false, jailNoService: false,
+            };
+        case 3:
+            return {
+                logText: `Reduced in rank by 2.`,
+                historyText: `${characterName} was reduced two grades in rank as punishment.`,
+                rankChange: -2, ageIncrease: 0, promotionDMPenalty: 0,
+                musterPenalty: 0, extraAwards: [], forcedRetire: false, jailNoService: false,
+            };
+        case 4: {
+            const months = d6(2, 0);
+            return {
+                logText: `Sentenced to ${months} months in military prison, rank reduced by 2. This year does not count as service.`,
+                historyText: `${characterName} was sentenced to ${months} months in military prison and reduced two grades in rank.`,
+                rankChange: -2, ageIncrease: 1, promotionDMPenalty: 0,
+                musterPenalty: 0, extraAwards: [], forcedRetire: false, jailNoService: true,
+            };
+        }
+        case 5: {
+            const years = d6(1, 0);
+            return {
+                logText: `Sentenced to ${yrs(years)} in prison — Dishonorable Discharge.`,
+                historyText: `${characterName} was sentenced to ${yrs(years)} in a military prison and dishonorably discharged.`,
+                rankChange: 0, ageIncrease: years, promotionDMPenalty: 0,
+                musterPenalty: -3, extraAwards: ['Dishonorable Discharge'], forcedRetire: true, jailNoService: false,
+            };
+        }
+        case 6:
+        case 7: {
+            const years = d6(2, 0);
+            return {
+                logText: `Sentenced to ${yrs(years)} in prison — Dishonorable Discharge.`,
+                historyText: `${characterName} was sentenced to ${yrs(years)} in a military prison and dishonorably discharged.`,
+                rankChange: 0, ageIncrease: years, promotionDMPenalty: 0,
+                musterPenalty: -3, extraAwards: ['Dishonorable Discharge'], forcedRetire: true, jailNoService: false,
+            };
+        }
+        case 8:
+        case 9:
+            return {
+                logText: `Death sentence — ${characterName} escaped! A bounty of 10,000 CR placed on their head.`,
+                historyText: `${characterName} was sentenced to death but staged a daring escape. A bounty of 10,000 credits was placed on their head.`,
+                rankChange: 0, ageIncrease: 0, promotionDMPenalty: 0,
+                musterPenalty: 0, extraAwards: ['Wanted: 10,000 CR Bounty'], forcedRetire: false, jailNoService: false,
+            };
+        case 10: {
+            const guards = d6(1, 0);
+            return {
+                logText: `Death sentence — ${characterName} escaped, killing ${guards} guard${guards !== 1 ? 's' : ''}! A bounty of 100,000 CR placed on their head.`,
+                historyText: `${characterName} was sentenced to death and escaped, killing ${guards} guard${guards !== 1 ? 's' : ''} in the process. A bounty of 100,000 credits was placed on their head.`,
+                rankChange: 0, ageIncrease: 0, promotionDMPenalty: 0,
+                musterPenalty: 0, extraAwards: ['Wanted: 100,000 CR Bounty'], forcedRetire: false, jailNoService: false,
+            };
+        }
+        default:
+            return {
+                logText: `Court Martial: unknown result.`,
+                historyText: `${characterName} faced a court martial with an undetermined outcome.`,
+                rankChange: 0, ageIncrease: 0, promotionDMPenalty: 0,
+                musterPenalty: 0, extraAwards: [], forcedRetire: false, jailNoService: false,
+            };
+    }
+}
+
 function careerCouncilor(upp) {
     //todo
     //idea is to suggest careers, first on survival, then on promo/position, finally on enlistent
