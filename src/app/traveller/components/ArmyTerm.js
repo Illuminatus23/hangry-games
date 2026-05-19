@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { datatables } from "../lib/data";
 import { d6, applySkill, getAgingRolls, careerCheckSpecReinlist, generateBattlename, generateOperationName, generateSystemName, getDecorationFromRoll, resolveCourtMartialResult } from "../lib/helpers";
-import { buildYearHistoryArmy } from "../lib/historyText";
+import { buildYearHistoryArmy, buildBranchAssignmentArmy, buildInitialTrainingArmy, buildSkillGainHistory, buildEndOfTermArmy } from "../lib/historyText";
 import { useCascade } from "../lib/useCascade";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -175,7 +175,7 @@ export default function ArmyTerm({
             ...prev,
             career: { ...prev.career, branch: arm },
         }));
-        handleHistoryAdd(`${characterName} selected the ${arm} arm of the ${career}.`);
+        handleHistoryAdd(buildBranchAssignmentArmy(characterName, arm, career));
 
         if (isFirstTerm) {
             const dataKey = getArmDataKey(career, arm);
@@ -195,10 +195,7 @@ export default function ArmyTerm({
             if (finalMosSkill) {
                 applySkill(setSkills, setCharacterData, finalMosSkill, { maxSkills: characterData.INT + characterData.EDU });
             }
-            handleHistoryAdd(
-                `${characterName} completed initial training in the ${characterData.career?.branch ?? career}, ` +
-                `gaining proficiency in ${year1GunCombatPick}${finalMosSkill ? ` and ${finalMosSkill}` : ""}.`
-            );
+            handleHistoryAdd(buildInitialTrainingArmy(characterName, characterData.career?.branch ?? career, career, year1GunCombatPick, finalMosSkill));
             setCurrentYear(2);
             setArmStep("yearStart");
         };
@@ -401,7 +398,7 @@ export default function ArmyTerm({
                 }
                 case "OCS": {
                     let eligible = true;
-                    if (characterData.age > 38) {
+                    if (characterData.chronoAge > 38) {
                         const waiverRoll = d6(1, specDM);
                         const waiverResult = specialTables[Math.min(waiverRoll - 1, specialTables.length - 1)];
                         eligible = waiverResult === "OCS";
@@ -522,7 +519,10 @@ export default function ArmyTerm({
             setCharacterData(prev => {
                 const next = { ...prev, career: { ...prev.career } };
                 if (effects.rankChange) next.career.rank = Math.max(1, next.career.rank + effects.rankChange);
-                if (effects.ageIncrease) next.age = (next.age ?? 18) + effects.ageIncrease;
+                if (effects.ageIncrease) {
+                    next.bioAge = (next.bioAge ?? 18) + effects.ageIncrease;
+                    next.chronoAge = (next.chronoAge ?? 18) + effects.ageIncrease;
+                }
                 if (effects.promotionDMPenalty) next.career.promotionDMPenalty = (next.career.promotionDMPenalty ?? 0) + effects.promotionDMPenalty;
                 if (effects.musterPenalty) next.career.musterPenalty = (next.career.musterPenalty ?? 0) + effects.musterPenalty;
                 if (effects.extraAwards.length) next.awards = [...(next.awards ?? []), ...effects.extraAwards];
@@ -622,11 +622,17 @@ export default function ArmyTerm({
     };
 
     const advanceYearOrEnd = () => {
+        const newBioAge = (characterData.bioAge ?? 18) + 1;
+        setCharacterData(prev => ({
+            ...prev,
+            bioAge: (prev.bioAge ?? 18) + 1,
+            chronoAge: (prev.chronoAge ?? 18) + 1,
+        }));
         if (currentYear < 4) {
             setCurrentYear(prev => prev + 1);
             setArmStep("yearStart");
         } else {
-            handleEndOfTerm();
+            handleEndOfTerm(newBioAge);
         }
     };
 
@@ -646,9 +652,7 @@ export default function ArmyTerm({
         applySkill(setSkills, setCharacterData, pendingSkillResult.skill, {
             maxSkills: characterData.INT + characterData.EDU,
         });
-        handleHistoryAdd(
-            `Term ${displayTerm}, Year ${currentYear}: ${characterName} gained ${pendingSkillResult.skill} from ${pendingSkillResult.tableName} training.`
-        );
+        handleHistoryAdd(buildSkillGainHistory(displayTerm, currentYear, characterName, pendingSkillResult.skill, pendingSkillResult.tableName, career));
 
         // Reset per-year state
         setPendingSkillResult(null);
@@ -660,8 +664,7 @@ export default function ArmyTerm({
         advanceYearOrEnd();
     };
 
-    const handleEndOfTerm = () => {
-        let histText = `${characterName} completed Term ${displayTerm} as ${career} (${characterData.career?.branch}). `;
+    const handleEndOfTerm = (endBioAge) => {
         let warnText = "";
 
         // Special duty
@@ -672,8 +675,8 @@ export default function ArmyTerm({
         const reinlistResult = careerCheckSpecReinlist(reinCheck, characterName);
         warnText += `Reinlist: ${reinlistResult[1]}`;
 
-        // Aging (pre-compute so it's available in the closure)
-        const endAge = characterData.age + 4;
+        // Aging — bioAge already incremented by advanceYearOrEnd
+        const endAge = endBioAge;
         const agingUpdates = {};
         let agingWarn = "";
         let agingHist = "";
@@ -691,14 +694,12 @@ export default function ArmyTerm({
         const finishEndOfTerm = (bonusSkill) => {
             if (bonusSkill) {
                 applySkill(setSkills, setCharacterData, bonusSkill, { maxSkills: characterData.INT + characterData.EDU });
-                histText += `Special assignment granted ${characterName} additional training in ${bonusSkill}. `;
             }
-            histText += agingHist;
             warnText += agingWarn;
             if (Object.keys(agingUpdates).length > 0) {
                 setCharacterData(prev => ({ ...prev, ...agingUpdates }));
             }
-            handleHistoryAdd(histText);
+            handleHistoryAdd(buildEndOfTermArmy(characterName, displayTerm, career, characterData.career?.branch, bonusSkill, agingHist));
             setWarning(warnText);
             if (reinlistResult[3]) {
                 setArmStep("forced");
@@ -731,11 +732,9 @@ export default function ArmyTerm({
 
     const handleRetire = () => {
         const newTerms = characterData.career.terms + 1;
-        const newAge = characterData.age + 4;
         const pension = (newTerms >= 5 && PENSION_CAREERS.includes(career)) ? 2000 * newTerms : 0;
         setCharacterData(prev => ({
             ...prev,
-            age: newAge,
             pension,
             career: { ...prev.career, terms: newTerms },
         }));
@@ -744,10 +743,8 @@ export default function ArmyTerm({
 
     const handleReinlist = () => {
         const newTerms = characterData.career.terms + 1;
-        const newAge = characterData.age + 4;
         setCharacterData(prev => ({
             ...prev,
-            age: newAge,
             career: { ...prev.career, terms: newTerms },
         }));
         setArmStep("yearStart");

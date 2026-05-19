@@ -256,7 +256,7 @@ export default function BasicTerm({
             }
 
             // Aging check at end of term
-            const endAge = characterData.age + 4;
+            const endAge = (characterData.bioAge ?? 18) + 4;
             if (endAge >= 34) {
                 const agingResult = getAgingRolls(endAge);
                 if (agingResult.decreases.length > 0) {
@@ -284,11 +284,13 @@ export default function BasicTerm({
     const handleRetire = () => {
         logPostTermSkills();
         const newTerms = characterData.career.terms + 1;
-        const newAge = characterData.age + 4;
+        const newBioAge = (characterData.bioAge ?? 18) + 4;
+        const newChronoAge = (characterData.chronoAge ?? 18) + 4;
         const pension = (newTerms >= 5 && PENSION_CAREERS.includes(career)) ? 2000 * newTerms : 0;
         setCharacterData(prev => ({
             ...prev,
-            age: newAge,
+            bioAge: newBioAge,
+            chronoAge: newChronoAge,
             pension,
             career: { ...prev.career, terms: newTerms },
         }));
@@ -298,10 +300,12 @@ export default function BasicTerm({
     const handleReinlist = () => {
         logPostTermSkills();
         const newTerms = characterData.career.terms + 1;
-        const newAge = characterData.age + 4;
+        const newBioAge = (characterData.bioAge ?? 18) + 4;
+        const newChronoAge = (characterData.chronoAge ?? 18) + 4;
         setCharacterData(prev => ({
             ...prev,
-            age: newAge,
+            bioAge: newBioAge,
+            chronoAge: newChronoAge,
             career: { ...prev.career, terms: newTerms },
         }));
         setTermStep("init");

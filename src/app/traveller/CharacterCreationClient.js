@@ -82,8 +82,8 @@ export default function CharacterCreation() {
         EDU: 7,
         SOC: 7,
         PSI: 0,
-        age: 0,
-        negAge: 0,
+        bioAge: 0,
+        chronoAge: 0,
         homeworld: "",
         homeworldString: "",
         history: [],
@@ -301,15 +301,15 @@ export default function CharacterCreation() {
                         <LabeledInput
                             label="Full Name"
                             id="characterName"
-                            value={characterData.age > 0 ? generateFullName() : characterName}
+                            value={characterData.bioAge > 0 ? generateFullName() : characterName}
                             onChange={(e) => setCharacterName(e.target.value)}
-                            disabled={characterData.age > 0}
+                            disabled={characterData.bioAge > 0}
                         />
-                        {characterData.age > 0 ? (
+                        {characterData.bioAge > 0 ? (
                             <div className="space-y-2">
                                 <div className="grid grid-cols-2 gap-3">
-                                    <LabeledInput label="Age" id="age" value={characterData.age + characterData.negAge} disabled />
-                                    <LabeledInput label="Apparent Age" id="aAge" value={characterData.age} disabled />
+                                    <LabeledInput label="Chronological Age" id="chronoAge" value={characterData.chronoAge} disabled />
+                                    <LabeledInput label="Biological Age" id="bioAge" value={characterData.bioAge} disabled />
                                 </div>
                                 <LabeledInput label="Homeworld" id="hName" value={characterData.homeworldString} disabled />
                             </div>

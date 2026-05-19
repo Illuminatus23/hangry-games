@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { datatables } from "../lib/data";
-import { d6, applySkill, getAgingRolls, generateBattlename, generateSystemName, getDecorationFromRoll, resolveCourtMartialResult } from "../lib/helpers";
-import { buildYearHistoryNavy } from "../lib/historyText";
+import { d6, applySkill, getAgingRolls, generateBattlename, generateOperationName, generateSystemName, getDecorationFromRoll, resolveCourtMartialResult } from "../lib/helpers";
+import { buildYearHistoryNavy, buildBranchAssignmentNavy, buildBootCampNavy, buildSkillGainHistory, buildEndOfTermNavy } from "../lib/historyText";
 import { useCascade } from "../lib/useCascade";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -174,7 +174,7 @@ export default function NavyTerm({
 
     const confirmBranch = (branchName) => {
         setCharacterData(prev => ({ ...prev, career: { ...prev.career, branch: branchName } }));
-        handleHistoryAdd(`${characterName} was assigned to the ${branchName} branch of the ${fleetDisplay}.`);
+        handleHistoryAdd(buildBranchAssignmentNavy(characterName, branchName, fleetDisplay));
         setRolledBranch("");
         setCanChooseBranch(false);
         setManualBranchChoice("");
@@ -204,9 +204,7 @@ export default function NavyTerm({
             });
         } else {
             applyWithCascadeCheck(rawSkill, (finalSkill) => {
-                handleHistoryAdd(
-                    `${characterName} completed boot camp in the ${b} branch, gaining ${bootPick1} and ${finalSkill}.`
-                );
+                handleHistoryAdd(buildBootCampNavy(characterName, b, bootPick1, finalSkill));
                 setBootPickNum(1);
                 setCurrentYear(2);
                 setNavyStep("yearStart");
@@ -244,12 +242,18 @@ export default function NavyTerm({
         advanceYearOrEnd();
     };
 
-    const advanceYearOrEnd = () => {
+    const advanceYearOrEnd = (bioInc = 1, chronoInc = 1) => {
+        const newBioAge = (characterData.bioAge ?? 18) + bioInc;
+        setCharacterData(prev => ({
+            ...prev,
+            bioAge: (prev.bioAge ?? 18) + bioInc,
+            chronoAge: (prev.chronoAge ?? 18) + chronoInc,
+        }));
         if (currentYear < 4) {
             setCurrentYear(prev => prev + 1);
             setNavyStep("yearStart");
         } else {
-            handleEndOfTerm();
+            handleEndOfTerm(newBioAge);
         }
     };
 
@@ -347,7 +351,7 @@ export default function NavyTerm({
                 const gained = applyNavySchoolSkills("Engineering");
                 log += `Engineering School: gained ${gained.length ? gained.join(", ") : "no skills"}. `;
             } else if (specialResult === "OCS") {
-                const overAge = characterData.age > 38;
+                const overAge = characterData.chronoAge > 38;
                 const waiverOk = !overAge || d6(1, specDM) >= 5;
                 if (waiverOk) {
                     commissionedThisYear = true;
@@ -406,7 +410,7 @@ export default function NavyTerm({
             if (currentYear < 4 && !wasRepeat) {
                 if (d6(1, 0) === 6) setForcedNextAssignment("Frozen Watch");
             }
-            advanceYearOrEnd();
+            advanceYearOrEnd(0, 1); // frozen watch: chronoAge advances, bioAge does not
             return;
         }
 
@@ -485,7 +489,10 @@ export default function NavyTerm({
                     setCharacterData(prev => {
                         const next = { ...prev, career: { ...prev.career } };
                         if (effects.rankChange) next.career.rank = Math.max(1, next.career.rank + effects.rankChange);
-                        if (effects.ageIncrease) next.age = (next.age ?? 18) + effects.ageIncrease;
+                        if (effects.ageIncrease) {
+                            next.bioAge = (next.bioAge ?? 18) + effects.ageIncrease;
+                            next.chronoAge = (next.chronoAge ?? 18) + effects.ageIncrease;
+                        }
                         if (effects.promotionDMPenalty) next.career.promotionDMPenalty = (next.career.promotionDMPenalty ?? 0) + effects.promotionDMPenalty;
                         if (effects.musterPenalty) next.career.musterPenalty = (next.career.musterPenalty ?? 0) + effects.musterPenalty;
                         if (effects.extraAwards.length) next.awards = [...(next.awards ?? []), ...effects.extraAwards];
@@ -530,18 +537,26 @@ export default function NavyTerm({
             if (!currentIsOfficer) {
                 const hasPending = characterData.commission === "navy";
                 if (hasPending) {
+                    // Pre-service academy commission comes through automatically
                     const o1Name = datatables.rank?.navy?.["O"]?.[1]?.[0] ?? "Ensign";
                     log += `Auto-commissioned as ${o1Name} (pending commission). `;
                     flags.commissionedAuto = true; flags.commissionedRankName = o1Name;
                     setCharacterData(prev => ({ ...prev, career: { ...prev.career, rank: 1, officer: true } }));
-                } else {
-                    const posRoll = d6(2, promoDM);
-                    const commissioned = posRoll >= promoTarget;
-                    log += `Commission (${promoTarget}+${dmStr}): rolled ${posRoll} — ${commissioned ? "Commissioned!" : "Not commissioned"}. `;
-                    if (commissioned) {
-                        const o1Name = datatables.rank?.navy?.["O"]?.[1]?.[0] ?? "Ensign";
-                        flags.commissionedRolled = true; flags.commissionedRankName = o1Name;
-                        setCharacterData(prev => ({ ...prev, career: { ...prev.career, rank: 1, officer: true, promotionDMPenalty: 0 } }));
+                } else if (!promotedThisTerm) {
+                    // Enlisted promotion only — commission requires OCS (special assignment)
+                    const promoRoll = d6(2, promoDM);
+                    const promoted = promoRoll >= promoTarget;
+                    log += `Promotion (${promoTarget}+${dmStr}): rolled ${promoRoll} — ${promoted ? "Promoted!" : "Not promoted"}. `;
+                    if (promoted) {
+                        const newRank = rank + 1;
+                        if (newRank <= maxRank) {
+                            const rankName = datatables.rank?.navy?.["E"]?.[newRank]?.[0] ?? `E${newRank}`;
+                            flags.promoted = true; flags.promotedToRankName = rankName;
+                            setCharacterData(prev => ({ ...prev, career: { ...prev.career, rank: newRank, promotionDMPenalty: 0 } }));
+                            setPromotedThisTerm(true);
+                        } else {
+                            log += `(max rank reached) `;
+                        }
                     } else if (reprimandDM !== 0) {
                         setCharacterData(prev => ({ ...prev, career: { ...prev.career, promotionDMPenalty: 0 } }));
                     }
@@ -628,9 +643,7 @@ export default function NavyTerm({
     const handleSkillConfirm = () => {
         if (!pendingSkillResult) return;
         applyNavySkill(pendingSkillResult.skill);
-        handleHistoryAdd(
-            `Term ${displayTerm}, Year ${currentYear}: ${characterName} gained ${pendingSkillResult.skill} from ${pendingSkillResult.tableName} training.`
-        );
+        handleHistoryAdd(buildSkillGainHistory(displayTerm, currentYear, characterName, pendingSkillResult.skill, pendingSkillResult.tableName, 'navy'));
         setPendingSkillResult(null);
         setAvailablePools([]);
         if (crossTrainOptions.length > 0) {
@@ -642,7 +655,7 @@ export default function NavyTerm({
 
     // ─── End of Term ────────────────────────────────────────────────────────
 
-    const handleEndOfTerm = () => {
+    const handleEndOfTerm = (endBioAge) => {
         const reinDM = (isOfficer || rank >= 4) ? 1 : 0;
         const reinRoll = d6(2, reinDM);
         const forced = reinRoll >= 12;
@@ -650,8 +663,8 @@ export default function NavyTerm({
         const dmStr = reinDM ? " DM+1" : "";
         let warnText = `Reenlistment (6+${dmStr}): rolled ${reinRoll} — ${forced ? "Must reinlist!" : canReinlist ? "May reinlist" : "Discharged"}. `;
 
-        // Aging
-        const endAge = characterData.age + 4;
+        // Aging — bioAge already incremented by advanceYearOrEnd
+        const endAge = endBioAge;
         let agingWarn = "";
         let agingHist = "";
         const agingUpdates = {};
@@ -670,20 +683,16 @@ export default function NavyTerm({
             setCharacterData(prev => ({ ...prev, ...agingUpdates }));
         }
 
-        handleHistoryAdd(
-            `${characterName} completed Term ${displayTerm} with the ${fleetDisplay} (${characterData.career?.branch}).${agingHist}`
-        );
+        handleHistoryAdd(buildEndOfTermNavy(characterName, displayTerm, fleetDisplay, characterData.career?.branch, agingHist));
         setWarning(warnText + agingWarn);
         setNavyStep(forced ? "forced" : canReinlist ? "reinlistChoice" : "retire");
     };
 
     const handleRetire = () => {
         const newTerms = terms + 1;
-        const newAge = characterData.age + 4;
         const pension = (newTerms >= 5 && PENSION_CAREERS.includes("navy")) ? 2000 * newTerms : 0;
         setCharacterData(prev => ({
             ...prev,
-            age: newAge,
             pension,
             career: { ...prev.career, terms: newTerms },
         }));
@@ -692,10 +701,8 @@ export default function NavyTerm({
 
     const handleReinlist = () => {
         const newTerms = terms + 1;
-        const newAge = characterData.age + 4;
         setCharacterData(prev => ({
             ...prev,
-            age: newAge,
             career: { ...prev.career, terms: newTerms },
         }));
         setNavyStep("yearStart");

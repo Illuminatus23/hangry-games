@@ -80,7 +80,8 @@ export function growUp(upp, characterName) {
             homeworldString: `${homeworldName} (${birthworld.uwp}-${birthworld.starport} ${birthworld.bases})`,
             homeworld: birthworld,
             history: historyBirth,
-            age: 18,
+            bioAge: 18,
+            chronoAge: 18,
         },
         skills: skills,
 

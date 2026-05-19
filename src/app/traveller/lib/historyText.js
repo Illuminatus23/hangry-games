@@ -70,6 +70,9 @@ const STAT_NAMES = { STR: 'strength', DEX: 'dexterity', END: 'endurance', INT: '
 
 const EXPERIENTIAL_CAREERS = new Set(['hunter', 'rogue', 'pirate', 'barbarian']);
 
+// TODO: some skill tables use long-form stat names ("Strength", "Dexterity", etc.)
+// instead of abbreviations. Add STAT_NORMALIZE map and update categorizeSkill when addressed.
+
 // Natural phrase for each weapon — handles singular/plural and articles correctly
 const WEAPON_PHRASE = {
     'Axe': 'an axe', 'Cudgel': 'a cudgel', 'Foil': 'a foil',
@@ -102,22 +105,30 @@ const SKILL_PHRASE = {
     'Tracked Vehicles': 'operating tracked vehicles', 'Wheeled Vehicles': 'operating wheeled vehicles',
     'ACV': 'operating an air-cushion vehicle',
     'Vacc Suit': 'operating in a vacuum',
-    'Engineering': 'space engineering', 'Navigation': 'space navigation',
+    'Engineering': 'space engineering', 'Navigation': 'navigating through space',
     'Biology': 'biology', 'Chemistry': 'chemistry', 'Genetics': 'genetics',
     'Forensics': 'forensics', 'Medical': 'medicine', 'Physics': 'physics', 'Robotics': 'robotics',
-    'Admin': 'administration', 'Interview': 'interviewing techniques',
-    'Linguistics': 'linguistics', 'Liasan': 'liaison work', 'Steward': 'stewardship',
+    'Admin': 'administration', 'Administration': 'administration',
+    'Interview': 'interviewing techniques',
+    'Linguistics': 'linguistics', 'Liaison': 'liaison work', 'Steward': 'the care and feeding of passengers',
     'Communications': 'communications technology', 'Computer': 'computer science',
     'Electronics': 'electronics', 'Gravitics': 'gravitics',
-    'Robot Ops': 'robot operations', 'Sensor Ops': 'sensor operations',
+    'Robot Ops': 'robot operations', 'Sensor Ops': 'experience with reading sensor data',
     'Guard/Hunting Beasts': 'handling guard and hunting animals',
     'Equestrian': 'horsemanship', 'Herding': 'herding animals',
     'Hunting': 'hunting', 'Recon': 'reconnaissance', 'Survival': 'wilderness survival',
     'Broker': 'brokerage', 'Legal': 'legal practice', 'Trader': 'trading',
-    'Instruction': 'instruction', 'Leader': 'leadership',
+    'Instruction': 'instruction', 'Leader': 'leadership', 'Leadership': 'leadership',
     'Brawling': 'unarmed combat',
+    'Tactics': 'tactical operations', 'Gunnery': 'ship gunnery',
+    'Forward Observer': 'calling in artillery and directing fire support',
+    'Mechanics': 'mechanical systems repair', 'Mechanical': 'mechanical systems repair',
+    'Battle Dress': 'operating powered battle armor',
+    'Zero-G Combat': 'zero-gravity combat',
+    'Ship Tactics': 'ship-to-ship tactical maneuvering', 'Fleet Tactics': 'fleet-level tactical operations',
+    'Technical': 'technical systems maintenance', 'Academic': 'academic study',
     'Bribery': 'bribery', 'Disguise': 'disguise', 'Forgery': 'forgery',
-    'Intrusion': 'intrusion', 'Streetwise': 'streetwise',
+    'Intrusion': 'lockpicking, picking pockets and other ways to enter restricted areas', 'Streetwise': 'local subcultures',
 };
 
 function categorizeSkill(skill) {
@@ -244,13 +255,13 @@ export function buildYearHistoryArmy(flags, characterName, career) {
 
 function buildNavyAssignmentText(assignment, characterName, worldName, battleName, operationName) {
     switch (assignment) {
-        case "Training":     return `${characterName} spent a year in training`;
-        case "Shore Duty":   return `${characterName} was posted to shore duty on ${worldName}`;
-        case "Patrol":       return `${characterName} served aboard a patrol vessel in the ${worldName} system`;
-        case "Siege":        return `${characterName} participated in the siege of ${worldName}`;
-        case "Strike":       return `${characterName} took part in ${operationName} at ${worldName}`;
-        case "Battle":       return `${characterName} served in ${battleName ?? "a major fleet engagement"}`;
-        default:             return `${characterName} spent the year on assignment`;
+        case "Training": return `${characterName} spent a year in training`;
+        case "Shore Duty": return `${characterName} was posted to shore duty on ${worldName}`;
+        case "Patrol": return `${characterName} served aboard a patrol vessel in the ${worldName} system`;
+        case "Siege": return `${characterName} participated in the siege of ${worldName}`;
+        case "Strike": return `${characterName} took part in ${operationName} at ${worldName}`;
+        case "Battle": return `${characterName} served in ${battleName ?? "a major fleet engagement"}`;
+        default: return `${characterName} spent the year on assignment`;
     }
 }
 
@@ -265,7 +276,7 @@ export function buildYearHistoryNavy(flags, characterName) {
 
     const prefix = `Term ${term}, Year ${year}: `;
 
-    if (frozenWatch) return `${prefix}${characterName} spent the year in frozen watch aboard a transit vessel.`;
+    if (frozenWatch) return `${prefix}Frozen Watch. ${characterName} was catalogued, sedated, and stowed — a replacement body held in reserve for casualties that hadn't happened yet. When they woke, a year had been spent on their behalf by people who hoped they'd never need to.`;
     if (routineDuty) return `${prefix}${characterName} spent the year on routine duty.`;
 
     if (special) {
@@ -295,6 +306,79 @@ export function buildYearHistoryNavy(flags, characterName) {
     if (promoted) text += ` ${characterName} was promoted to ${promotedToRankName}.`;
 
     return `${prefix}${text}`;
+}
+
+// ─── Term Event Builders ─────────────────────────────────────────────────────
+
+export function buildBranchAssignmentArmy(characterName, arm, career) {
+    return `${characterName} selected the ${arm} arm of the ${career}.`;
+}
+
+export function buildInitialTrainingArmy(characterName, branch, career, skill1, skill2) {
+    const skills = [skill1, skill2].filter(Boolean);
+    const gains = describeSkillGains(skills, career);
+    return `${characterName} completed initial training in the ${branch ?? career}, ${gains}.`;
+}
+
+export function buildBranchAssignmentNavy(characterName, branchName, fleetDisplay) {
+    return `${characterName} was assigned to the ${branchName} branch of the ${fleetDisplay}.`;
+}
+
+export function buildBootCampNavy(characterName, branch, skill1, skill2) {
+    const skills = [skill1, skill2].filter(Boolean);
+    const gains = describeSkillGains(skills, 'navy');
+    return `${characterName} completed boot camp in the ${branch} branch, ${gains}.`;
+}
+
+export function buildSkillGainHistory(term, year, characterName, skill, tableName, career) {
+    const gains = describeSkillGains([skill], career);
+    switch (tableName) {
+        case "Navy Life":
+            tableName = "in their off time";
+            break;
+        case "Army":
+            tableName = "in their off time";
+            break;
+        case "Marine Life":
+            tableName = "in their off time";
+            break;
+        case "Shipboard Life":
+            tableName = "in their off time between worlds";
+            break;
+        case "Shore Duty":
+            tableName = "in their off time while stuck planet-side";
+            break;
+        case "Petty Officer":
+            tableName = "as a petty officer";
+            break;
+        case "NCO":
+            tableName = "as an NCO";
+            break;
+        case "Command":
+            tableName = "as a commanding officer";
+            break;
+        case "Command":
+            tableName = "as a staff officer";
+            break;
+        default:
+            tableName = `During ${tableName} training,`;
+            break;
+    }
+    return `Term ${term}, Year ${year}: ${tableName} ${characterName} ${gains}.`;
+}
+
+export function buildEndOfTermArmy(characterName, term, career, branch, bonusSkill, agingHist) {
+    let text = `${characterName} completed Term ${term} as ${career} (${branch}). `;
+    if (bonusSkill) {
+        const gains = describeSkillGains([bonusSkill], career);
+        text += `On special assignment, ${characterName} ${gains}. `;
+    }
+    text += agingHist;
+    return text;
+}
+
+export function buildEndOfTermNavy(characterName, term, fleetDisplay, branch, agingHist) {
+    return `${characterName} completed Term ${term} with the ${fleetDisplay} (${branch}).${agingHist}`;
 }
 
 // ─── Biography Generator ────────────────────────────────────────────────────
@@ -352,13 +436,13 @@ export function generateBiographyCareer(_characterData, _skills, _characterName)
 const CAREER_DISPLAY_BIO = { law: 'law enforcement officer' };
 
 export function generateBiographyMusterOut(characterData, _skills, characterName) {
-    const { career, pension, cash, ship, shipshares, gear, age } = characterData;
+    const { career, pension, cash, ship, shipshares, gear, chronoAge } = characterData;
     const { careername, terms } = career;
 
     const careerDisplay = CAREER_DISPLAY_BIO[careername] ?? careername;
     const yearsServed = terms * 4;
 
-    let para1 = `After ${terms} term${terms !== 1 ? 's' : ''} and ${yearsServed} years as a ${careerDisplay}, ${characterName} mustered out at age ${age}.`;
+    let para1 = `After ${terms} term${terms !== 1 ? 's' : ''} and ${yearsServed} years as a ${careerDisplay}, ${characterName} mustered out at age ${chronoAge}.`;
 
     if (pension > 0) {
         para1 += ` Having served long enough to earn a pension, they will receive Cr${pension.toLocaleString()} per year for the rest of their life.`;

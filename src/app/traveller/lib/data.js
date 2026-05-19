@@ -491,7 +491,7 @@ export const datatables = {
         'Handguns': ['Body Pistol', 'Gauss Pistol', 'Pistol', 'Revolver', 'Snub Pistol'],
         'Heavy Weapons': ['Grenade Launcher', 'Light Assault Gun', 'Machine Gun', 'Autocannon', 'Flamethrower', 'VRF Gauss Gun'],
         'Inborn': ['Artisan', 'Carousing', 'Instruction', 'Jack-of-all-Trades', 'Leader'],
-        'Interpersonal': ['Admin', 'Interview', 'Linguistics', 'Liasan', 'Recruiting', 'Steward'],
+        'Interpersonal': ['Admin', 'Interview', 'Linguistics', 'Liaison', 'Recruiting', 'Steward'],
         'Science': ['Biology', 'Chemistry', 'Genetics', 'Forensics', 'Medical', 'Physics', 'Robotics'],
         'Space': ['Engineering', 'Sensor Ops', 'Navigation', 'Pilot', 'Ships Boat', 'Vacc Suit'],
         'Space Combat': ['Gunnery', 'Sensor Ops', 'Ship Tactics', 'Tactics'],
@@ -750,13 +750,13 @@ export const datatables = {
             //Category, Condition, Level Req, DM returned
             "Survival": ['Skill', 'MOS', 2, 1],
             "Decoration": ['None'],
-            "Promotion": ['UUP', 'Education', 7, 1],
+            "Promotion": ['UUP', 'EDU', 7, 1],
             "Command": {
                 "marines": 7,
                 "army": 7
             },
             "Assignement": ['Raid', 'Raid', 'Counter Insurgency', 'Counter Insurgency', 'Garrison', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Internal Security', 'Police Action'],
-            "MOS": ['Gun Combat', 'Special Combat', 'Heavy Weapons', 'Heavy Weapons', 'Vehicle', 'Recon', 'Vacc Suit']
+            "MOS": ['Gun Combat', 'Special Combat', 'Heavy Weapons', 'Heavy Weapons', 'Vehicle', 'Environ', 'Vacc Suit']
         },
         Marines: {
             "Training": [0, 0, 6, 7, false],
@@ -768,7 +768,7 @@ export const datatables = {
             "Garrison": [0, 0, 7, 0, false],
             "Survival": ['Skill', 'MOS', 2, 1],
             "Decoration": ['None'],
-            "Promotion": ['UUP', 'Education', 7, 1],
+            "Promotion": ['UUP', 'EDU', 7, 1],
             "Command": {
                 "marines": 7,
                 "army": 7
@@ -785,13 +785,13 @@ export const datatables = {
             "Garrison": [0, 0, 7, 0, false],
             "Survival": ['None'],
             "Decoration": ['None'],
-            "Promotion": ['UUP', 'Intelligence', 8, 1],
+            "Promotion": ['UUP', 'INT', 8, 1],
             "Command": {
                 "marines": 10,
                 "army": 10
             },
             "Assignement": ['Raid', 'Internal Security', 'Counter Insurgency', 'Garrison', 'Garrison', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Internal Security', 'Police Action'],
-            "MOS": ['Vehicle', 'Combat Engineering', 'Vehicle', 'Mechanical', 'Electronic', 'Medical', 'Computer']
+            "MOS": ['Vehicle', 'Combat Engineering', 'Vehicle', 'Mechanical', 'Electronic', 'Medical', 'Technical']
         },
         Commando: {
             "Training": [3, 0, 8, 6, false],
@@ -800,13 +800,13 @@ export const datatables = {
             "Counter Insurgency": [5, 8, 7, 6, true],
             "Survival": ['Skill', 'MOS', 2, 1],
             "Decoration": ['None'],
-            "Promotion": ['UUP', 'Endurance', 8, 1],
+            "Promotion": ['UUP', 'END', 8, 1],
             "Command": {
                 "marines": 7,
                 "army": 6
             },
             "Assignement": ['Raid', 'Raid', 'Counter Insurgency', 'Police Action', 'Internal Security', 'Garrison', 'Training', 'Training', 'Counter Insurgency', 'Raid', 'Raid'],
-            "MOS": ['Gun Combat', 'Special Combat', 'Heavy Weapons', 'Demolitions', 'Survival', 'Recon', 'Battle Dress']
+            "MOS": ['Gun Combat', 'Special Combat', 'Heavy Weapons', 'Demolitions', 'Environ', 'Recon', 'Battle Dress']
         },
         Artillery: {
             //Survival, Decoration, Promotion, Skill
@@ -819,13 +819,13 @@ export const datatables = {
             //Category, Condition, Level Req, DM returned
             "Survival": ['Skill', 'MOS', 2, 1],
             "Decoration": ['None'],
-            "Promotion": ['UUP', 'Education', 7, 1],
+            "Promotion": ['UUP', 'EDU', 7, 1],
             "Command": {
                 "marines": 9,
                 "army": 8
             },
             "Assignement": ['Raid', 'Training', 'Counter Insurgency', 'Police Action', 'Garrison', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Counter Insurgency', 'Training'],
-            "MOS": ['Field Artillery Gunner', 'Field Artillery Gunner', 'Vehicle', 'Mechanical', 'Forward Observer', 'Computer', 'Electronics']
+            "MOS": ['Field Artillery Gunner', 'Field Artillery Gunner', 'Vehicle', 'Mechanical', 'Forward Observer', 'Computer', 'Technical']
         },
         Cavalry: {
             //Survival, Decoration, Promotion, Skill, combat
@@ -838,21 +838,21 @@ export const datatables = {
             //Category, Condition, Level Req, DM returned
             "Survival": ['Skill', 'MOS', 2, 1],
             "Decoration": ['None'],
-            "Promotion": ['UUP', 'Education', 7, 1],
+            "Promotion": ['UUP', 'EDU', 7, 1],
             "Command": {
                 "marines": 7,
                 "army": 7
             },
             "Assignement": ['Raid', 'Training', 'Counter Insurgency', 'Police Action', 'Garrison', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Internal Security', 'Police Action'],
-            "MOS": ['Vehicle', 'Vehicle', 'Vehicle', 'Heavy Weapons', 'Heavy Weapons', 'Mechancal', 'Computer']
+            "MOS": ['Vehicle', 'Vehicle', 'Vehicle', 'Heavy Weapons', 'Heavy Weapons', 'Mechanical', 'Technical']
         },
         ServiceSkills: {
-            "Army Life": ["Brawling", "Strength", "Gambling", "Dexterity", "Endurance", "Endurance", "Pistol", "Social", "Social"],
-            "Marines Life": ["Brawling", "Gambling", "Strength", "Dexterity", "Endurance", "Blade Combat", "Education", "Social", "Social"],
-            "NCO": ["Heavy Weapons", "Mechanics", "Tactics", "Heavy Weapons", "Mechanical", "Tactics", "Leadership", "Leadership", "Administration", "Instruction", "Administration"],
-            "Command": ["Endurance", "Gun Combat", "Vehicle", "Heavy Weapons", "Leadership", "Tactics", "Tactics", "Leadership"],
-            "Staff": ["Mechanical", "Foward Observer", "Computer", "Electronics", "Medical", "Instruction", "Administration", "Administration"],
-            "Shipboard Life": ["Forward Observer", "Ships Boat", "Gunnery", "Vacc Suit", "Gunnery", "Vacc Suit"]
+            "Army Life": ["Brawling", "STR", "Vice", "DEX", "END", "END", "Handgun", "SOC", "SOC"],
+            "Marines Life": ["Brawling", "Vice", "STR", "DEX", "END", "Hand Combat", "EDU", "SOC", "SOC"],
+            "NCO": ["Heavy Weapons", "Mechanics", "Tactics", "Heavy Weapons", "Mechanical", "Tactics", "Leadership", "Inborn", "Interpersonal"],
+            "Command": ["END", "Gun Combat", "Vehicle", "Heavy Weapons", "Leadership", "Tactics", "Tactics", "Inborn"],
+            "Staff": ["Mechanical", "Forward Observer", "Computer", "Electronics", "Medical", "Instruction", "Administration", "Academic"],
+            "Shipboard Life": ["Forward Observer", "Ships Boat", "Gunnery", "Vacc Suit", "Gunnery", "Vacc Suit", "Ship Tactics", "Fleet Tactics"]
         },
         Special: {
             "E": ["Cross-Training", "Specialist School", "Commando School", "Protected Forces", "Recruiting", "Recruiting", "OCS", "OCS"],
@@ -891,8 +891,8 @@ export const datatables = {
             "Battle": [0, 0, 7, 0, true],
             "Survival": ['Skill', 'MOS', 2, 1],
             "Decoration": ['None'],
-            "Promotion": ['UUP', ['Education', 'Social'], [8, 9], 1],
-            "MOS": ['Mechanical', 'Electronic', 'Gun Combat', 'Navigation', 'Computer', 'Liaison', 'Zero-G Combat', 'Vacc Suit'],
+            "Promotion": ['UUP', ['EDU', 'SOC'], [8, 9], 1],
+            "MOS": ['Mechanical', 'Electronic', 'Gun Combat', 'Navigation', 'Computer', 'Interpersonal', 'Zero-G Combat', 'Vacc Suit'],
             "Command": 7
         },
         Crew: {
@@ -904,8 +904,8 @@ export const datatables = {
             "Battle": [0, 0, 7, 0, true],
             "Survival": ['Skill', 'MOS', 2, 1],
             "Decoration": ['None'],
-            "Promotion": ['UUP', ['Education', 'Social'], [8, 9], 1],
-            "MOS": ['Mechanical', 'Electronic', 'Gun Combat', 'Navigation', 'Computer', 'Liaison', 'Zero-G Combat', 'Vacc Suit'],
+            "Promotion": ['UUP', ['EDU', 'SOC'], [8, 9], 1],
+            "MOS": ['Mechanical', 'Electronic', 'Gun Combat', 'Navigation', 'Computer', 'Interpersonal', 'Zero-G Combat', 'Vacc Suit'],
             "Command": 0
         },
         Flight: {
@@ -918,7 +918,7 @@ export const datatables = {
             "Survival": ['Skill', 'Pilot', 2, 1],
             "Decoration": ['Rank', 'Traveller'],
             "Promotion": ['None'],
-            "MOS": ['Vacc Suit', 'Admin', 'Gun Combat', 'Communications', 'Ships Boat', 'Navigation', 'Pilot', 'Pilot'],
+            "MOS": ['Vacc Suit', 'Admin', 'Gun Combat', 'Communications', 'Ships Boat', 'Space', 'Pilot', 'Pilot'],
             "Command": 8
         },
         Engineering: {
@@ -931,7 +931,7 @@ export const datatables = {
             "Survival": ['Skill', 'Engineering', 4, 1],
             "Decoration": ['None'],
             "Promotion": ['None'],
-            "MOS": ['Mechanical', 'Electronic', 'Engineering', 'Mechanical', 'Vacc Suit', 'Engineering', 'Engineering', 'Engineering'],
+            "MOS": ['Mechanical', 'Electronic', 'Engineering', 'Mechanical', 'Vacc Suit', 'Space Tech', 'Engineering', 'Engineering'],
             "Command": 10
         },
         Medical: {
@@ -944,7 +944,7 @@ export const datatables = {
             "Survival": ['None'],
             "Decoration": ['None'],
             "Promotion": ['Skill', 'Medical', 5, 1],
-            "MOS": ['Administration', 'Jack-of-All-Trades', 'Electronic', 'Administration', 'Medical', 'Computer', 'Medical', 'Medical'],
+            "MOS": ['Administration', 'Technical', 'Electronic', 'Administration', 'Medical', 'Computer', 'Medical', 'Medical'],
             "Command": 11
         },
         Gunnery: {
@@ -955,9 +955,9 @@ export const datatables = {
             "Strike": [5, 9, 7, 6, true],
             "Battle": [6, 7, 6, 6, true],
             "Survival": ['None'],
-            "Decoration": ['UUP', 'Dexterity', 10, 1],
-            "Promotion": ['UUP', 'Dexterity', 9, 1],
-            "MOS": ['Forward Observer', 'Gun Combat', 'Communications', 'Computer', 'Gunnery', 'Gunnery', 'Gunnery', 'Gunnery'],
+            "Decoration": ['UUP', 'DEX', 10, 1],
+            "Promotion": ['UUP', 'DEX', 9, 1],
+            "MOS": ['Forward Observer', 'Gun Combat', 'Communications', 'Computer', 'Sensor Ops', 'Special Combat', 'Gunnery', 'Gunnery'],
             "Command": 9
         },
         Technical: {
@@ -970,7 +970,7 @@ export const datatables = {
             "Survival": ['None'],
             "Decoration": ['None'],
             "Promotion": ['Skill', 'MOS', 3, 1],
-            "MOS": ['Mechanical', 'Mechanical', 'Electronic', 'Electronic', 'Computer', 'Computer', 'Gravitics', 'Jack-of-All-Trades'],
+            "MOS": ['Mechanical', 'Mechanical', 'Electronic', 'Electronic', 'Computer', 'Computer', 'Gravitics', 'Technical'],
             "Command": 12
         },
         BranchSelect: {
@@ -978,12 +978,12 @@ export const datatables = {
             "O": ['Technical Services', 'Line', 'Line', 'Engineering', 'Gunnery', 'Line', 'Flight', 'Medical']
         },
         ServiceSkills: {
-            "Navy Life": ['Brawling', 'Strength', 'Carousing', 'Gambling', 'Endurance', 'Dexterity', 'Endurance', 'Education', 'Carousing', 'Vacc Suit'],
-            "Shipboard Life": ['Gambling', 'Dexterity', 'Blade Combat', 'Mechanical', 'Ships Boat', 'Vacc Suit', 'Zero-G Combat', 'Communications', 'Administration', 'Jack-of-All-Trades'],
-            "Shore Duty Life": ['Carousing', 'Vehicle', 'Forward Observer', 'Vacc Suit', 'Liaison', 'Vehicle', 'Forward Observer', 'Survival', 'Vacc Suit', 'Battle Dress'],
-            "Petty Officer": ['Vacc Suit', 'Blade Combat', 'Gun Combat', 'Mechanical', 'Medical', 'Leadership', 'Zero-G Combat', 'Education', 'Instruction', 'Administration'],
-            "Command": ['Vehicle', 'Endurance', 'Gun Combat', 'Ships Boat', 'Pilot', 'Ship Tactics', 'Leadership', 'Social', 'Leadership', 'Ship Tactics'],
-            "Staff": ['Computer', 'Electronics', 'Gun Combat', 'Administration', 'Bribery', 'Ship Tactics', 'Fleet Tactics', 'Intelligence', 'Ship Tactics', 'Fleet Tactics']
+            "Navy Life": ['Brawling', 'STR', 'Carousing', 'Gambling', 'END', 'DEX', 'END', 'EDU', 'Inborn', 'Vacc Suit'],
+            "Shipboard Life": ['Gambling', 'DEX', 'Hand Combat', 'Mechanical', 'Ships Boat', 'Vacc Suit', 'Zero-G Environ', 'Communications', 'Administration', 'Inborn'],
+            "Shore Duty Life": ['Vice', 'Vehicle', 'Forward Observer', 'Vacc Suit', 'Liaison', 'Vacc Suit', 'Forward Observer', 'Environ', 'Vacc Suit', 'Battle Dress'],
+            "Petty Officer": ['Vacc Suit', 'Blade Combat', 'Gun Combat', 'Mechanical', 'Medical', 'Vehicle', 'Zero-G Environ', 'EDU', 'Instruction', 'Interpersonal'],
+            "Command": ['Vehicle', 'END', 'Gun Combat', 'Ships Boat', 'Pilot', 'Leadership', 'Leadership', 'SOC', 'Inborn', 'Ship Tactics'],
+            "Staff": ['Computer', 'Electronics', 'Gun Combat', 'Academic', 'Bribery', 'Ship Tactics', 'Fleet Tactics', 'INT', 'Ship Tactics', 'Fleet Tactics']
         },
         Assignments: ['Battle', 'Frozen Watch', 'Siege', 'Strike', 'Patrol', 'Training', 'Patrol', 'Strike', 'Shore Duty', 'Special', 'Special', 'Special'],
         Special: {
@@ -1005,7 +1005,7 @@ export const datatables = {
             "Mission": [4, 0, 0, 6, false],
             "Special": [5, 0, 0, 6, true],
             "Wartime": [6, 0, 0, 7, true],
-            "Survival": ['UUP', 'Endurance', 9, 1],
+            "Survival": ['UUP', 'END', 9, 1],
             "Skill": ['Terms', 'Terms', 3, 1],
             "Decoration": ['None'],
             "Promotion": ['None'],
@@ -1020,7 +1020,7 @@ export const datatables = {
             "Mission": [5, 0, 0, 7, false],
             "Special": [6, 0, 0, 6, true],
             "Wartime": [6, 0, 0, 6, true],
-            "Survival": ['UUP', 'Endurance', 9, 1],
+            "Survival": ['UUP', 'END', 9, 1],
             "Skill": ['Skill', 'Pilot', 3, 1],
             "Decoration": ['None'],
             "Promotion": ['None'],
@@ -1035,8 +1035,8 @@ export const datatables = {
             "Mission": [5, 0, 0, 7, false],
             "Special": [5, 0, 0, 7, true],
             "Wartime": [6, 0, 0, 6, true],
-            "Survival": ['UUP', 'Endurance', 9, 1],
-            "Skill": ['UUP', 'Intelligence', 9, 1],
+            "Survival": ['UUP', 'END', 9, 1],
+            "Skill": ['UUP', 'INT', 9, 1],
             "Decoration": ['None'],
             "Promotion": ['None'],
             "MOS": ['Air Raft', 'Vehicle', 'Gun Combat', 'Vacc Suit', 'Recon', 'Space', 'Survival', 'Jack-of-All-Trades', 'Vehicle', 'Gun Combat'],
@@ -1050,11 +1050,11 @@ export const datatables = {
             "Mission": [3, 0, 7, 7, false],
             "Special": [3, 0, 6, 7, true],
             "Wartime": [5, 0, 5, 7, true],
-            "Survival": ['UUP', 'Intelligence', 9, 1],
+            "Survival": ['UUP', 'INT', 9, 1],
             "Skill": ['None'],
             "Decoration": ['None'],
             "Promotion": ['None'],
-            "MOS": ['Electronic', 'Admin', 'Communications', 'Computer', 'Computer', 'Broker', 'Intelligence', 'Education', 'Liaison', 'Admin'],
+            "MOS": ['Electronic', 'Admin', 'Communications', 'Computer', 'Computer', 'Broker', 'INT', 'EDU', 'Liaison', 'Admin'],
             "School": ['Specialist', 'Specialist', 'Specialist', 'Ship', 'Field Training', 'Administrator']
         },
         Operations: {
@@ -1068,7 +1068,7 @@ export const datatables = {
             "Survival": ['Skill', 'Pilot', 2, 1],
             "Skill": ['None'],
             "Decoration": ['None'],
-            "Promotion": ['UUP', 'Intelligence', 9, 1],
+            "Promotion": ['UUP', 'INT', 9, 1],
             "MOS": ['Mechanical', 'Gun Combat', 'Vehicle', 'Engineering', 'Computer', 'Navigation', 'Pilot', 'Ships Boat', 'Gunnery', 'Ship Tactics'],
             "School": ['Specialist', 'Specialist', 'Ship', 'Ship', 'Field Training', 'Administrator']
         },
@@ -1083,8 +1083,8 @@ export const datatables = {
             "Survival": ['None'],
             "Skill": ['None'],
             "Decoration": ['None'],
-            "Promotion": ['UUP', 'Education', 10, 1],
-            "MOS": ['Strength', 'Mechanical', 'Vehicle', 'Vacc Suit', 'Electronic', 'Gravitics', 'Engineering', 'Education', 'Computer', 'Medic'],
+            "Promotion": ['UUP', 'EDU', 10, 1],
+            "MOS": ['STR', 'Mechanical', 'Vehicle', 'Vacc Suit', 'Electronic', 'Gravitics', 'Engineering', 'EDU', 'Computer', 'Medic'],
             "School": ['Specialist', 'Specialist', 'Technical', 'Technical', 'Technical', 'Administrator']
         },
         Detached: {
@@ -1107,17 +1107,17 @@ export const datatables = {
             "O": ['Detached', 'Detached', 'Technical', 'Technical', 'Operations', 'Operations', 'Operations', 'Administration', 'Administration', 'Administration', 'Administration']
         },
         ServiceSkills: {
-            "Scouts Life": ['Strength', 'Gambling', 'Gun Combat', 'Carousing', 'Gun Combat', 'Brawling', 'Education', 'Strength', 'Endurance', 'Dexterity'],
-            "Wartime": ['Hunting', 'Bribery', 'Equestrian', 'Forgery', 'Streetwise', 'Liaison', 'Survival', 'Gun Combat', 'Space', 'Social'],
-            "Field": ['Jack-of-All-Trades', 'Education', 'Gun Combat', 'Carousing', 'Gun Combat', 'Gambling', 'Education', 'Jack-of-All-Trades', 'Streetwise'],
-            "Bureaucracy": ['Intelligence', 'Gambling', 'Carousing', 'Education', 'Computer', 'Vehicle', 'Intelligence', 'Education', 'Streetwise', 'Intelligence'],
-            "Administrator": ['Admin', 'Admin', 'Computer', 'Vacc Suit', 'Gun Combat', 'Space', 'Liaison', 'Education', 'Leadership', 'Social'],
+            "Scouts Life": ['STR', 'Gambling', 'Gun Combat', 'Carousing', 'Gun Combat', 'Brawling', 'EDU', 'STR', 'END', 'DEX'],
+            "Wartime": ['Hunting', 'Bribery', 'Equestrian', 'Forgery', 'Streetwise', 'Liaison', 'Survival', 'Gun Combat', 'Space', 'SOC'],
+            "Field": ['Jack-of-All-Trades', 'EDU', 'Gun Combat', 'Carousing', 'Gun Combat', 'Gambling', 'EDU', 'Jack-of-All-Trades', 'Streetwise'],
+            "Bureaucracy": ['INT', 'Gambling', 'Carousing', 'EDU', 'Computer', 'Vehicle', 'INT', 'EDU', 'Streetwise', 'INT'],
+            "Administrator": ['Admin', 'Admin', 'Computer', 'Vacc Suit', 'Gun Combat', 'Space', 'Liaison', 'EDU', 'Leadership', 'SOC'],
         },
         ServiceSchools: {
             "Ship": [2, ['Pilot', 'Navigation', 'Engineering', 'Gunnery', 'Space', 'Space']],
             "Intelligence": [2, ['Forgery', 'Streetwise', 'Brawling', 'Bribery', 'Gun Combat', 'Survival']],
-            "Technical": [1, ['Computer', 'Electronics', 'Gravitites', 'Mechanical', 'Naval Architechture', 'Education']],
-            "Specialist": [1, ['Medical', 'Mechanical', 'Computer', 'Admin', 'Strength', 'Gunnery']],
+            "Technical": [1, ['Computer', 'Electronics', 'Gravitites', 'Mechanical', 'Naval Architechture', 'EDU']],
+            "Specialist": [1, ['Medical', 'Mechanical', 'Computer', 'Admin', 'STR', 'Gunnery']],
             "Field Training": [1, ['Vehicle', 'Air Raft', 'Recon', 'Survival', 'Navigation', 'Survey']],
             "Contact": [2, ['Survey', 'Liaison', 'Streetwise', 'Survival', 'Pilot', 'Gun Combat']],
             "Administrator": [0, []]
@@ -1268,7 +1268,7 @@ export const datatables = {
             "ExamScore": [4, 6, 7, 7, 8, 8]
         },
         ServiceSkills: {
-            "Merchants Life": ['Brawling', 'Carousing', 'Gambling', 'Trader', 'Education', 'Carousing'],
+            "Merchants Life": ['Brawling', 'Carousing', 'Gambling', 'Trader', 'EDU', 'Carousing'],
             "Shipboard Life": ['Gambling', 'Blade Combat', 'Vacc Suit', 'Zero-G Combat', 'Communications', 'Jack-of-All-Trades'],
             "Officer Skills": ['Brawling', 'Vehicle', 'Ship&#39;s Boat', 'Gun Combat', 'Liaison', 'Liaison'],
             "Mercantile Skills": ['Streetwise', 'Broker', 'Trader', 'Liaison', 'Admin', 'Legal'],
@@ -1280,7 +1280,7 @@ export const datatables = {
             "Admin": ['Admin', 'Liaison', 'Bribery', 'Admin', 'Admin', 'Streetwise'],
             "Sales": ['Trader', 'Broker', 'Computer', 'Liaison', 'Trader', 'Broker'],
             "Planet Bound Life": ['Gun Combat', 'Streetwise', 'Vacc Suit', 'Vacc Suit', 'Gun Combat', 'Brawling'],
-            "Free Trader Life": ['Dexterity', 'Brawling', 'Streetwise', 'Forgery', 'Bribery', 'Legal'],
+            "Free Trader Life": ['DEX', 'Brawling', 'Streetwise', 'Forgery', 'Bribery', 'Legal'],
             "Free Trader Service": ['Steward', 'Trader', 'Broker', 'Admin', 'Gunnery', 'Leadership'],
             "Free Trader Business": ['Engineering', 'Navigation', 'Steward', 'Legal', 'Steward', 'Broker']
         },
@@ -2321,16 +2321,16 @@ export const datatables = {
         ],
     CourtMartial: {
         "-1": "Case dismissed.",
-        "0":  "Reprimand (-1 to next promotion).",
-        "1":  "Reprimand (-3 to next promotion).",
-        "2":  "Reduce rank -1.",
-        "3":  "Reduce rank -2.",
-        "4":  "Jail (2D months), reduce rank -2.",
-        "5":  "Jail (1D years), DD.",
-        "6":  "Jail (2D years), DD.",
-        "7":  "Jail (2D years), DD.",
-        "8":  "Death. Escape; 10000 CR reward.",
-        "9":  "Death. Escape; 10000 CR reward.",
+        "0": "Reprimand (-1 to next promotion).",
+        "1": "Reprimand (-3 to next promotion).",
+        "2": "Reduce rank -1.",
+        "3": "Reduce rank -2.",
+        "4": "Jail (2D months), reduce rank -2.",
+        "5": "Jail (1D years), DD.",
+        "6": "Jail (2D years), DD.",
+        "7": "Jail (2D years), DD.",
+        "8": "Death. Escape; 10000 CR reward.",
+        "9": "Death. Escape; 10000 CR reward.",
         "10": "Death. Escape, killing 1D guards; 100000 CR reward.",
     },
 };

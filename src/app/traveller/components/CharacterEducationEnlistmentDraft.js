@@ -130,7 +130,7 @@ export default function CharacterEducationEnlistmentDraft({
 
                 handleHistoryAdd(`${characterName} applied to ${friendlyName} and was accepted but washed out of the program.`);
                 if (results.school === "medical") {
-                    setCharacterData((prev) => ({ ...prev, age: 23 }));
+                    setCharacterData((prev) => ({ ...prev, bioAge: 23, chronoAge: 23 }));
                 }
                 //setStep("enlistment")
                 setSchoolOptions([
@@ -150,7 +150,7 @@ export default function CharacterEducationEnlistmentDraft({
                         applySkill(setSkills, setCharacterData, "Pilot");
                         applySkill(setSkills, setCharacterData, "Pilot");
                     }
-                    setCharacterData((prev) => ({ ...prev, age: 23 }));
+                    setCharacterData((prev) => ({ ...prev, bioAge: 23, chronoAge: 23 }));
                     //setStep("navy")
                     setSchoolOptions([
                         { id: 1, name: "Take a commission as a Navy pilot", value: "navy" },
@@ -162,7 +162,7 @@ export default function CharacterEducationEnlistmentDraft({
                     }));
                 } else {
                     const currentEDU = characterData.EDU;
-                    setCharacterData((prev) => ({ ...prev, age: 24 }));
+                    setCharacterData((prev) => ({ ...prev, bioAge: 24, chronoAge: 24 }));
                     setCharacterData((prev) => ({ ...prev, EDU: currentEDU + 1 }));
                     setCharacterData(prev => ({
                         ...prev,
@@ -214,7 +214,7 @@ export default function CharacterEducationEnlistmentDraft({
             const draft = (results.school === "navy" || results.school === "military") ? ` and was immediately drafted into the ${results.school}` : "";
             const historyStr = `${characterName} applied to ${friendlyName} and was accepted but dropped out after 1 year${draft}.`;
             handleHistoryAdd(historyStr);
-            setCharacterData((prev) => ({ ...prev, age: 19 }));
+            setCharacterData((prev) => ({ ...prev, bioAge: 19, chronoAge: 19 }));
             if (results.school === "navy") {
                 //setStep("navy")
                 setSchoolOptions([
@@ -290,7 +290,7 @@ export default function CharacterEducationEnlistmentDraft({
                         ])
                     }
                 } else {
-                    setCharacterData((prev) => ({ ...prev, age: 22 }));
+                    setCharacterData((prev) => ({ ...prev, bioAge: 22, chronoAge: 22 }));
                     setSchoolOptions([
                         { id: 1, name: "Enlist in a career", value: "skip" },
                         scoutsOpt,
@@ -331,7 +331,7 @@ export default function CharacterEducationEnlistmentDraft({
                         { id: 2, name: "Apply to med school", value: "medical" },
                     ])
                 } else {
-                    setCharacterData((prev) => ({ ...prev, age: 22 }));
+                    setCharacterData((prev) => ({ ...prev, bioAge: 22, chronoAge: 22 }));
                     //setStep("army");
                     setSchoolOptions([
                         { id: 1, name: "Take a commission in the army", value: "enlistarmy" },
