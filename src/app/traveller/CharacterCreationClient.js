@@ -237,7 +237,7 @@ export default function CharacterCreation() {
                 {warning !== "" && <p className="text-xs text-destructive">{warning}</p>}
             </div>
         ),
-        retire: <MusterOut characterData={characterData} setCharacterData={setCharacterData} setSkills={setSkills} skills={skills} setGear={setGear} setStep={setStep} />,
+        retire: <MusterOut characterData={characterData} setCharacterData={setCharacterData} setSkills={setSkills} skills={skills} setGear={setGear} setStep={setStep} handleHistoryAdd={handleHistoryAdd} characterName={characterName} />,
         complete: (
             <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">Character creation complete. Your character sheet is finalized on the right.</p>

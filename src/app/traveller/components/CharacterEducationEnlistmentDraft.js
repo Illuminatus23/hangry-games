@@ -26,7 +26,7 @@ export default function CharacterEducationEnlistmentDraft({
             options.push({
                 id: 5,
                 name: "Naval Academy",
-                value: "navy",
+                value: "navalacademy",
             });
         }
 
@@ -92,7 +92,8 @@ export default function CharacterEducationEnlistmentDraft({
             return;
         }
 
-        const results = handleSchoolApp(upp, nextApplication, characterName);
+        const schoolKey = nextApplication === "navalacademy" ? "navy" : nextApplication;
+        const results = handleSchoolApp(upp, schoolKey, characterName);
         let friendlyName = "college";
         switch (results.school) {
             case "military":
@@ -301,7 +302,7 @@ export default function CharacterEducationEnlistmentDraft({
 
             } else if (results.school === "navy") {
                 //marine or navy commission
-                setCharacterData((prev) => ({ ...prev, commission: "navy" }));
+                setCharacterData((prev) => ({ ...prev, commission: "navy", bioAge: 22, chronoAge: 22 }));
 
                 if (results.honors) {
                     setWarning(`${characterName} applied to ${friendlyName}, was accepted and graduated with honors. Choose whether or not they go to a post graduate school.`);

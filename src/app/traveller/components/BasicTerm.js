@@ -3,7 +3,7 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { datatables } from "../lib/data";
 import SkillSelector from "./SkillSelector";
-import { careerCheckSimple, careerCheckSpecReinlist, generateBattlename, d6, applySkill, getAgingRolls } from "../lib/helpers";
+import { careerCheckSimple, careerCheckSpecReinlist, d6, applySkill, getAgingRolls } from "../lib/helpers";
 import { Button } from "@/components/ui/button";
 import { describeSkillGains } from "../lib/historyText";
 
@@ -30,6 +30,7 @@ export default function BasicTerm({
     const canPromote = careerData?.position[0] !== 99;
     const skillData = datatables.rank?.[career]?.skills;
     const terms = characterData.career.terms + 1;
+    const termYears = (characterData.career.terms === 0 && (characterData.bioAge ?? 18) === 19) ? 3 : 4;
 
     const automaticSkills = useMemo(() => {
         if (!career) return [];
@@ -136,7 +137,6 @@ export default function BasicTerm({
             charSurvival: careerCheckSimple(careerData.survival, upp, characterName),
             charPosition: (canPromote) ? careerCheckSimple(careerData.position, upp, characterName) : [false, ""],
             charPromo: (canPromote) ? careerCheckSimple(careerData.promotion, upp, characterName) : [false, ""],
-            charSpec: careerCheckSpecReinlist(careerData.specduty, characterName),
             charReenlist: careerCheckSpecReinlist(careerData.reenlist, characterName),
         }
 
@@ -165,7 +165,7 @@ export default function BasicTerm({
             setPageWarning?.(warningText);
             setStep("End")
         } else {
-            historyText = (termResults.charPosition || termResults.charPromo || termResults.charSpec) ? historyText + `${characterName} spent 4 years as a ${career}. ` : historyText + `${characterName} spent 4 uneventful years as a ${career}. `;
+            historyText = (termResults.charPosition[0] || termResults.charPromo[0]) ? historyText + `${characterName} spent ${termYears} years as a ${career}. ` : historyText + `${characterName} spent ${termYears} uneventful years as a ${career}. `;
             const isFirstTerm = characterData.career.terms === 0;
             const isDraftedFirstTerm = characterData.career?.drafted && isFirstTerm;
             //lived!
@@ -222,29 +222,14 @@ export default function BasicTerm({
                     }
                 }
             }
-            warningText = warningText + `Special Assignment: ${termResults.charSpec[1]}. `;
-
-            if (termResults.charSpec[0]) {
-                const rando = Math.floor((Math.random() * 5) + 1);
-                let descriptor = "";
-                if (career === "flyer" || career === "sailor") {
-                    const battleName = generateBattlename();
-                    descriptor = `saw combat during the ${battleName}`;
-                } else {
-                    descriptor = datatables.Basics[career].specDutyDesc[rando];
-                }
-                historyText = historyText + `During that time ${characterName} ${descriptor}. `;
-                skillGained = true;
-                setPicksRemaining((prev) => prev + 1);
-            }
             warningText = warningText + `Reinlist: ${termResults.charReenlist[1]}. `;
 
             let nextStep = 'reinlistChoice';
             if (termResults.charReenlist[3]) {
-                historyText = historyText + `At the end of 4 years, social and political pressure kept them in their career. `
+                historyText = historyText + `At the end of ${termYears} years, social and political pressure kept them in their career. `
                 nextStep = 'forced';
             } else if (!termResults.charReenlist[0]) {
-                historyText = historyText + `At the end of 4 years, social and political pressure forced them out of their career. `
+                historyText = historyText + `At the end of ${termYears} years, social and political pressure forced them out of their career. `
                 nextStep = 'retire';
             }
 
@@ -256,7 +241,7 @@ export default function BasicTerm({
             }
 
             // Aging check at end of term
-            const endAge = (characterData.bioAge ?? 18) + 4;
+            const endAge = (characterData.bioAge ?? 18) + termYears;
             if (endAge >= 34) {
                 const agingResult = getAgingRolls(endAge);
                 if (agingResult.decreases.length > 0) {
@@ -284,9 +269,10 @@ export default function BasicTerm({
     const handleRetire = () => {
         logPostTermSkills();
         const newTerms = characterData.career.terms + 1;
-        const newBioAge = (characterData.bioAge ?? 18) + 4;
-        const newChronoAge = (characterData.chronoAge ?? 18) + 4;
-        const pension = (newTerms >= 5 && PENSION_CAREERS.includes(career)) ? 2000 * newTerms : 0;
+        const newBioAge = (characterData.bioAge ?? 18) + termYears;
+        const newChronoAge = (characterData.chronoAge ?? 18) + termYears;
+        const dishonorably = characterData.awards?.includes('Dishonorable Discharge') ?? false;
+        const pension = (!dishonorably && newTerms >= 5 && PENSION_CAREERS.includes(career)) ? 2000 * newTerms : 0;
         setCharacterData(prev => ({
             ...prev,
             bioAge: newBioAge,
@@ -300,8 +286,8 @@ export default function BasicTerm({
     const handleReinlist = () => {
         logPostTermSkills();
         const newTerms = characterData.career.terms + 1;
-        const newBioAge = (characterData.bioAge ?? 18) + 4;
-        const newChronoAge = (characterData.chronoAge ?? 18) + 4;
+        const newBioAge = (characterData.bioAge ?? 18) + termYears;
+        const newChronoAge = (characterData.chronoAge ?? 18) + termYears;
         setCharacterData(prev => ({
             ...prev,
             bioAge: newBioAge,
@@ -317,6 +303,8 @@ export default function BasicTerm({
         setPickIndex(prev => prev + 1);
         setWarning("");
     };
+
+    const exitLabel = (characterData.career.terms + 1) >= 5 ? "Retire" : "Muster Out";
 
     return (
         <div className="space-y-3">
@@ -365,7 +353,7 @@ export default function BasicTerm({
                     )}
                     {pendingTermStep !== 'forced' && (
                         <Button type="button" variant="outline" onClick={handleRetire}>
-                            Retire
+                            {exitLabel}
                         </Button>
                     )}
                 </div>
@@ -380,7 +368,7 @@ export default function BasicTerm({
                     )}
                     {termStep !== 'forced' && (
                         <Button type="button" variant="outline" onClick={handleRetire}>
-                            Retire
+                            {exitLabel}
                         </Button>
                     )}
                 </div>

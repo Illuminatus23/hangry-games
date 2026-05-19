@@ -26,13 +26,13 @@ export const datatables = {
             " was valedictorian of the graduating class at the prestigious Imperial Secondary School"],
         stat: ["", "non-existent", "pathetic", "terrible", "weak", "below average", "average", "above average", "good", "excellent", "amazing", "unbelievable", "superhuman", "alien", "god-like"],
         planet: {
-            "size": ['astroid', 'small', 'small', 'small', 'small', 'medium', 'medium', 'medium', 'large', 'large', 'large'],
+            "size": ['asteroid', 'small', 'small', 'small', 'small', 'medium', 'medium', 'medium', 'large', 'large', 'large'],
             "atmosphere": ['no', 'a trace', 'a very thin, tainted', 'a very thin', 'a thin, tainted', 'a standard', 'a tainted', 'a dense', 'a dense, tainted', 'an exotic', 'a corrosive', 'an insidious', 'a high, dense', 'an ellipsoid', 'a thin, low'],
             "hydrosphere": ['desert', 'dry', 'dry', 'temperate', 'temperate', 'temperate', 'wet', 'wet', 'wet', 'wet', 'water'],
             "population": ['small', 'small', 'average', 'average', 'average', 'average', 'large', 'large', 'very large', 'very large', 'extremely large'],
-            "law": ['an anarchist', 'an unstable', 'a weak', 'a permissive', 'an enlightened', 'a moderate', 'a moderate', 'a strict', 'extremely strict', 'a domineering', 'a repressive', 'an authoritative', 'an oppressive', 'a fascist', 'a tyrannical', 'a paramiltirary', 'a police state controled by', 'an inhumane'],
+            "law": ['an anarchist', 'an unstable', 'a weak', 'a permissive', 'an enlightened', 'a moderate', 'a moderate', 'a strict', 'extremely strict', 'a domineering', 'a repressive', 'an authoritative', 'an oppressive', 'a fascist', 'a tyrannical', 'a paramilitary', 'a police state controlled by', 'an inhumane'],
             "tech": ['pre-industrial', 'industrial', 'industrial', 'pre-stellar', 'pre-stellar', 'basic stellar', 'basic stellar', 'stellar', 'stellar', 'advanced stellar'],
-            "government": ['No Government', 'Corporate Government', 'Direct Democracy', 'Self-Perpetuating Oligarchy', 'Representative Democracy', 'Feudal Techocracy', 'Captive Government', 'Balkanized Government', 'Civil Service Beauacracy', 'Impersonal Bureaucracy', 'Charismatic Dictatorship', 'Non-Charismatic Dictatorship', 'Charismatic Oligarchy', 'Religious Dictatorship', 'Religious Autocracy', 'Totalitarian Oligarchy'],
+            "government": ['No Government', 'Corporate Government', 'Direct Democracy', 'Self-Perpetuating Oligarchy', 'Representative Democracy', 'Feudal Technocracy', 'Captive Government', 'Balkanized Government', 'Civil Service Bureaucracy', 'Impersonal Bureaucracy', 'Charismatic Dictatorship', 'Non-Charismatic Dictatorship', 'Charismatic Oligarchy', 'Religious Dictatorship', 'Religious Autocracy', 'Totalitarian Oligarchy'],
             "starport": {
                 "A": 'along a main space route in Imperial space',
                 "B": 'in Imperial space',
@@ -91,7 +91,7 @@ export const datatables = {
         "E": 'in the Frontier',
         "X": 'cut off from Imperial space'
     },
-    government: ['No Government', 'Corporate Government', 'Direct Democracy', 'Self-Perpetuating Oligarchy', 'Representative Democracy', 'Feudal Technocracy', 'Captive Government', 'Balkanized Government', 'Civil Service Beauacracy', 'Impersonal Bureaucracy', 'Charismatic Dictatorship', 'Non-Charismatic Dictatorship', 'Charismatic Oligarchy', 'Religious Dictatorship', 'Religious Autocracy', 'Totalitarian Oligarchy'],
+    government: ['No Government', 'Corporate Government', 'Direct Democracy', 'Self-Perpetuating Oligarchy', 'Representative Democracy', 'Feudal Technocracy', 'Captive Government', 'Balkanized Government', 'Civil Service Bureaucracy', 'Impersonal Bureaucracy', 'Charismatic Dictatorship', 'Non-Charismatic Dictatorship', 'Charismatic Oligarchy', 'Religious Dictatorship', 'Religious Autocracy', 'Totalitarian Oligarchy'],
     fullEnlistmentOps: {
         "marines": {
             enlist: [9, 'INT', 8, 'STR', 8],
@@ -219,7 +219,7 @@ export const datatables = {
         "Army": {
             "Infantry": ["Infantry", "Ground troops specializing in rifles, recon, and heavy weapons."],
             "Cavalry": ["Cavalry", "Ground troops specializing in air and land support."],
-            "Artillery": ["Artillery", "Support troops specializing in bombardment and artilery."],
+            "Artillery": ["Artillery", "Support troops specializing in bombardment and artillery."],
             "Support": ["Support", "Support troops providing medical and technical services to regular troops."]
         },
         "Marines": {
@@ -238,7 +238,7 @@ export const datatables = {
         "Scouts": {
             "Detached Duty": ["Detached", "Office of ex-scouts, records, and intelligence."],
             "Operations": ["Operations", "Office of security, maintenance and fleets."],
-            "Administration": ["Administration", "The Beauracracy in charge of finance, procurement and personnel."],
+            "Administration": ["Administration", "The Bureaucracy in charge of finance, procurement and personnel."],
             "Technical Services": ["Technical", "Education, research and development."]
         },
         "Merchants": {
@@ -271,7 +271,7 @@ export const datatables = {
             success: [9, 'EDU', 8, 2],
             education: ['1d6-3', 'INT', 9, 1],
             honors: [9, 'INT', 9, 1],
-            skills: ['Tactics', 'Leader', 'Admin', 'Heavy Weapons', 'Forward Observer', 'Computer']
+            skills: ['Tactics', 'Leadership', 'Admin', 'Heavy Weapons', 'Forward Observer', 'Computer']
         },
         merchants: {
             admission: [9, 'EDU', 10, 2],
@@ -304,7 +304,7 @@ export const datatables = {
             skills: ['Ships Boat', 'Navigation', 'Pilot'], //pilot 1d6-3(min1)
         },
     },
-    chanceToDescriptor: ["guarenteed", "guarenteed", "guaranteed", "nearly guaranteed", "very likely", "very high", "high", "average", "below average", "low", "very low", "unlikely", "near impossible", "non-existant", "impossible"],
+    chanceToDescriptor: ["guaranteed", "guaranteed", "guaranteed", "nearly guaranteed", "very likely", "very high", "high", "average", "below average", "low", "very low", "unlikely", "near impossible", "non-existent", "impossible"],
     skillToDescriptor: ["average", "trained", "proficient", "adept", "expert", "a master"],
     decorationDescriptor: {
         'MCUF': 'Meritorious Conduct Under Fire',
@@ -328,13 +328,13 @@ export const datatables = {
             E: ['', ['Private', 'Pvt'], ['Lance Corporal', 'LCpl'], ['Corporal', 'Cpl'], ['Lance Sergeant', 'Sgt'],
                 ['Sergeant', 'Sgt'], ['Gunnery Sergeant', 'Sgt'], ['Leading Sergeant', 'LdSgt'], ['First Sergeant', 'Sgt'], ['Sergeant Major', 'Sgt Maj']],
             O: ['', ['Second Lieutenant', 'Lt'], ['First Lieutenant', 'Lt'], ['Captain', 'Cpt'], ['Major', 'Maj'], ['Lieutenant Colonel', 'Lt Col'],
-                ['Colonel', 'Col'], ['Brigadier General', 'Brg Gen'], ['Major Genera', 'Maj Gen'], ['Lieutenant General', 'Lt Gen'], ['General', 'Gen']]
+                ['Colonel', 'Col'], ['Brigadier General', 'Brg Gen'], ['Major General', 'Maj Gen'], ['Lieutenant General', 'Lt Gen'], ['General', 'Gen']]
         },
         marines: {
             E: ['', ['Private', 'Pvt'], ['Lance Corporal', 'LCpl'], ['Corporal', 'Cpl'], ['Lance Sergeant', 'Sgt'],
                 ['Sergeant', 'Sgt'], ['Gunnery Sergeant', 'Sgt'], ['Leading Sergeant', 'Sgt'], ['First Sergeant', 'Sgt'], ['Sergeant Major', 'Sgt Maj']],
             O: ['', ['Second Lieutenant', 'Lt'], ['First Lieutenant', 'Lt'], ['Captain', 'Cpt'], ['Force Commander', 'Com'], ['Lieutenant Colonel', 'Lt Col'],
-                ['Colonel', 'Col'], ['Brigadier General', 'Brg Gen'], ['Major Genera', 'Maj Gen'], ['Lieutenant General', 'Lt Gen'], ['General', 'Gen']]
+                ['Colonel', 'Col'], ['Brigadier General', 'Brg Gen'], ['Major General', 'Maj Gen'], ['Lieutenant General', 'Lt Gen'], ['General', 'Gen']]
         },
         navy: {
             E: ['', ['Spacehand Recruit', ''], ['Spacehand Apprentice', ''], ['Able Spacehand', ''], ['Petty Officer 3rd Class', ''],
@@ -342,7 +342,7 @@ export const datatables = {
             O: ['', ['Ensign', 'Ens'], ['Sublieutenant', 'Sub Lt'], ['Lieutenant', 'Lt'], ['Lieutenant Commander', 'Lt Com'], ['Commander', 'Com'], ['Captain', 'Capt'],
                 ['Commodore', 'Comm'], ['Fleet Admiral', 'Admr'], ['Sector Admiral', 'Admr'], ['Grand Admiral', 'Admr']]
         },
-        scouts: { //Bearuacracy Only
+        scouts: { //Bureaucracy Only
             E: ['Field Operative', ['Recruit', ''], ['Apprentice', ''], ['Journeyman', ''], ['Skilled Worker', ''], ['Assistant Team Leader', ''], ['Team Leader', ''], ['Assistant Supervisor', ''], ['Supervisor', ''], ['Senior Supervisor', '']],
             O: ['', ['Administrative Trainee', ''], ['Junior Administrator', ''], ['Administrator', ''], ['Group Administrator', ''], ['Senior Administrator', ''], ['Scout Commander', ''], ['Scout Leader', ''],
                 ['Senior Scout Leader', ''], ['Sector Scout Leader', '']]
@@ -368,7 +368,7 @@ export const datatables = {
         },
         sailor: {
             E: [['', ''], ['', '']],
-            O: [['', ''], ['Ensign', 'Ens'], ['Lieutenent', 'Lt'], ['Lieutenant Commander', 'Lt Cdr'], ['Commander', 'Cdr'], ['Captain', 'Cpt'], ['Admiral', 'Adm'],],
+            O: [['', ''], ['Ensign', 'Ens'], ['Lieutenant', 'Lt'], ['Lieutenant Commander', 'Lt Cdr'], ['Commander', 'Cdr'], ['Captain', 'Cpt'], ['Admiral', 'Adm'],],
             skills: {
                 'E1': ['Small Watercraft'],
                 'O2': ['Large Watercraft']
@@ -444,11 +444,11 @@ export const datatables = {
         },
         barbarian: {
             E: [['', ''], ['', '']],
-            O: [['', ''], ['Brave', ''], ['Warior', ''], ['Leader', ''], ['Chieftan', ''], ['Chief', 'Chief'], ['Elder', 'Elder'],],
+            O: [['', ''], ['Brave', ''], ['Warrior', ''], ['Leader', ''], ['Chieftain', ''], ['Chief', 'Chief'], ['Elder', 'Elder'],],
             skills: {
                 'E1': ['Large Blade'],
                 'O2': ['Blade Combat'],
-                'O4': ['Leader'],
+                'O4': ['Leadership'],
             }
         },
 
@@ -490,7 +490,7 @@ export const datatables = {
         'Hand Combat': ['Blade Combat', 'Brawling', 'END', 'STR'],
         'Handguns': ['Body Pistol', 'Gauss Pistol', 'Pistol', 'Revolver', 'Snub Pistol'],
         'Heavy Weapons': ['Grenade Launcher', 'Light Assault Gun', 'Machine Gun', 'Autocannon', 'Flamethrower', 'VRF Gauss Gun'],
-        'Inborn': ['Artisan', 'Carousing', 'Instruction', 'Jack-of-all-Trades', 'Leader'],
+        'Inborn': ['Artisan', 'Carousing', 'Instruction', 'Jack-of-all-Trades', 'Leadership'],
         'Interpersonal': ['Admin', 'Interview', 'Linguistics', 'Liaison', 'Recruiting', 'Steward'],
         'Science': ['Biology', 'Chemistry', 'Genetics', 'Forensics', 'Medical', 'Physics', 'Robotics'],
         'Space': ['Engineering', 'Sensor Ops', 'Navigation', 'Pilot', 'Ships Boat', 'Vacc Suit'],
@@ -551,7 +551,7 @@ export const datatables = {
                 advanced: ['', 'Vice', 'Forensic', 'Environ', 'Tactics', 'Technical', 'Interrogation'],
                 education: ['', 'Legal', 'Inborn', 'Economic', 'Interview', 'Forensic', 'Interpersonal'],
             },
-            specDutyDesc: ['solved a high profile murder of a nobel', 'cracked a cold case and put a predator behind bars', 'took on the local organized crime ring, and won', 'put a corrupt politician behind bars', 'shut down a smuggling operation'],
+            specDutyDesc: ['solved a high profile murder of a noble', 'cracked a cold case and put a predator behind bars', 'took on the local organized crime ring, and won', 'put a corrupt politician behind bars', 'shut down a smuggling operation'],
             muster: {
                 cash: [1, 2, 5, 7.5, 10, 25, 50],
                 benefits: ['Low passage', 'INT', 'Forensics kit', 'Weapon', 'High passage', 'SOC', 'Traveller Aid Membership']
@@ -569,7 +569,7 @@ export const datatables = {
                 advanced: ['', 'Medical', 'Medical', 'Mechanical', 'Electronics', 'Technical', 'Academic'],
                 education: ['', 'Medical', 'Science', 'Interpersonal', 'Technical', 'Mental', 'Academic'],
             },
-            specDutyDesc: ['served as a medic in a war torn system', 'was mentored by a well-known surgon', 'began their own private practice', 'did break through research on a deadly disease', 'studied alien physiology'],
+            specDutyDesc: ['served as a medic in a war torn system', 'was mentored by a well-known surgeon', 'began their own private practice', 'did break through research on a deadly disease', 'studied alien physiology'],
             muster: {
                 cash: [20, 20, 20, 30, 40, 60, 100],
                 benefits: ['Low passage', 'EDU', 'EDU', 'Weapon', 'Medical instruments', 'Mid passage', '']
@@ -587,7 +587,7 @@ export const datatables = {
                 advanced: ['', 'Vice', 'Streetwise', 'Interrogation', 'Recruiting', 'Inborn', 'Economic'],
                 education: ['', 'Liaison', 'Interpersonal', 'Academic', 'Technical', 'Inborn', 'SOC'],
             },
-            specDutyDesc: ['was part of a delegation that brokered an important peace treaty', 'was elected for a term as a local official', 'was mentored by a renowned politicial', 'helped draft major planetary reforms', 'served as an ambassador in a foriegn system'],
+            specDutyDesc: ['was part of a delegation that brokered an important peace treaty', 'was elected for a term as a local official', 'was mentored by a renowned politician', 'helped draft major planetary reforms', 'served as an ambassador in a foreign system'],
             muster: {
                 cash: [2, 5, 10, 10, 10, 20, 30],
                 benefits: ['Low passage', 'INT', 'EDU+2', 'Weapon', 'SOC', 'High passage', 'Travellers Aid membership']
@@ -603,9 +603,9 @@ export const datatables = {
                 personal: ['', 'END', 'EDU', 'Mental', 'Brawling', 'DEX', 'Inborn'],
                 service: ['', 'Gun Combat', 'Vehicle', 'Hand Combat', 'Inborn', 'Vehicle', 'EDU'],
                 advanced: ['', 'Recruiting', 'Vehicle', 'Liaison', 'Interrogation', 'Interpersonal', 'Economic'],
-                education: ['', 'Economic', 'Academic', 'Computer', 'Admin', 'Inborn', 'Leader'],
+                education: ['', 'Economic', 'Academic', 'Computer', 'Admin', 'Inborn', 'Leadership'],
             },
-            specDutyDesc: ['brokered a major trade deal', 'served the board of directors of a megacorporation', 'served on a multi-system trade comission', 'was mentored by a highly successful investor', 'met all their KPIs and exceeded expectations'],
+            specDutyDesc: ['brokered a major trade deal', 'served the board of directors of a megacorporation', 'served on a multi-system trade commission', 'was mentored by a highly successful investor', 'met all their KPIs and exceeded expectations'],
             muster: {
                 cash: [0, 0, 10, 10, 40, 40, 80],
                 benefits: ['Low passage', 'Mid passage', '', 'Watch', '', 'High passage', 'SOC']
@@ -658,7 +658,7 @@ export const datatables = {
                 service: ['', 'Space', 'Zero-G Environ', 'Gun Combat', 'Special Combat', 'Blade Combat', 'Gun Combat'],
                 advanced: ['', 'Vice', 'Mechanical', 'Gunnery', 'Ship Tactics', 'Tactics', 'Space'],
                 education: ['', 'Pilot', 'Space', 'Vice', 'Technical', 'Inborn', 'Electronics'],
-            }, specDutyDesc: ['helped take a cruiseliner with out a single casualty', 'ransomed a nobel family and escaped', 'helped defeat a rival crew in deep space', 'was captured, but was freed in a daring escape', 'captured a government transport of high quality goods'],
+            }, specDutyDesc: ['helped take a cruise liner without a single casualty', 'ransomed a noble family and escaped', 'helped defeat a rival crew in deep space', 'was captured, but was freed in a daring escape', 'captured a government transport of high quality goods'],
             muster: {
                 cash: [0, 0, 1, 10, 50, 50, 50],
                 benefits: ['Low passage', 'INT', 'Weapon', 'Letter of marque', 'SOC+-1', 'Mid passage', 'Corsair']
@@ -712,7 +712,7 @@ export const datatables = {
                 advanced: ['', 'Hand Combat', 'Mechanical', 'Environ', 'Environ', 'Vice', 'Archaic Weapons'],
                 education: ['', 'Medical', 'Interrogation', 'Tactics', 'Environ', 'Inborn', 'Inborn'],
             },
-            specDutyDesc: ['helped conquer a neighboring tribe', 'fought off technologically advanced invaders', 'killed a giant predator plaguing their village', 'went on a vision quest in the wilderness for several years', 'was mentored by a great warior'],
+            specDutyDesc: ['helped conquer a neighboring tribe', 'fought off technologically advanced invaders', 'killed a giant predator plaguing their village', 'went on a vision quest in the wilderness for several years', 'was mentored by a great warrior'],
             muster: {
                 cash: [0, 0, 1, 2, 3, 4, 5],
                 benefits: ['Low passage', 'Weapon', 'Weapon', 'Weapon', '', 'High passage', 'High passage']
@@ -727,7 +727,7 @@ export const datatables = {
             skills: {
                 personal: ['', 'Physical', 'DEX', 'END', 'Mental', 'Vice', 'Hand Combat'],
                 service: ['', 'Gun Combat', 'Hand Combat', 'Environ', 'Vehicle', 'Vice', 'DEX'],
-                advanced: ['', 'Space', 'Ships Boat', 'Vehicle', 'Navigation', 'Space Tech', 'Leader'],
+                advanced: ['', 'Space', 'Ships Boat', 'Vehicle', 'Navigation', 'Space Tech', 'Leadership'],
                 education: ['', 'Science', 'Technical', 'Academic', 'Interpersonal', 'Inborn', 'Inborn'],
             },
             specDutyDesc: ['joined the imperial entourage for a year', 'began a charitable foundation', 'led house troops on the field of battle', 'hosted two delegations on neutral ground to broker a peace deal', 'was mentored by a close relative'],
@@ -755,7 +755,7 @@ export const datatables = {
                 "marines": 7,
                 "army": 7
             },
-            "Assignement": ['Raid', 'Raid', 'Counter Insurgency', 'Counter Insurgency', 'Garrison', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Internal Security', 'Police Action'],
+            "Assignment": ['Raid', 'Raid', 'Counter Insurgency', 'Counter Insurgency', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Internal Security', 'Special', 'Special'],
             "MOS": ['Gun Combat', 'Special Combat', 'Heavy Weapons', 'Heavy Weapons', 'Vehicle', 'Environ', 'Vacc Suit']
         },
         Marines: {
@@ -773,7 +773,7 @@ export const datatables = {
                 "marines": 7,
                 "army": 7
             },
-            "Assignement": ['Raid', 'Raid', 'Counter Insurgency', 'Internal Security', "Ship's Troops", 'Garrison', "Ship's Troops", 'Training', 'Counter Insurgency', 'Police Action', 'Police Action'],
+            "Assignment": ['Raid', 'Raid', 'Counter Insurgency', 'Counter Insurgency', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Internal Security', 'Special', 'Special'],
             "MOS": ['Gun Combat', 'Special Combat', 'Zero-G Combat', 'Zero-G Combat', 'Heavy Weapons', 'Forward Observer', 'Battle Dress']
         },
         Support: {
@@ -790,7 +790,7 @@ export const datatables = {
                 "marines": 10,
                 "army": 10
             },
-            "Assignement": ['Raid', 'Internal Security', 'Counter Insurgency', 'Garrison', 'Garrison', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Internal Security', 'Police Action'],
+            "Assignment": ['Raid', 'Internal Security', 'Counter Insurgency', 'Garrison', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Internal Security', 'Special', 'Special'],
             "MOS": ['Vehicle', 'Combat Engineering', 'Vehicle', 'Mechanical', 'Electronic', 'Medical', 'Technical']
         },
         Commando: {
@@ -805,7 +805,7 @@ export const datatables = {
                 "marines": 7,
                 "army": 6
             },
-            "Assignement": ['Raid', 'Raid', 'Counter Insurgency', 'Police Action', 'Internal Security', 'Garrison', 'Training', 'Training', 'Counter Insurgency', 'Raid', 'Raid'],
+            "Assignment": ['Raid', 'Raid', 'Counter Insurgency', 'Police Action', 'Police Action', 'Internal Security', 'Training', 'Counter Insurgency', 'Raid', 'Special', 'Special'],
             "MOS": ['Gun Combat', 'Special Combat', 'Heavy Weapons', 'Demolitions', 'Environ', 'Recon', 'Battle Dress']
         },
         Artillery: {
@@ -824,7 +824,7 @@ export const datatables = {
                 "marines": 9,
                 "army": 8
             },
-            "Assignement": ['Raid', 'Training', 'Counter Insurgency', 'Police Action', 'Garrison', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Counter Insurgency', 'Training'],
+            "Assignment": ['Raid', 'Training', 'Counter Insurgency', 'Police Action', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Counter Insurgency', 'Special', 'Special'],
             "MOS": ['Field Artillery Gunner', 'Field Artillery Gunner', 'Vehicle', 'Mechanical', 'Forward Observer', 'Computer', 'Technical']
         },
         Cavalry: {
@@ -843,13 +843,13 @@ export const datatables = {
                 "marines": 7,
                 "army": 7
             },
-            "Assignement": ['Raid', 'Training', 'Counter Insurgency', 'Police Action', 'Garrison', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Internal Security', 'Police Action'],
+            "Assignment": ['Raid', 'Training', 'Counter Insurgency', 'Police Action', 'Garrison', 'Garrison', 'Training', 'Police Action', 'Internal Security', 'Special', 'Special'],
             "MOS": ['Vehicle', 'Vehicle', 'Vehicle', 'Heavy Weapons', 'Heavy Weapons', 'Mechanical', 'Technical']
         },
         ServiceSkills: {
             "Army Life": ["Brawling", "STR", "Vice", "DEX", "END", "END", "Handgun", "SOC", "SOC"],
             "Marines Life": ["Brawling", "Vice", "STR", "DEX", "END", "Hand Combat", "EDU", "SOC", "SOC"],
-            "NCO": ["Heavy Weapons", "Mechanics", "Tactics", "Heavy Weapons", "Mechanical", "Tactics", "Leadership", "Inborn", "Interpersonal"],
+            "NCO": ["Heavy Weapons", "Mechanical", "Tactics", "Heavy Weapons", "Mechanical", "Tactics", "Leadership", "Inborn", "Interpersonal"],
             "Command": ["END", "Gun Combat", "Vehicle", "Heavy Weapons", "Leadership", "Tactics", "Tactics", "Inborn"],
             "Staff": ["Mechanical", "Forward Observer", "Computer", "Electronics", "Medical", "Instruction", "Administration", "Academic"],
             "Shipboard Life": ["Forward Observer", "Ships Boat", "Gunnery", "Vacc Suit", "Gunnery", "Vacc Suit", "Ship Tactics", "Fleet Tactics"]
@@ -863,19 +863,19 @@ export const datatables = {
         SchoolSkills: {
             Commando: [5, ["Brawling", "Gun Combat", "Demolitions", "Intrusion", "Stealth", "Survival", "Recon", "Vacc Suit", "Blade Combat", "Instruction"]],
             Protected: [3, ["High-G Environ", "Zero-G Combat", "Vacc Suit"]],
-            Intelligence: [4, ["Forgery", "Bribery", "Streetwise", "Interogation", "Vice"]],
+            Intelligence: [4, ["Forgery", "Bribery", "Streetwise", "Interrogation", "Vice"]],
             Staff: [4, ["Admin", "Combat Engineering", "Computer", "Robot Ops"]],
-            Command: [4, ["Tactics", "Leader", "Recon"]],
+            Command: [4, ["Tactics", "Leadership", "Recon"]],
             Engineering: [4, ["Mechanical", "Electronic", "Engineering", "Vacc Suit", "Computer", "Gravitics"]],
         },
         Muster: {
             army: {
                 cash: [2, 5, 10, 10, 10, 20, 30],
-                benefits: ['Low passage', 'Weapon', 'High passage', 'Weapon', 'Mid passage', 'SOC', 'Traveller Aid Membership'],
+                benefits: ['Low passage', 'INT', 'EDU+2', 'Weapon', 'High passage', 'Mid passage', 'SOC'],
             },
             marines: {
                 cash: [2, 5, 5, 10, 20, 30, 40],
-                benefits: ['Low passage', 'Weapon', 'High passage', 'EDU+2', 'High passage', 'SOC', 'Traveller Aid Membership'],
+                benefits: ['Low passage', 'INT+2', 'EDU', 'Weapon', 'Traveller Aid Membership', 'High Passage', 'SOC+2'],
             },
         },
 
@@ -994,7 +994,11 @@ export const datatables = {
         Schooling: ['', 'Academic', 'Medical', 'Space', 'Space Tech', 'Computer', 'Liaison'],
         SchoolSkills: {
             Engineering: [5, ["Mechanical", "Electronics", "Gravitics", "Engineering"]],
-        }
+        },
+        Muster: {
+            cash: [1, 5, 5, 10, 20, 50, 50],
+            benefits: ['Low passage', 'INT', 'EDU+2', 'Weapon', 'Traveller Aid Membership', 'High passage', 'SOC+2'],
+        },
     },
     Scouts: {
         Survey: {
@@ -1116,16 +1120,25 @@ export const datatables = {
         ServiceSchools: {
             "Ship": [2, ['Pilot', 'Navigation', 'Engineering', 'Gunnery', 'Space', 'Space']],
             "Intelligence": [2, ['Forgery', 'Streetwise', 'Brawling', 'Bribery', 'Gun Combat', 'Survival']],
-            "Technical": [1, ['Computer', 'Electronics', 'Gravitites', 'Mechanical', 'Naval Architechture', 'EDU']],
+            "Technical": [1, ['Computer', 'Electronics', 'Gravitics', 'Mechanical', 'Naval Architecture', 'EDU']],
             "Specialist": [1, ['Medical', 'Mechanical', 'Computer', 'Admin', 'STR', 'Gunnery']],
             "Field Training": [1, ['Vehicle', 'Air Raft', 'Recon', 'Survival', 'Navigation', 'Survey']],
             "Contact": [2, ['Survey', 'Liaison', 'Streetwise', 'Survival', 'Pilot', 'Gun Combat']],
             "Administrator": [0, []]
         },
         Assignments: {
-            "E": ['Wartime', 'Training', 'Training', 'Base', 'Routine', 'Routine', 'Mission', 'Mission', 'Special', 'Special', 'Transfer'],
-            "O": ['Wartime', 'Training', 'Base', 'Training', 'Routine', 'Routine', 'Base', 'Mission', 'Mission', 'Mission', 'Special']
+            "Field": ['Wartime', 'Training', 'Training', 'Base', 'Routine', 'Routine', 'Mission', 'Mission', 'Special', 'Special', 'Transfer'],
+            "Bureaucracy": ['Wartime', 'Training', 'Base', 'Training', 'Routine', 'Routine', 'Base', 'Mission', 'Mission', 'Mission', 'Special']
         },
+        InitialSkill: {
+            Survey: "Pilot",
+            Exploration: "Pilot",
+            Communications: "Pilot",
+            Detached: "Administration",
+            Technical: "Computer",
+            Operations: "Leadership",
+            Administration: "Administration"
+        }
     },
     Merchants: {
         Companies: {
@@ -1136,7 +1149,7 @@ export const datatables = {
             4: ['Khu Su\'ikh', 'Al Morai', 'Solar Shipping', 'Solomani Shipping', 'Saxe Transport', 'Gvaeknoks', 'ladria Vlovl'],
             5: ['Tlasayerlahel', 'Reastirlao', 'Reastirlao', 'Star Patterns Trading', 'Ling Standard Products', 'Makhidkarun', 'Naasirka', 'Sharurshid', 'Tukera Lines', 'Priantqlovr Drafr']
         },
-        Lines: ['Free Traders', 'Interface Line', 'Fledgeling Line', 'Subsector Wide Line', 'Sector Wide Line', 'MegaCorporation'],
+        Lines: ['Free Traders', 'Interface Line', 'Fledgling Line', 'Subsector Wide Line', 'Sector Wide Line', 'MegaCorporation'],
         Assignments: {
             "Large": ['', '', 'Down', 'Route', 'Route', 'Route', 'Route', 'Route', 'Route', 'Charter', 'Speculative', 'Exploratory', 'Special', 'Special'],
             "Small": ['', '', 'Down', 'Route', 'Route', 'Route', 'Route', 'Charter', 'Speculative', 'Speculative', 'Exploratory', 'Exploratory', 'Special', 'Up'],
@@ -1150,7 +1163,7 @@ export const datatables = {
             'Smuggling': 'a smuggling operation',
             'Piracy': 'a pirate ship'
         },
-        Avalailability: {
+        Availability: {
             Deck: [9, 10],
             Engineering: [8, 8],
             Purser: [7, 6],
@@ -1160,13 +1173,13 @@ export const datatables = {
         },
         SpecialDuty: {
             "O": ['Trade Station', 'Command School', 'Deck School', 'Engineering School', 'Purser School', 'Business School', 'Department Test'],
-            "E": ['Security Training', 'Trade Station', 'Helm Training', 'Drive Training', 'Steward Training', 'Commission', 'Commision']
+            "E": ['Security Training', 'Trade Station', 'Helm Training', 'Drive Training', 'Steward Training', 'Commission', 'Commission']
         },
         MusterCredits: {
             'MegaCorporation': [1, 5, 10, 20, 30, 40, 50],
             'SectorWide': [1, 5, 10, 20, 30, 40, 50],
             'Subsector': [1, 5, 10, 20, 40, 40, 100],
-            'Fledgeling': [1, 5, 10, 20, 50, 40, 40],
+            'Fledgling': [1, 5, 10, 20, 50, 40, 40],
             'Interface': [1, 5, 10, 20, 30, 40, 50],
             'Freetraders': [1, 2, 10, 20, 30, 40, 30]
         },
@@ -1290,14 +1303,14 @@ export const datatables = {
         },
     },
     Specops: {
-        adjectives: ['Able', 'Blazing', 'Creeping', 'Daunting', 'Earnest', 'Fighting', 'Glowing', 'Hardy', 'Injured', 'Jungle', 'Knowing', 'Leaping', 'Moving', 'Negative', 'Ominus', 'Pouncing', 'Quiet', 'Rising', 'Sleeping', 'Tall', 'Unrelenting', 'Vexing', 'Wailing', 'Xanthic', 'Young', 'Zealous'],
+        adjectives: ['Able', 'Blazing', 'Creeping', 'Daunting', 'Earnest', 'Fighting', 'Glowing', 'Hardy', 'Injured', 'Jungle', 'Knowing', 'Leaping', 'Moving', 'Negative', 'Ominous', 'Pouncing', 'Quiet', 'Rising', 'Sleeping', 'Tall', 'Unrelenting', 'Vexing', 'Wailing', 'Xanthic', 'Young', 'Zealous'],
         nouns: ['Ax', 'Bell', 'Chasm', 'Deep', 'Eye', 'Force', 'Gun', 'Hand', 'Ignition', 'Justice', 'Knight', 'Light', 'Moon', 'Night', 'Ocean', 'Poison', 'Quill', 'Rogue', 'Spear', 'Talisman', 'Urge', 'Vigor', 'Wheel', 'Xray', 'Yell', 'Zeal'],
         animals: ['Angel', 'Bear', 'Chimera', 'Dog', 'Eagle', 'Fox', 'Gorilla', 'Hawk', 'Iguana', 'Jaguar', 'Koala', 'Lion', 'Mouse', 'Nixie', 'Owl', 'Panther', 'Qilin', 'Ram', 'Salamander', 'Tiger', 'Umbrella', 'Vulture', 'Wolf', 'Xilex', 'Yeti', 'Zebra']
     },
     Battles: {
-        type: ['Battle', 'Siege', 'Capture', 'Sack', 'Conquest', 'Action', 'Massacre', 'Fall', 'Revolt', 'Uprising', 'Recapture', 'Assault', 'Liberation', 'Rebellion', 'Heresy', 'Insurrection', 'Defection', 'Mutiny', 'Revolution', 'Riot', 'Upheaval', 'Schism', 'Edicts', 'Surpression', 'Betrayal'],
-        spaceplace: ['Star', 'Moon', 'System', 'Point', 'Station', 'Rest', 'Astroid', 'Rings', 'Comet', 'Crossing', 'Abode', 'Outpost', 'Nebula', 'Sector', 'Cluster'],
-        planetplace: ['Star', 'Moon', 'Point', 'Station', 'Rest', 'Astroid', 'Crossing', 'Abode', 'Outpost', 'Ocean', 'Sea', 'River', 'Glen', 'Glade', 'Hook', 'Hollow', 'Parish', 'Hill', 'Mountain', 'Range', 'Gulch', 'Castle', 'City', 'Village', 'Metropolis', 'Church', 'Island', 'Pass', 'Bridge', 'Harbor'],
+        type: ['Battle', 'Siege', 'Capture', 'Sack', 'Conquest', 'Action', 'Massacre', 'Fall', 'Revolt', 'Uprising', 'Recapture', 'Assault', 'Liberation', 'Rebellion', 'Heresy', 'Insurrection', 'Defection', 'Mutiny', 'Revolution', 'Riot', 'Upheaval', 'Schism', 'Edicts', 'Suppression', 'Betrayal'],
+        spaceplace: ['Star', 'Moon', 'System', 'Point', 'Station', 'Rest', 'Asteroid', 'Rings', 'Comet', 'Crossing', 'Abode', 'Outpost', 'Nebula', 'Sector', 'Cluster'],
+        planetplace: ['Star', 'Moon', 'Point', 'Station', 'Rest', 'Asteroid', 'Crossing', 'Abode', 'Outpost', 'Ocean', 'Sea', 'River', 'Glen', 'Glade', 'Hook', 'Hollow', 'Parish', 'Hill', 'Mountain', 'Range', 'Gulch', 'Castle', 'City', 'Village', 'Metropolis', 'Church', 'Island', 'Pass', 'Bridge', 'Harbor'],
         theplace: ['Anomaly', 'Doctrine', 'Ruins', 'Artifact', 'Sect', 'Tribe', 'People']
     },
     Names:

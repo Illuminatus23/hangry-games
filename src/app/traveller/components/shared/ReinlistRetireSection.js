@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 
-export function ReinlistRetireSection({ step, characterName, reinlistLabel, onReinlist, onRetire }) {
+export function ReinlistRetireSection({ step, characterName, reinlistLabel, retireLabel = "Retire", onReinlist, onRetire }) {
     return (
         <div className="space-y-2">
             <p className="text-xs text-muted-foreground">
@@ -16,7 +16,7 @@ export function ReinlistRetireSection({ step, characterName, reinlistLabel, onRe
                     <Button onClick={onReinlist}>{reinlistLabel}</Button>
                 )}
                 {step !== "forced" && (
-                    <Button variant="outline" onClick={onRetire}>Retire</Button>
+                    <Button variant="outline" onClick={onRetire}>{retireLabel}</Button>
                 )}
             </div>
         </div>

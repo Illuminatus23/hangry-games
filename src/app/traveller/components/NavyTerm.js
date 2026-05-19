@@ -23,10 +23,8 @@ function normalizeNavySkill(skill) {
     const map = {
         "Strength": "STR", "Dexterity": "DEX", "Endurance": "END",
         "Intelligence": "INT", "Education": "EDU", "Social": "SOC",
-        "Mechanics": "Mechanical",
         "Administration": "Admin",
         "Jack-of-All-Trades": "Jack-of-all-Trades",
-        "Leadership": "Leader",
     };
     return map[skill] ?? skill;
 }
@@ -119,6 +117,9 @@ export default function NavyTerm({
 
     // Year assignment tracking
     const [forcedNextAssignment, setForcedNextAssignment] = useState(null);
+
+    const [termStartAge, setTermStartAge] = useState(characterData.bioAge ?? 18);
+    const termLength = termStartAge === 19 ? 3 : 4;
 
     // Per-year state
     const [availablePools, setAvailablePools] = useState([]);
@@ -249,7 +250,7 @@ export default function NavyTerm({
             bioAge: (prev.bioAge ?? 18) + bioInc,
             chronoAge: (prev.chronoAge ?? 18) + chronoInc,
         }));
-        if (currentYear < 4) {
+        if (currentYear < termLength) {
             setCurrentYear(prev => prev + 1);
             setNavyStep("yearStart");
         } else {
@@ -407,7 +408,7 @@ export default function NavyTerm({
             handleHistoryAdd(buildYearHistoryNavy(flags, characterName));
             setYearLogs(prev => [...prev, log]);
             setWarning(log);
-            if (currentYear < 4 && !wasRepeat) {
+            if (currentYear < termLength && !wasRepeat) {
                 if (d6(1, 0) === 6) setForcedNextAssignment("Frozen Watch");
             }
             advanceYearOrEnd(0, 1); // frozen watch: chronoAge advances, bioAge does not
@@ -581,9 +582,9 @@ export default function NavyTerm({
             }
         }
 
-        // Skill check
+        // Skill check — suppressed for Special assignments (the sub-event grants its own skills)
         let skillsPassed = false;
-        if (skillThreshold > 0) {
+        if (skillThreshold > 0 && displayAssignment !== "Special") {
             const skillRoll = d6(2, 0);
             skillsPassed = skillRoll >= skillThreshold;
             log += `Skills (${skillThreshold}+): rolled ${skillRoll} — ${skillsPassed ? "table available" : "no skill"}. `;
@@ -607,8 +608,8 @@ export default function NavyTerm({
         }
         setAvailablePools(pools);
 
-        // Year-end same-assignment roll (not on year 4, not if this was already a repeat)
-        if (currentYear < 4 && !wasRepeat) {
+        // Year-end same-assignment roll (not on last year, not if this was already a repeat)
+        if (currentYear < termLength && !wasRepeat) {
             const repeatRoll = d6(1, 0);
             log += `Year-end roll: ${repeatRoll}${repeatRoll === 6 ? " — same assignment next year!" : ""}. `;
             if (repeatRoll === 6) setForcedNextAssignment(displayAssignment);
@@ -690,7 +691,8 @@ export default function NavyTerm({
 
     const handleRetire = () => {
         const newTerms = terms + 1;
-        const pension = (newTerms >= 5 && PENSION_CAREERS.includes("navy")) ? 2000 * newTerms : 0;
+        const dishonorably = characterData.awards?.includes('Dishonorable Discharge') ?? false;
+        const pension = (!dishonorably && newTerms >= 5 && PENSION_CAREERS.includes("navy")) ? 2000 * newTerms : 0;
         setCharacterData(prev => ({
             ...prev,
             pension,
@@ -701,6 +703,7 @@ export default function NavyTerm({
 
     const handleReinlist = () => {
         const newTerms = terms + 1;
+        setTermStartAge(characterData.bioAge ?? 18);
         setCharacterData(prev => ({
             ...prev,
             career: { ...prev.career, terms: newTerms },
@@ -715,6 +718,8 @@ export default function NavyTerm({
         setPromotedThisTerm(false);
         setBootPickNum(1);
     };
+
+    const exitLabel = (terms + 1) >= 5 ? "Retire" : "Muster Out";
 
     // ─── Render ─────────────────────────────────────────────────────────────
 
@@ -845,6 +850,7 @@ export default function NavyTerm({
                     step={navyStep}
                     characterName={characterName}
                     reinlistLabel={`Reinlist (${fleetDisplay})`}
+                    retireLabel={exitLabel}
                     onReinlist={handleReinlist}
                     onRetire={handleRetire}
                 />

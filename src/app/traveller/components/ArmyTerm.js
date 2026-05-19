@@ -23,7 +23,7 @@ function normalizeServiceSkill(skill, career) {
     const map = {
         "Strength": "STR", "Dexterity": "DEX", "Endurance": "END",
         "Intelligence": "INT", "Education": "EDU", "Social": "SOC",
-        "Mechanics": "Mechanical", "Pistol": "Handguns",
+        "Pistol": "Handguns",
     };
     const normalized = map[skill] ?? skill;
     if (normalized === "Blade Combat" && career === "marines") return "Large Blade";
@@ -167,8 +167,10 @@ export default function ArmyTerm({
 
     // Career-level check arrays — army/marines not in Basics, use fallbacks
     const basicsData = datatables.Basics?.[career];
-    const specCheck = basicsData?.specduty ?? [7];
     const reinCheck = basicsData?.reenlist ?? [6];
+
+    const [termStartAge, setTermStartAge] = useState(characterData.bioAge ?? 18);
+    const termLength = termStartAge === 19 ? 3 : 4;
 
     const handleArmSelect = (arm) => {
         setCharacterData(prev => ({
@@ -219,7 +221,7 @@ export default function ArmyTerm({
         if (!armData) { setWarning(`No data for branch: ${currentBranch}`); return; }
 
         const assignRoll = d6(2, 0);
-        const rolledAssignment = armData["Assignement"][Math.max(0, Math.min(10, assignRoll - 2))];
+        const rolledAssignment = armData["Assignment"][Math.max(0, Math.min(10, assignRoll - 2))];
 
         // Marines cannot serve Counter Insurgency or Internal Security — reassign to Ship's Troops
         const assignmentName =
@@ -628,7 +630,7 @@ export default function ArmyTerm({
             bioAge: (prev.bioAge ?? 18) + 1,
             chronoAge: (prev.chronoAge ?? 18) + 1,
         }));
-        if (currentYear < 4) {
+        if (currentYear < termLength) {
             setCurrentYear(prev => prev + 1);
             setArmStep("yearStart");
         } else {
@@ -666,10 +668,6 @@ export default function ArmyTerm({
 
     const handleEndOfTerm = (endBioAge) => {
         let warnText = "";
-
-        // Special duty
-        const specResult = careerCheckSpecReinlist(specCheck, characterName);
-        warnText += `Special Duty: ${specResult[1]} `;
 
         // Reinlist roll
         const reinlistResult = careerCheckSpecReinlist(reinCheck, characterName);
@@ -710,29 +708,13 @@ export default function ArmyTerm({
             }
         };
 
-        if (specResult[0]) {
-            const dataKey = getArmDataKey(career, characterData.career?.branch);
-            const armData = datatables.Army?.[dataKey];
-            if (armData) {
-                const mosList = armData["MOS"] ?? [];
-                const rawSkill = normalizeServiceSkill(mosList[Math.floor(Math.random() * mosList.length)], career);
-                const cascadeOpts = datatables.Skills?.[rawSkill];
-                if (Array.isArray(cascadeOpts) && cascadeOpts.length > 0) {
-                    triggerCascade(rawSkill, cascadeOpts.map(s => normalizeServiceSkill(s, career)), finishEndOfTerm);
-                } else {
-                    finishEndOfTerm(rawSkill);
-                }
-            } else {
-                finishEndOfTerm(null);
-            }
-        } else {
-            finishEndOfTerm(null);
-        }
+        finishEndOfTerm(null);
     };
 
     const handleRetire = () => {
         const newTerms = characterData.career.terms + 1;
-        const pension = (newTerms >= 5 && PENSION_CAREERS.includes(career)) ? 2000 * newTerms : 0;
+        const dishonorably = characterData.awards?.includes('Dishonorable Discharge') ?? false;
+        const pension = (!dishonorably && newTerms >= 5 && PENSION_CAREERS.includes(career)) ? 2000 * newTerms : 0;
         setCharacterData(prev => ({
             ...prev,
             pension,
@@ -743,6 +725,7 @@ export default function ArmyTerm({
 
     const handleReinlist = () => {
         const newTerms = characterData.career.terms + 1;
+        setTermStartAge(characterData.bioAge ?? 18);
         setCharacterData(prev => ({
             ...prev,
             career: { ...prev.career, terms: newTerms },
@@ -758,6 +741,8 @@ export default function ArmyTerm({
         setYearMosTable([]);
         setPromotedThisTerm(false);
     };
+
+    const exitLabel = (characterData.career.terms + 1) >= 5 ? "Retire" : "Muster Out";
 
     const availablePools = getAvailablePools(
         career, isOfficer, rank,
@@ -855,6 +840,7 @@ export default function ArmyTerm({
                     step={armStep}
                     characterName={characterName}
                     reinlistLabel={`Reinlist as ${career}`}
+                    retireLabel={exitLabel}
                     onReinlist={handleReinlist}
                     onRetire={handleRetire}
                 />

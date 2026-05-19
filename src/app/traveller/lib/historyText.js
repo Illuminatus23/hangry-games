@@ -118,11 +118,11 @@ const SKILL_PHRASE = {
     'Equestrian': 'horsemanship', 'Herding': 'herding animals',
     'Hunting': 'hunting', 'Recon': 'reconnaissance', 'Survival': 'wilderness survival',
     'Broker': 'brokerage', 'Legal': 'legal practice', 'Trader': 'trading',
-    'Instruction': 'instruction', 'Leader': 'leadership', 'Leadership': 'leadership',
+    'Instruction': 'instruction', 'Leadership': 'leadership',
     'Brawling': 'unarmed combat',
     'Tactics': 'tactical operations', 'Gunnery': 'ship gunnery',
     'Forward Observer': 'calling in artillery and directing fire support',
-    'Mechanics': 'mechanical systems repair', 'Mechanical': 'mechanical systems repair',
+    'Mechanical': 'mechanical systems repair',
     'Battle Dress': 'operating powered battle armor',
     'Zero-G Combat': 'zero-gravity combat',
     'Ship Tactics': 'ship-to-ship tactical maneuvering', 'Fleet Tactics': 'fleet-level tactical operations',
@@ -357,7 +357,7 @@ export function buildSkillGainHistory(term, year, characterName, skill, tableNam
         case "Command":
             tableName = "as a commanding officer";
             break;
-        case "Command":
+        case "Staff":
             tableName = "as a staff officer";
             break;
         default:
