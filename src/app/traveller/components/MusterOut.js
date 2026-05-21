@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import { datatables } from "../lib/data";
-import { d6 } from "../lib/helpers";
+import { d6, applySkill } from "../lib/helpers";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -60,18 +60,27 @@ function getEligibleWeapons(skills) {
     return [...eligible].sort();
 }
 
-export default function MusterOut({ characterData, setCharacterData, skills, setGear, setStep, handleHistoryAdd, characterName }) {
+const MERCHANT_CAREERS = ['megacorp trader', 'sector-wide trader', 'subsector-wide trader', 'interface trader', 'fledgling trader', 'free trader'];
+const TRADER_SHIPS = ['Far Trader', 'Fat Trader'];
+
+export default function MusterOut({ characterData, setCharacterData, skills, setSkills, setGear, setStep, handleHistoryAdd, characterName }) {
     const career = characterData.career.careername;
     const terms = characterData.career.terms;
     const rank = characterData.career.rank - 1;
+    const isMerchant = MERCHANT_CAREERS.includes(career);
 
     const musterData =
         datatables.Basics?.[career]?.muster
         ?? datatables.Army?.Muster?.[career]
         ?? (career === 'navy' ? datatables.Navy?.Muster : undefined)
+        ?? (career === 'scouts' ? datatables.Scouts?.Muster : undefined)
         ?? {};
-    const cashTable = musterData.cash ?? [];
-    const benefitTable = musterData.benefits ?? [];
+    const cashTable = isMerchant
+        ? (datatables.Merchants?.MusterCash ?? [])
+        : (musterData.cash ?? []);
+    const benefitTable = isMerchant
+        ? (datatables.Merchants?.MusterBenefits ?? [])
+        : (musterData.benefits ?? []);
 
     const rollAdds =
         rank === 1 || rank === 2 ? 1 :
@@ -81,7 +90,7 @@ export default function MusterOut({ characterData, setCharacterData, skills, set
     const initialRolls = Math.max(0, (2 * terms) + rollAdds + musterPenalty);
     const CASH_CAP = 3;
 
-    const PENSION_CAREERS = ['navy', 'marines', 'army', 'scouts', 'flyer', 'sailor'];
+    const PENSION_CAREERS = ['navy', 'marines', 'army', 'flyer', 'sailor'];
     const pension = characterData.pension ?? 0;
     const isFull = terms >= 5;
 
@@ -109,7 +118,7 @@ export default function MusterOut({ characterData, setCharacterData, skills, set
     const normalizedChoice = choice === "cash" ? "cash" : "benefits";
     const effectiveChoice = normalizedChoice === "cash" && !canRollCash ? "benefits" : normalizedChoice;
 
-    const ships = ["Lab ship", "Seeker", "Corsair", "Safari ship", "Yacht"];
+    const ships = ["Lab ship", "Seeker", "Corsair", "Safari ship", "Yacht", "Scout Ship", "Far Trader", "Fat Trader"];
     const gear = ["Low passage", "Mid passage", "High passage", "Traveller Aid Membership", "Travellers Aid membership", "Forensics kit", "Medical instruments", "Letter of marque", "Watch"];
 
     const confirmWeapon = () => {
@@ -143,7 +152,8 @@ export default function MusterOut({ characterData, setCharacterData, skills, set
 
         const benefit = benefitTable[roll - 1];
         setRollsRemaining(prev => prev - 1);
-        setResultLog(prev => [...prev, { type: "benefit", roll, mod, result: benefit }]);
+        const wasted = benefit === "Scout Ship" && characterData.ship === "Scout Ship";
+        setResultLog(prev => [...prev, { type: "benefit", roll, mod, result: benefit, wasted }]);
 
         // Stat benefits: STR, DEX, END, INT, EDU, SOC with optional +N / -N
         const statMatch = benefit?.match(/^(STR|DEX|END|INT|EDU|SOC)([+-]\d+)?$/);
@@ -161,9 +171,29 @@ export default function MusterOut({ characterData, setCharacterData, skills, set
             return;
         }
 
+        // 'Trader' muster benefit — apply as a skill
+        if (benefit === "Trader") {
+            applySkill(setSkills, setCharacterData, "Trader", {});
+            handleHistoryAdd?.(`${characterName}'s merchant experience is recognised — Trader skill improved.`);
+            return;
+        }
+
         if (gear.includes(benefit)) {
             setGear(prev => [...prev, benefit]);
             setCharacterData(prev => ({ ...prev, gear: [...(prev.gear ?? []), benefit] }));
+        } else if (benefit === "Scout Ship") {
+            // Only the first Scout Ship roll counts; subsequent rolls are wasted
+            setCharacterData(prev => prev.ship === "Scout Ship" ? prev : { ...prev, ship: "Scout Ship" });
+        } else if (TRADER_SHIPS.includes(benefit)) {
+            // First receipt = ship; additional = 10 years off mortgage (tracked as shipshares)
+            setCharacterData(prev => {
+                if (!prev.ship) {
+                    handleHistoryAdd?.(`${characterName} took possession of a ${benefit}.`);
+                    return { ...prev, ship: benefit };
+                }
+                handleHistoryAdd?.(`${characterName}'s ${benefit} benefit reduced the mortgage by 10 years.`);
+                return { ...prev, shipshares: (prev.shipshares ?? 0) + 1 };
+            });
         } else if (ships.includes(benefit)) {
             setCharacterData(prev => ({ ...prev, ship: benefit, shipshares: (prev.shipshares ?? 0) + 1 }));
         } else if (benefit) {
@@ -268,6 +298,7 @@ export default function MusterOut({ characterData, setCharacterData, skills, set
                                     <>
                                         Benefit roll {r.roll} (mod {r.mod >= 0 ? `+${r.mod}` : r.mod}):{" "}
                                         <span className="capitalize font-semibold text-foreground">{String(r.result)}</span>
+                                        {r.wasted && <span className="text-muted-foreground"> (wasted — already have Scout Ship)</span>}
                                     </>
                                 )}
                             </li>

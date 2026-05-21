@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { describeSkillGains } from "../lib/historyText";
 
 const ALWAYS_TWO_CAREERS = ['belter', 'rogue', 'hunter', 'doctor', 'scientist'];
-const PENSION_CAREERS = ['navy', 'marines', 'army', 'scouts', 'flyer', 'sailor'];
+const PENSION_CAREERS = ['navy', 'marines', 'army', 'flyer', 'sailor'];
 
 export default function BasicTerm({
     upp,
@@ -247,13 +247,14 @@ export default function BasicTerm({
                 if (agingResult.decreases.length > 0) {
                     setCharacterData(prev => {
                         const updates = {};
-                        agingResult.decreases.forEach(stat => {
-                            updates[stat] = Math.max(1, (prev[stat] ?? 1) - 1);
+                        agingResult.decreases.forEach(({ stat, loss }) => {
+                            updates[stat] = Math.max(1, (prev[stat] ?? 1) - loss);
                         });
                         return { ...prev, ...updates };
                     });
-                    warningText += ` Aging: ${agingResult.decreases.join(', ')} decreased by 1.`;
-                    historyText += ` The years caught up with ${characterName}: ${agingResult.decreases.join(', ')} each reduced by 1.`;
+                    const agingStr = agingResult.decreases.map(({ stat, loss }) => `${stat} -${loss}`).join(', ');
+                    warningText += ` Aging: ${agingStr}.`;
+                    historyText += ` The years caught up with ${characterName}: ${agingStr}.`;
                 }
             }
         }

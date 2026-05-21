@@ -1,0 +1,70 @@
+export const historyDescriptors = {
+    social: ["a poor street urchin", "an orphan", "to an indentured family", "to a poor family", "to a working-class family", "to a merchant family", "to a well respected family", "to a recently wealthy family", "to an old, respected family", "to a noble family of the planet", "the first child of a Baron"],
+    intelligence: [" IQ, an incredibly low 60, indicating possible mental retardation.",
+        " IQ of 75, indicating possible learning disabilities.",
+        " IQ of 85, well below the average.",
+        " inability to focus.",
+        " average intelligence.",
+        " IQ of 110.",
+        " IQ of 120, indicating an acute intelligence.",
+        " IQ of 130, well above average.",
+        " IQ of 140, indicating a superior intelligence.",
+        " IQ of a near genius 150.",
+        " IQ of a genius-level 160."],
+    education: [" never received any formal education",
+        " dropped out of school before the age of 12",
+        " was a secondary school drop out",
+        " never graduated from secondary school",
+        " received only a basic education and graduated at the bottom of the class",
+        " received only a basic education and was an average student",
+        " graduated with top honors from a local public school",
+        " graduated with top honors from a well respected private school",
+        " was granted a scholarship and graduated from a well respected private school",
+        " was granted a scholarship and graduated from the prestigious Imperial Secondary School",
+        " was valedictorian of the graduating class at the prestigious Imperial Secondary School"],
+    stat: ["", "non-existent", "pathetic", "terrible", "weak", "below average", "average", "above average", "good", "excellent", "amazing", "unbelievable", "superhuman", "alien", "god-like"],
+    planet: {
+        "size": ['asteroid', 'small', 'small', 'small', 'small', 'medium', 'medium', 'medium', 'large', 'large', 'large'],
+        "atmosphere": ['no', 'a trace', 'a very thin, tainted', 'a very thin', 'a thin, tainted', 'a standard', 'a tainted', 'a dense', 'a dense, tainted', 'an exotic', 'a corrosive', 'an insidious', 'a high, dense', 'an ellipsoid', 'a thin, low'],
+        "hydrosphere": ['desert', 'dry', 'dry', 'temperate', 'temperate', 'temperate', 'wet', 'wet', 'wet', 'wet', 'water'],
+        "population": ['small', 'small', 'average', 'average', 'average', 'average', 'large', 'large', 'very large', 'very large', 'extremely large'],
+        "law": ['an anarchist', 'an unstable', 'a weak', 'a permissive', 'an enlightened', 'a moderate', 'a moderate', 'a strict', 'extremely strict', 'a domineering', 'a repressive', 'an authoritative', 'an oppressive', 'a fascist', 'a tyrannical', 'a paramilitary', 'a police state controlled by', 'an inhumane'],
+        "tech": ['pre-industrial', 'industrial', 'industrial', 'pre-stellar', 'pre-stellar', 'basic stellar', 'basic stellar', 'stellar', 'stellar', 'advanced stellar'],
+        "government": ['No Government', 'Corporate Government', 'Direct Democracy', 'Self-Perpetuating Oligarchy', 'Representative Democracy', 'Feudal Technocracy', 'Captive Government', 'Balkanized Government', 'Civil Service Bureaucracy', 'Impersonal Bureaucracy', 'Charismatic Dictatorship', 'Non-Charismatic Dictatorship', 'Charismatic Oligarchy', 'Religious Dictatorship', 'Religious Autocracy', 'Totalitarian Oligarchy'],
+        "starport": {
+            "A": 'along a main space route in Imperial space',
+            "B": 'in Imperial space',
+            "C": 'on the edge of Imperial space',
+            "D": 'on the fringe of Imperial space',
+            "E": 'in the Frontier',
+            "X": 'cut off from Imperial space'
+        },
+        "trade": {
+            "Ast": "asteroid",
+            "Des": "desert",
+            "Vac": "vacuum",
+            "Wat": "water",
+            "Hi": "high-population",
+            "Lo": "low-population",
+            "Fl": "fluid ocean",
+            "Ice": "ice capped",
+            "Po": "poor",
+            "Ri": "rich",
+            "NAg": "non-agricultural",
+            "NIn": "non-industrial",
+            "In": "industrial",
+            "Ag": "agricultural"
+        }
+    },
+};
+
+export const planetDescriptors = {
+    size: ["Asteroid", "Small", "Small", "Small", "Small", "Medium", "Medium", "Medium", "Large", "Large", "Large", "Large", "Large"],
+    atmos: ["Vacuum", "Vacuum", "Thin", "Thin", "Standard", "Standard", "Standard", "Dense", "Dense", "Exotic", "Exotic", "Exotic", "Exotic", "Exotic", "Exotic", "Exotic"],
+    hydro: ["Desert", "Desert", "Dry", "Dry", "Wet", "Wet", "Wet", "Wet", "Wet", "Wet", "Water", "Water", "Water"],
+    pop: ["Low", "Low", "Moderate", "Moderate", "Moderate", "Moderate", "High", "High", "High", "High", "High", "High", "High"],
+    law: ["No", "Low", "Low", "Moderate", "Moderate", "Moderate", "Moderate", "Moderate", "High", "High", "Extreme", "Extreme", "Extreme", "Extreme", "Extreme", "Extreme", "Extreme"],
+    tech: ["Pre-Industrial", "Pre-Industrial", "Industrial", "Industrial", "Pre-Stellar", "Pre-Stellar", "Early Stellar", "Early Stellar", "Mid Stellar", "Mid Stellar", "High Stellar", "High Stellar", "High Stellar", "High Stellar", "High Stellar", "High Stellar", "High Stellar"],
+};
+
+export const government = ['No Government', 'Corporate Government', 'Direct Democracy', 'Self-Perpetuating Oligarchy', 'Representative Democracy', 'Feudal Technocracy', 'Captive Government', 'Balkanized Government', 'Civil Service Bureaucracy', 'Impersonal Bureaucracy', 'Charismatic Dictatorship', 'Non-Charismatic Dictatorship', 'Charismatic Oligarchy', 'Religious Dictatorship', 'Religious Autocracy', 'Totalitarian Oligarchy'];

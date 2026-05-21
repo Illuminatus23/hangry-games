@@ -7,6 +7,8 @@ import BasicTerm from "./components/BasicTerm";
 import MusterOut from "./components/MusterOut";
 import ArmyTerm from "./components/ArmyTerm";
 import NavyTerm from "./components/NavyTerm";
+import ScoutTerm from "./components/ScoutTerm";
+import MerchantTerm from "./components/MerchantTerm";
 import { datatables } from "./lib/data"
 import { generateBiography } from "./lib/historyText";
 import { Button } from "@/components/ui/button";
@@ -229,8 +231,8 @@ export default function CharacterCreation() {
         army: <ArmyTerm {...sharedTermProps} skills={skills} />,
         marines: <ArmyTerm {...sharedTermProps} skills={skills} />,
         navy: <NavyTerm {...sharedTermProps} skills={skills} />,
-        scouts: <BasicTerm {...sharedTermProps} />,
-        merchants: <BasicTerm {...sharedTermProps} />,
+        scouts: <ScoutTerm {...sharedTermProps} skills={skills} />,
+        merchants: <MerchantTerm {...sharedTermProps} skills={skills} />,
         End: (
             <div className="space-y-2">
                 <h2 className="text-lg font-semibold">The story ends here.</h2>

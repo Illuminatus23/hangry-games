@@ -12,7 +12,7 @@ import { SkillPickSection } from "./shared/SkillPickSection";
 import { ServiceLogSection } from "./shared/ServiceLogSection";
 import { ReinlistRetireSection } from "./shared/ReinlistRetireSection";
 
-const PENSION_CAREERS = ['navy', 'marines', 'army', 'scouts', 'flyer', 'sailor'];
+const PENSION_CAREERS = ['navy', 'marines', 'army', 'flyer', 'sailor'];
 
 function getArmDataKey(career, branch) {
     if (career === "marines" && branch === "Marine Infantry") return "Marines";
@@ -681,11 +681,12 @@ export default function ArmyTerm({
         if (endAge >= 34) {
             const agingResult = getAgingRolls(endAge);
             if (agingResult.decreases.length > 0) {
-                agingResult.decreases.forEach(stat => {
-                    agingUpdates[stat] = Math.max(1, (characterData[stat] ?? 1) - 1);
+                agingResult.decreases.forEach(({ stat, loss }) => {
+                    agingUpdates[stat] = Math.max(1, (characterData[stat] ?? 1) - loss);
                 });
-                agingWarn = ` Aging: ${agingResult.decreases.join(", ")} -1.`;
-                agingHist = ` Age took its toll: ${agingResult.decreases.join(", ")} each reduced by 1.`;
+                const agingStr = agingResult.decreases.map(({ stat, loss }) => `${stat} -${loss}`).join(", ");
+                agingWarn = ` Aging: ${agingStr}.`;
+                agingHist = ` Age took its toll: ${agingStr}.`;
             }
         }
 

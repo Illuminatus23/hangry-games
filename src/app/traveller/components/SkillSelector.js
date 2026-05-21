@@ -27,6 +27,13 @@ export default function SkillSelector({
         Object.prototype.hasOwnProperty.call(datatables.Skills, skill);
 
     const skillOps = useMemo(() => {
+        const standardKeys = new Set(['personal', 'service', 'advanced', 'education']);
+        const keys = Object.keys(skillTables ?? {});
+        // Named tables (e.g. merchants) — show the table names directly
+        if (keys.length > 0 && keys.some(k => !standardKeys.has(k))) {
+            return keys.map((name, i) => ({ id: i + 1, name, value: name }));
+        }
+        // Standard generic format
         const ops = [
             { id: 1, name: "Personal Development Skills", value: "personal" },
             { id: 2, name: "Service Skills", value: "service" },
@@ -36,7 +43,7 @@ export default function SkillSelector({
             ops.push({ id: 4, name: "Advanced Education Skills", value: "education" });
         }
         return ops;
-    }, [characterData.EDU]);
+    }, [characterData.EDU, skillTables]);
 
     useEffect(() => {
         if (!presetSkill) return;

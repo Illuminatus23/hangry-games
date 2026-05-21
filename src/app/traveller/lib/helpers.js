@@ -695,20 +695,33 @@ export function applySkill(setSkills, setCharacterData, skill, opts = {}) {
     });
 }
 
+// Called once at end of term. Aging table (core rules p.47):
+//   34–46: STR 8+, DEX 7+, END 8+  → fail = -1
+//   50–62: STR 9+, DEX 8+, END 9+  → fail = -1
+//   66+:   STR 9+, DEX 9+, END 9+  → fail = -2; INT 9+ → fail = -1
+// Returns decreases as [{ stat, loss }] so callers apply the correct amount.
 export function getAgingRolls(age) {
-    let strTarget, dexTarget, endTarget;
-    if (age < 38) {
+    let strTarget, dexTarget, endTarget, intTarget = 0, physLoss = 1;
+
+    if (age < 50) {
         strTarget = 8; dexTarget = 7; endTarget = 8;
-    } else if (age < 46) {
+    } else if (age < 66) {
         strTarget = 9; dexTarget = 8; endTarget = 9;
     } else {
         strTarget = 9; dexTarget = 9; endTarget = 9;
+        intTarget = 9;
+        physLoss = 2;
     }
+
     const rolls = [
-        { stat: 'STR', roll: d6(2, 0), target: strTarget },
-        { stat: 'DEX', roll: d6(2, 0), target: dexTarget },
-        { stat: 'END', roll: d6(2, 0), target: endTarget },
+        { stat: 'STR', roll: d6(2, 0), target: strTarget, loss: physLoss },
+        { stat: 'DEX', roll: d6(2, 0), target: dexTarget, loss: physLoss },
+        { stat: 'END', roll: d6(2, 0), target: endTarget, loss: physLoss },
     ];
-    const decreases = rolls.filter(r => r.roll < r.target).map(r => r.stat);
+    if (intTarget > 0) {
+        rolls.push({ stat: 'INT', roll: d6(2, 0), target: intTarget, loss: 1 });
+    }
+
+    const decreases = rolls.filter(r => r.roll < r.target).map(r => ({ stat: r.stat, loss: r.loss }));
     return { rolls, decreases };
 }
