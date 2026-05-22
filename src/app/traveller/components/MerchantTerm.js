@@ -554,13 +554,24 @@ export default function MerchantTerm({
     };
 
     // ── Skill picked ──────────────────────────────────────────────────────
+    const STATS = new Set(['STR', 'DEX', 'END', 'INT', 'EDU', 'SOC']);
+
     const handleSkillResolved = (skill) => {
+        const descriptors = datatables.skillToDescriptor ?? [];
+        const currentLevel = skills.find(s => s.name === skill)?.level ?? 0;
+        const newLevel = Math.min(currentLevel + 1, descriptors.length - 1);
+        const descriptor = descriptors[newLevel] ?? 'trained';
+        const skillSentence = STATS.has(skill)
+            ? ` ${characterName} improved their ${skill}.`
+            : ` ${characterName} became ${descriptor} in ${skill}.`;
+        const updatedLog = pendingYearLog + skillSentence;
+        setPendingYearLog(updatedLog);
         applySkill(setSkills, setCharacterData, skill, { maxSkills: characterData.INT + characterData.EDU });
         setPickIndex(prev => prev + 1);
         if (examEligible) {
             setMerchantStep('examOffer');
         } else {
-            finishYear(pendingYearLog);
+            finishYear(updatedLog);
         }
     };
 
@@ -571,7 +582,7 @@ export default function MerchantTerm({
         const examScores = deptData.ExamScore ?? [];
         const examIdx = isOfficer ? rank : 0;
         const score = examScores[examIdx] ?? 6;
-        const roll = d6(1, 0);
+        const roll = d6(2, 0);
         const passed = roll >= score;
         setWarning(prev => `${prev}. Exam (${score}+): ${roll} → ${passed ? 'PASSED' : 'failed'}.`);
 
@@ -667,7 +678,7 @@ export default function MerchantTerm({
             }
         }
 
-        handleHistoryAdd(buildMerchantEndOfTermHistory(characterName, termNumber, currentDept, lineName, agingHist));
+        handleHistoryAdd(buildMerchantEndOfTermHistory(characterName, termNumber, currentDept, lineName, agingHist, isFreeTrader));
         setWarning(warnText.trim());
 
         // Reenlistment roll: 4+, DM+1 if O1+

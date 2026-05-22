@@ -98,9 +98,9 @@ export const rank = {
             Engineering: [['Assistant Drive Hand', ''], ['Drive Hand', ''], ['Assistant Engineer', ''], ['Engineer', ''], ['Chief Engineer', '']],
             Purser: [['Steward', ''], ['Junior Purser', ''], ['Assistant Purser', ''], ['Purser', ''], ['Chief Purser', '']],
             Medical: [['Steward', ''], ['Junior Purser', ''], ['Assistant Medic', ''], ['Medic', 'Dr'], ['Chief Purser', 'Dr']],
-            Administration: [['Clerk', ''], ['Assistant Manager', ''], ['Manager', ''], ['Assistant Station Head', ''], ['Station Head', '']],
+            Admin: [['Clerk', ''], ['Assistant Manager', ''], ['Manager', ''], ['Assistant Station Head', ''], ['Station Head', '']],
             Sales: [['Apprentice', ''], ['Clerk', ''], ['Assistant Broker', ''], ['Broker', ''], ['Senior Broker', '']],
-            Freetraders: ['', ['4th Officer', ''], ['3rd Officer', ''], ['2nd Officer', ''], ['1st Officer', ''], ['Captain', 'Capt'], ['Owner', 'Capt']]
+            'Free Trader': ['', ['4th Officer', ''], ['3rd Officer', ''], ['2nd Officer', ''], ['1st Officer', ''], ['Captain', 'Capt'], ['Owner', 'Capt']]
         }
     },
     flyer: {

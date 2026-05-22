@@ -307,15 +307,19 @@ export function buildYearHistoryArmy(flags, characterName, career) {
     const isMarine = career === "marines";
 
     if (kia) {
-        if (isCombat) {
-            const loc = battleName ?? "the engagement";
-            return isMarine
-                ? `${prefix}${characterName} fell in ${loc}. The Corps does not forget its dead. The story ends here.`
-                : `${prefix}${characterName} was killed in action during ${loc}. Another name for the regimental roll. The story ends here.`;
+        let pool;
+        if (!isCombat) {
+            if (assignment === "Internal Security") {
+                pool = isMarine ? DEATH_HAZARDOUS_MARINES : DEATH_HAZARDOUS_ARMY;
+            } else {
+                pool = isMarine ? DEATH_ACCIDENT_GENERIC : DEATH_ACCIDENT_ARMY;
+            }
+        } else if (isMarine && assignment === "Raid") {
+            pool = DEATH_INTENSE_ARMY;
+        } else {
+            pool = DEATH_COMBAT_ARMY;
         }
-        return isMarine
-            ? `${prefix}The service claimed ${characterName} during a ${assignment} assignment. The Corps does not forget. The story ends here.`
-            : `${prefix}${characterName} was killed during a ${assignment} assignment. The story ends here.`;
+        return `${prefix}${pick(pool)(characterName)} The story ends here.`;
     }
 
     let text;
@@ -476,14 +480,16 @@ export function buildYearHistoryNavy(flags, characterName) {
     const base = buildNavyAssignmentText(assignment, characterName, worldName, battleName, operationName, ft);
 
     if (kia) {
-        const kiaLines = {
-            imperial: `${characterName} was lost during ${battleName ?? "a naval engagement"}. The Imperial Navy records the names of its dead. The story ends here.`,
-            reserve: `${characterName} was killed in action. The Reserve Fleet does not forget those it loses. The story ends here.`,
-            system: `${characterName} was killed defending the system. The planet they protected will remember. The story ends here.`,
-        };
-        return isCombat
-            ? `${prefix}${base}, and was killed in action.`
-            : `${prefix}${kiaLines[ft] ?? kiaLines.imperial}`;
+        let pool;
+        if (!isCombat) {
+            if (assignment === "Patrol" || assignment === "Shore Duty") pool = DEATH_HAZARDOUS_NAVY;
+            else pool = DEATH_ACCIDENT_NAVY;
+        } else if (assignment === "Battle") {
+            pool = DEATH_INTENSE_NAVY;
+        } else {
+            pool = DEATH_COMBAT_NAVY;
+        }
+        return `${prefix}${pick(pool)(characterName)} The story ends here.`;
     }
 
     let text = `${base}.`;
@@ -638,10 +644,19 @@ export function buildYearHistoryScout(flags, characterName) {
     const isField = FIELD_OFFICES_SET.has(office);
 
     if (kia) {
-        if (isCombat) {
-            return `${prefix}${characterName} was killed in action${worldName ? ` in the ${worldName} system` : ""}. The signal never came back. The story ends here.`;
+        let pool;
+        if (office === "Detached") {
+            pool = DEATH_BLACK_OPS;
+        } else if (warMission && isCombat) {
+            pool = DEATH_INTENSE_SCOUT;
+        } else if (warMission || isCombat) {
+            pool = DEATH_COMBAT_SCOUT;
+        } else if (isField) {
+            pool = DEATH_ACCIDENT_SCOUT;
+        } else {
+            pool = DEATH_ACCIDENT_GENERIC;
         }
-        return `${prefix}${characterName} was lost on a ${assignment} assignment${worldName ? ` in the ${worldName} system` : ""}. The Scout Service filed a missing-persons report. The story ends here.`;
+        return `${prefix}${pick(pool)(characterName)} The story ends here.`;
     }
 
     if (transferred) {
@@ -901,41 +916,253 @@ const SMALL_EXPLORATORY = [
     (n) => `${n} opened new trade contacts for the line. Whether those contacts would still be there next quarter was not guaranteed.`,
 ];
 
-// Free Trader flavor — individualism, danger, barely legal
+// Free Trader flavor — independent operators, no company, no safety net
 const FT_ROUTE = [
     (n) => `${n} ran a standard route. Legitimate cargo. Verified manifests. Even the customs inspector seemed disappointed.`,
     (n) => `The stars don't care about schedules. ${n} made the run anyway, late and over budget, profit scraped from the margins.`,
     (n) => `${n} flew the old familiar lane again. The ship needed work it wasn't getting. The cargo paid what it paid.`,
+    (n) => `Nothing exciting. ${n} moved freight, collected payment, and kept the drives running. Some years are like that.`,
+    (n) => `Three jumps, two clients, one near-miss with a customs scanner. ${n} cleared port with a profit and no awkward questions.`,
 ];
 const FT_CHARTER = [
     (n) => `A charter client with no questions and a sealed cargo bay. ${n} didn't ask. Credits transferred on delivery.`,
     (n) => `The charter paid well. The client preferred not to be on record. ${n} preferred not to know why.`,
+    (n) => `Exclusive transport contract. The passenger list was short, the non-disclosure clause was long, and the pay was excellent.`,
+    (n) => `${n} flew a private charter to a system not on the standard lanes. The client asked for silence. ${n} kept it.`,
 ];
 const FT_SPECULATIVE = [
     (n) => `${n} bought cheap and gambled on selling dear. Sometimes it worked. This time it mostly worked.`,
     (n) => `Speculative cargo and a nose for market gaps. ${n} played the odds and came out ahead, barely.`,
+    (n) => `The market intelligence was good. The hold was full of something a destination world needed badly. ${n} made the call and it paid.`,
+    (n) => `Commodity trading at jump range. Ore bought on a mining world, luxury goods on the return leg. ${n} called it a living.`,
+    (n) => `${n} read the market, placed the bet, and sat in jump space hoping the price held. It mostly held.`,
 ];
 const FT_EXPLORATORY = [
     (n) => `${n} jumped toward the edge of known space looking for trade contacts nobody else had found yet. The void offered no guarantees.`,
     (n) => `First contact with an underdeveloped system. ${n} planted a flag, opened a ledger, and started talking price.`,
+    (n) => `Deep frontier work. No charts worth trusting, no backup, no rescue if the drives failed. ${n} found a market worth coming back to.`,
+    (n) => `${n} spent the year opening new lanes — the kind that don't appear on corporate maps because no one else survived long enough to file them.`,
+    (n) => `Underdeveloped world, no established trade contact, no guaranteed buyer. ${n} improvised. It worked better than expected.`,
 ];
 const FT_SMUGGLING = [
-    (n) => `The manifest listed machine parts. The crates said otherwise. ${n}'s quick hands and a sealed cargo bay kept the inspector happy.`,
+    (n) => `The manifest listed machine parts. The crates said otherwise. ${n}'s quick hands and a sealed cargo bay kept the inspector satisfied.`,
     (n) => `Moving contraband through contested space. ${n} had run the route before. Knew where the patrol windows were. Knew the risk.`,
-    (n) => `${n} didn't ask what was in the containers. The client didn't say. The credits cleared and the ship jumped before anyone looked too hard.`,
+    (n) => `${n} didn't ask what was in the containers. The client didn't say. The credits cleared and the ship jumped before anyone looked too closely.`,
+    (n) => `Restricted goods, a nervous broker, and an orbital checkpoint with a shift change at 0400. ${n} timed it right.`,
+    (n) => `The item was illegal on five worlds and taxed prohibitively on three more. ${n} found the sixth.`,
 ];
 const FT_PIRACY = [
-    (n) => `They called it enforcement of salvage rights. The crew of the target ship used a different word for it. ${n} came out ahead.`,
+    (n) => `They called it enforcement of salvage rights. The crew of the target ship used a different word. ${n} came out ahead.`,
     (n) => `${n} hit a trader two systems out from port. Clean intercept, fast boarding, minimal violence. The cargo was valuable. The moral ledger was not reviewed.`,
     (n) => `Piracy is a business. ${n} ran it like one: target selection, risk assessment, speed. The profit margin was the best it had been all year.`,
+    (n) => `The target's transponder said courier. The hold said something else. ${n}'s crew left them with a working drive and nothing worth flying.`,
+    (n) => `Two ships, one ambush. ${n}'s crew knew which side of the intercept to be on. The math was simple.`,
 ];
 const FT_NO_BUSINESS = [
     (n) => `Three weeks groundside with no contracts. The credits drained slowly. ${n} took odd jobs and waited for something to come through.`,
     (n) => `No work. ${n} sat in a dockside bar and watched ships that weren't theirs move goods that weren't going their way.`,
     (n) => `The market had dried up. ${n} stayed planetside, did some maintenance, and tried not to count the remaining credit balance too often.`,
+    (n) => `A year of false leads and missed connections. ${n}'s broker took a cut of nothing. The portmaster charged a docking fee for the privilege.`,
+    (n) => `Sometimes the galaxy just doesn't have anything for you. ${n} waited it out, kept the ship ready, and kept the crew fed. Barely.`,
+];
+const FT_END_OF_TERM = [
+    (n) => `Four years flying independent. ${n}'s ship held together. So did ${n}.`,
+    (n) => `No quarterly reviews. No performance ratings. Just the ledger and the drives, and ${n} kept both out of the red.`,
+    (n) => `${n} filed no reports to anyone, answered to no corporate board, and survived to fly another term. That was the whole deal.`,
+    (n) => `The ship needed a new motivator and the hold had seen better days. ${n} had too — but they were still out here.`,
+    (n) => `Four years of runs, deals, close calls, and marginal profits. Free trading is less a career and more a condition. ${n} had it bad.`,
+    (n) => `Same ship. Roughly the same debts. Different systems, different faces, same question at the end of every run: was it worth it. ${n} kept saying yes.`,
 ];
 
-// Death flavor
+// ─── Death flavor pools ───────────────────────────────────────────────────────
+// ACCIDENT (non-combat, low survival target): field mishaps, equipment failure, exposure
+
+const DEATH_ACCIDENT_ARMY = [
+    (n) => `A fault in the training equipment went undetected through three inspection cycles before it claimed ${n}'s life during a live-fire exercise — the kind of death that generates a safety memo and nothing else.`,
+    (n) => `In the low-visibility conditions of a nighttime sweep, ${n} was caught in friendly fire from a unit that couldn't see the markings; the investigation that followed was thorough and arrived at the expected conclusion.`,
+    (n) => `${n} sustained a field injury that should have been manageable, but medical response was delayed by terrain and communication failure, and what began as a treatable wound became something it shouldn't have been.`,
+    (n) => `Extended exposure to the heat, radiation, and atmospheric conditions of the deployment zone left ${n} with injuries the forward aid station couldn't reverse, despite the fact that every protocol had been followed exactly as written.`,
+    (n) => `A section of building collapsed without warning during what had been a routine garrison sweep, burying ${n} under debris in a structure that engineering had cleared two days prior.`,
+];
+
+const DEATH_ACCIDENT_NAVY = [
+    (n) => `A reactor coolant leak on ${n}'s deck went undetected for six hours, and by the time the alarm triggered the exposure had already reached a level the ship's medical bay was not equipped to treat.`,
+    (n) => `${n} was conducting a routine external inspection when the EVA tether failed at its fastening point; recovery was launched within four minutes and reached the coordinates, but ${n} was not there.`,
+    (n) => `A pressure failure in an unmanned maintenance corridor turned out to be manned — ${n} had gone in to run a diagnostic ahead of schedule, a fact that wasn't logged and wasn't known until it was too late.`,
+    (n) => `During what was logged as a standard systems drill, a cascade malfunction in the power coupling injured three crew members and killed ${n}; the incident review board completed its report, filed recommendations, and moved on.`,
+    (n) => `${n} suffered an acute medical episode three jumps from the nearest facility capable of treating it, and the ship's doctor did everything that could be done in the time that was available, which turned out to be insufficient.`,
+];
+
+const DEATH_ACCIDENT_SCOUT = [
+    (n) => `A microfracture in the environmental suit's collar seal went undetected by pre-mission checks, and ${n} was two kilometers into a survey traverse before the alarm sounded, too far from the ship for the situation to resolve in their favor.`,
+    (n) => `The ground in the survey zone was geologically unstable in ways the preliminary scans hadn't captured, and ${n} was lost in a collapse during what was logged as a standard surface reconnaissance.`,
+    (n) => `The equipment failed in deep field in a way that ${n}'s training hadn't covered, not because the training was inadequate but because the failure mode was one that hadn't been documented before — it is now.`,
+    (n) => `${n} contracted a pathogen that the ship's medical systems couldn't identify, and by the time a sample reached a facility capable of analysis, the question had already answered itself; the report classifies the cause as environmental exposure.`,
+    (n) => `The atmospheric sensor readings in the survey zone were within acceptable parameters until they weren't, and ${n} had already committed to the sample site before the discrepancy became apparent.`,
+];
+
+const DEATH_ACCIDENT_GENERIC = [
+    (n) => `${n} died in the course of routine duty, not through any failure of skill or preparation but simply because the work carries risks that documentation and protocols can reduce but never eliminate.`,
+    (n) => `The frontier doesn't require malice to be lethal — it only requires the right combination of accumulated small variables arriving at the wrong moment, which is what happened to ${n}.`,
+    (n) => `Every career in service to the Imperium carries a line of actuarial fine print that most people never have to read; ${n} was one of the ones for whom it turned out to apply.`,
+];
+
+// HAZARDOUS_DUTY (borderline, security work, patrol incidents, boardings gone wrong)
+
+const DEATH_HAZARDOUS_ARMY = [
+    (n) => `A civil disturbance that command had assessed as low-risk escalated within forty minutes into something that left three soldiers dead and ${n} among them, the after-action report noting that threat assessment procedures would be reviewed.`,
+    (n) => `A civilian in the crowd that ${n}'s unit was managing turned out to be carrying a concealed weapon and used it before anyone could respond; the incident report describes the situation as having been handled correctly up to that point.`,
+    (n) => `During a counter-riot deployment in an unstable district, ${n} was separated from the unit during the dispersal and didn't survive the separation — the report classifies it as a civil unrest response fatality.`,
+    (n) => `${n} was leading the extraction team during a hostage situation when the situation changed in the final thirty seconds; the hostages came out alive, and ${n} did not.`,
+    (n) => `An ambush during a security sweep indicated that the patrol schedule had been compromised; ${n} was in the lead element, and the attackers had clearly prepared for exactly that configuration.`,
+];
+
+const DEATH_HAZARDOUS_MARINES = [
+    (n) => `The boarding operation went according to plan until the point where the target vessel's actual crew manifest diverged significantly from the one on record, and ${n} was in the section of the ship where that divergence became apparent first.`,
+    (n) => `What began as a standard shipboard security response to a disturbance in the cargo hold escalated well beyond the initial assessment, and by the time reinforcements arrived ${n} had already been lost.`,
+    (n) => `The hold was supposed to be empty and the inspection was supposed to be a formality; ${n} was the first one through the hatch when both of those assumptions turned out to be incorrect.`,
+    (n) => `A weapons transfer aboard a troop transport resulted in an accidental discharge during handling — a preventable accident by every metric, which makes it exactly as final as any other kind.`,
+];
+
+const DEATH_HAZARDOUS_NAVY = [
+    (n) => `${n}'s patrol encountered a vessel that refused to respond to repeated hailing attempts and, when intercepted, turned out to have good reasons for that refusal and the means to act on them.`,
+    (n) => `The interdiction of a suspected smuggling vessel became a boarding action when the crew chose to resist rather than comply, and ${n} was part of the team that went aboard into a situation where resistance had already been established.`,
+    (n) => `The patrol found what it had been sent to look for, which is not always the straightforward success it sounds like — the finding cost ${n}'s life and confirmed the intelligence that had originally sent the patrol out.`,
+    (n) => `The contact the patrol was tracking appeared on sensors as a single small vessel and turned out to be bait; ${n}'s ship survived the ambush that followed, though ${n} did not.`,
+    (n) => `A live-ordnance targeting exercise ended in a fatality that the investigating board attributed to human error in the loading sequence, though the crew who were present have always maintained that the conclusion was simpler than the evidence warranted.`,
+    (n) => `${n} was running maintenance on an active weapon system when it discharged, a failure mode that the safety manual addresses in four separate sections and that happened anyway, because safety manuals describe what should occur rather than what does.`,
+];
+
+// COMBAT (isCombat, standard engagements)
+
+const DEATH_COMBAT_ARMY = [
+    (n) => `${n} was killed during a counter-insurgency sweep when an improvised device detonated on a route that had been cleared the previous day, the kind of death that generates an intelligence report and a name on a list.`,
+    (n) => `The firefight in the built-up district lasted most of the afternoon, and ${n} held the position that needed holding long enough for the rest of the unit to consolidate, which is the kind of outcome that reads well in citations and costs everything.`,
+    (n) => `During a police action that command had projected as low-intensity, ${n} encountered opposition that the projection hadn't accounted for, and the engagement that followed went into the report under a category that requires no further explanation.`,
+    (n) => `${n} was killed in the opening phase of the assault before the objective had been reached, and the posthumous commendation that was filed captures the facts of the action without quite capturing what it cost.`,
+    (n) => `The objective was secured by the time the unit reached the extraction point, but ${n} had been left behind in the consolidation phase — not abandoned, simply unable to be reached in the time available.`,
+    (n) => `${n} established the suppressing position in the corridor and held it long enough for the rest of the squad to get to safety, which is a description that sounds like the beginning of a story and is actually the end of one.`,
+];
+
+const DEATH_COMBAT_NAVY = [
+    (n) => `${n} was stationed in the section of the ship that absorbed the direct hit during the siege, and while the vessel survived the engagement and completed its mission, ${n} was not among the crew that brought it back to port.`,
+    (n) => `The fleet engagement was recorded as a tactical success, and ${n}'s name appears in the battle report under the station that was destroyed, listed with the notation "destroyed with honors" as though that phrase contains more than it does.`,
+    (n) => `The siege ran considerably longer than the initial projections suggested it would, and ${n} was there for most of it before not being there anymore, which is a distinction the record notes without elaboration.`,
+    (n) => `${n} was at the gun turret during the strike run when it took a direct hit; the ship completed its mission and returned to base, and the after-action report notes the strike as successful.`,
+    (n) => `The boarding party that ${n} was leading encountered armed resistance from the moment the hatch opened, and while the breach was ultimately successful and the objective achieved, ${n} was not among those who emerged.`,
+];
+
+const DEATH_COMBAT_SCOUT = [
+    (n) => `${n}'s mission was classified as a standard special assignment, but the operational zone had been reclassified as active wartime territory between the briefing and the deployment, a discrepancy that the mission planning process had not accounted for.`,
+    (n) => `The assignment required ${n} to be armed for the first time in several years of field work, which was itself a signal about the nature of what they were being sent into; the weapon was used, and it wasn't sufficient.`,
+    (n) => `The Scout Service classifies the operation in which ${n} died as active survey, and the file that describes it is sealed at a clearance level that most people who knew ${n} will never hold.`,
+    (n) => `The wartime assignment briefing described the role as observational, and ${n} proceeded on that basis until the situation on the ground made the original framing impossible to maintain, at which point adaptation became survival became neither.`,
+];
+
+const DEATH_COMBAT_GENERIC = [
+    (n) => `${n} was killed in a combat engagement during active service — the engagement was recorded in detail, the death was noted in the appropriate registers, and the conflict that produced both continued without pause.`,
+    (n) => `Every soldier who signs understands that combat is part of the terms; ${n} understood this, served within those terms, and died within them, which is as much as anyone who signs can ask for and as little as it sounds.`,
+    (n) => `The mission was accomplished according to the after-action assessment, and ${n}'s name appears in the cost column of that assessment, which is the column that doesn't get read at the debriefing.`,
+];
+
+// INTENSE_COMBAT (major assaults, fleet battles, high casualty expected)
+
+const DEATH_INTENSE_ARMY = [
+    (n) => `The raid went in with full knowledge that casualties were expected, and ${n} was part of the assault element that made the initial contact with the target's defenses, which is the part of a raid where the expected casualties tend to occur.`,
+    (n) => `The assault on the fortified position was the kind of operation that command describes as strategically necessary and soldiers describe in other terms; ${n} was among the casualties that the strategic necessity produced.`,
+    (n) => `${n} died in the first wave of an assault whose objective was described in terms that made the cost seem abstract until the cost arrived, at which point it became very concrete.`,
+    (n) => `By the time ${n} was killed, the counter-insurgency had quietly become a war in everything but name, a reclassification that the official reports still decline to make even in retrospect.`,
+    (n) => `${n}'s unit reached the target and accomplished what they were sent to do, but the extraction didn't include everyone, and the tally of who made it back lists ${n} in the column that doesn't get celebrated.`,
+    (n) => `The raid was successful by every operational metric, which is the kind of sentence that can be written about an action that also kills people, and which is exactly the kind of sentence that was written about the action that killed ${n}.`,
+];
+
+const DEATH_INTENSE_NAVY = [
+    (n) => `${n} was serving aboard a vessel that absorbed catastrophic damage during the fleet engagement — the ship was not designed to survive what it encountered, the crew was not expected to survive it, and very few of them did.`,
+    (n) => `The battle that killed ${n} was described as decisive in the operational summary, a word that belongs to the side that won it, and ${n}'s section of the fleet was on the side for whom it was decisive in a different sense.`,
+    (n) => `${n} was aboard a strike vessel that neutralized its target before being destroyed on the return vector — the mission was classified as accomplished, and ${n}'s death was logged under the category that means the same thing as accomplished.`,
+    (n) => `The void gives nothing back, and ${n}'s ship was destroyed with all hands during the engagement; the record says "all hands" and means it, and ${n} is one of the names that phrase contains.`,
+    (n) => `A gun crew in a direct fleet engagement operates without meaningful cover, a fact that ${n} understood and accepted by virtue of being at the gun when the exchange began and remaining there until it ended.`,
+    (n) => `The gunnery exchange lasted eleven minutes from first contact to cessation, and ${n} was recorded as active at their station for the first ten of those minutes, which is as long as the station remained active.`,
+];
+
+const DEATH_INTENSE_SCOUT = [
+    (n) => `${n}'s wartime posting was active in the field when the conflict reached the operational zone, and the gap between "active wartime posting" and "direct combat fatality" turned out to be narrower than the mission brief had suggested.`,
+    (n) => `${n}'s survey ship was conducting observations in a system that became an engagement zone during the operation, and a vessel configured for survey work is not configured for what ${n} encountered there.`,
+    (n) => `The wartime zone was designated as low-intensity at the time ${n} was assigned to it, a designation that the zone's subsequent behavior did not support, and ${n} died as a result of the discrepancy between the designation and the reality.`,
+    (n) => `${n} was killed while conducting scientific work in a system that the military had reclassified as an active engagement zone without that reclassification propagating to the Scout Service's operational calendar in time for it to matter.`,
+];
+
+// BLACK_OPS (Scout Detached office — intelligence work, deep cover, deniable operations)
+
+const DEATH_BLACK_OPS = [
+    (n) => `${n}'s file in the Scout Service is marked classified at a level that most people who knew ${n} will never hold, and the cause of death listed in the accessible portion of the record is "mission-related incident," a phrase that has been chosen to describe the situation accurately while describing it as little as possible.`,
+    (n) => `Every deep cover operation has a duration beyond which the probability of continuation begins to work against the operative, and ${n}'s assignment exceeded that duration in a system where extraction was not a realistic option.`,
+    (n) => `${n} was operating under a documented false identity in a hostile system when contact was lost; no body has been recovered, no public inquiry has been opened, and the Scout Service's position is that no comment is appropriate.`,
+    (n) => `The intelligence work required ${n} to be present in locations from which, by the nature of the work, they could not be extracted if the situation changed — and ${n} understood this requirement and accepted it when the assignment was offered.`,
+    (n) => `${n} died performing work that is not officially acknowledged to have occurred, conducted on behalf of an organization that is not officially acknowledged to have directed it; the pension was disbursed to the listed next of kin without explanation, which is the standard procedure.`,
+    (n) => `${n}'s cover was compromised at a point in the operation when breaking cover would have cost the mission and maintaining it would cost ${n}, and the choice that was made reflects everything that Detached duty asks of the people who volunteer for it.`,
+    (n) => `The final data burst ${n} transmitted before going dark contained intelligence that proved operationally valuable, and ${n} would have understood the economics of that transaction even if it's unlikely they would have described it in those terms.`,
+    (n) => `${n}'s final operational log entry is a timestamp with no accompanying notation, which is itself a notation of a kind — Detached operatives who have time to write something usually do.`,
+    (n) => `The cover held across three years of embedded operation in a system that had every reason to look closely, and then it didn't hold anymore, and the difference between those two states is where ${n} is now.`,
+    (n) => `There is a memorial maintained by the Scout Service at an undisclosed location where the names of operatives lost in deniable operations are recorded; ${n}'s name is there, though no one outside the Service will confirm this.`,
+];
+
+// CRIMINAL — SMUGGLING (Merchant FT, caught by authorities or cargo hazard)
+
+const DEATH_CRIMINAL_SMUGGLING = [
+    (n) => `The checkpoint that ${n} passed through had been designated routine in every prior transit, and the additional personnel and scanning equipment that were present on this occasion turned out to be the result of intelligence that ${n} didn't have access to.`,
+    (n) => `The client represented the cargo as safe to transport and the route as clear, and both of those representations turned out to be incorrect in ways that became apparent to ${n} in the wrong order — the route first, then the cargo.`,
+    (n) => `${n} had run contraband through this corridor a number of times without incident, which is the kind of track record that produces confidence in a route right up until the patrol cutter assigned to that corridor is upgraded to something faster.`,
+    (n) => `The transaction was structured so that ${n} would meet the buyer at the destination and receive payment on delivery, which is why ${n} didn't know until arrival that the buyer was conducting the transaction in a professional law enforcement capacity.`,
+    (n) => `The information that someone in the network had talked reached ${n} approximately forty minutes after it would have been useful, and in the interval between those two points the situation had already resolved itself.`,
+    (n) => `The item that ${n} agreed to transport was restricted across six systems for reasons that weren't entirely clear from the contract, and attempting delivery to the seventh system was how ${n} found out what those reasons were.`,
+    (n) => `A tip was filed with port authority that described ${n}'s vessel, cargo, and scheduled departure with a level of specificity that indicated someone with direct operational knowledge, and by the time ${n} received any indication that something was wrong the berth was already surrounded.`,
+    (n) => `The scanner that ${n}'s vessel passed through had been upgraded since the last transit of this route, and the upgraded version detected what the previous version had missed, and the officers at the terminal were prepared for exactly that result.`,
+];
+
+// CRIMINAL — PIRACY (Merchant FT, target fought back or naval interdiction)
+
+const DEATH_CRIMINAL_PIRACY = [
+    (n) => `The target vessel's defensive capacity was significantly higher than the intelligence assessment had indicated, and ${n}'s approach profile was optimized for an intercept against a much less capable ship, a mismatch that resolved itself quickly and badly.`,
+    (n) => `A naval escort appeared in the system approximately thirty seconds after ${n}'s intercept was committed, operating under a transponder code that appeared on no chart ${n} had access to, and the engagement that followed was not the one ${n} had planned for.`,
+    (n) => `The split of the proceeds became a source of conflict among the crew at a point in the operation when conflict among the crew was the worst possible variable to introduce, and ${n} was on the side of the argument that lost.`,
+    (n) => `${n} selected a target that turned out to be carrying personnel who were not the kind that file incident reports or request assistance — they were the kind that communicate through consequences, and the consequence they chose to send was ${n}.`,
+    (n) => `Piracy as a business model depends on accurate target selection, and the operation that killed ${n} failed at that stage in a way that didn't become apparent until the intercept was already committed and the boarding was already in progress.`,
+    (n) => `The target identified ${n}'s vessel through a registration cross-reference and filed a bounty with three separate recovery organizations; ${n} evaded collection for six months before one of those organizations located the ship.`,
+    (n) => `${n} ran the intercept correctly and the boarding cleanly, and the naval response that arrived while ${n} was still aboard the target was not the result of any error in the operation — it was simply already in the system, waiting for exactly this kind of signal.`,
+    (n) => `${n} was in the target vessel's cargo bay when the crew made the decision to jump rather than continue resisting the boarding, a decision that solved the crew's problem while creating a considerably more serious one for ${n}.`,
+];
+
+// FREE TRADER — non-criminal deaths by assignment type
+
+const DEATH_FT_ROUTE = [
+    (n) => `${n}'s ship departed on a standard cargo run and failed to arrive at the destination on the projected schedule, and when a search was dispatched to the intermediate waypoints, the vessel was found adrift with no distress signal logged and no final entry in the ship's record.`,
+    (n) => `The run was the same route ${n} had completed dozens of times before, which is perhaps why the drive anomaly that appeared on day two of transit didn't register as the emergency it turned out to be until it was well past the point where anything could be done about it.`,
+    (n) => `${n} died moving cargo between stars, which is what ${n} did, and the risk that came with doing it caught up with them on a run that was in every other way unremarkable.`,
+    (n) => `${n}'s transponder went silent somewhere in the second jump corridor, and the cargo manifest that was eventually recovered with the hull lists goods that never reached their destination, which is the administrative summary of a death that deserves more than an administrative summary.`,
+];
+
+const DEATH_FT_CHARTER = [
+    (n) => `The charter client provided accurate information about the destination, the timeline, and the payment terms, and declined to provide any information about the parties who had reason to intercept the delivery, a gap in the briefing that proved fatal.`,
+    (n) => `${n} took the charter because the pay was better than anything else on the board and the client seemed credible, and both of those assessments were accurate — the client was credible and the pay was good, and neither fact was sufficient protection against what followed.`,
+    (n) => `The cargo bay had been sealed per the client's instructions and ${n} had agreed not to open it, which was a reasonable term until the nature of what was inside became relevant to ${n}'s survival, at which point reasonable terms were no longer the governing consideration.`,
+    (n) => `The client's enemies moved faster than the client's warnings, and ${n} received the information that would have changed the route about twelve hours after the route was no longer changeable.`,
+];
+
+const DEATH_FT_SPECULATIVE = [
+    (n) => `${n} read the market correctly and made a well-reasoned speculative bet on a commodity that turned out to have undisclosed complications attached to it, the kind that don't appear in the trade listings and don't become apparent until the transaction is too far along to exit.`,
+    (n) => `The seller's representation of the goods did not include any mention of the outstanding debt that was attached to them, and the parties responsible for collecting that debt were not interested in ${n}'s explanation that the purchase had been made in good faith.`,
+    (n) => `${n} acquired cargo that another party considered their property regardless of the transaction ${n} had completed to obtain it, and the resolution of that disagreement did not go in ${n}'s favor.`,
+];
+
+const DEATH_FT_EXPLORATORY = [
+    (n) => `${n} jumped into an uncharted system on an exploratory trade mission and failed to transmit the navigation data that would have allowed anyone to follow — whether that was because the situation prevented transmission or because there was nothing left to transmit from is a question the record cannot answer.`,
+    (n) => `First contact with a previously uncharted inhabited system is one of the most significant events a free trader can experience, and it doesn't always proceed in a direction that allows the trader to file a report afterward; ${n}'s experience was of that kind.`,
+    (n) => `The frontier doesn't discriminate between experienced operators and inexperienced ones, and ${n} had enough experience to know this while also having exactly as much as every other trader who has found a new system and not come back from it.`,
+    (n) => `The drive gave out at a point in the exploratory route that was three jumps from the nearest port and one jump past the point where ${n}'s repair supplies were adequate to the task — ${n} worked the problem for as long as there was a problem to work.`,
+];
+
+// Corporate merchant death flavor (non-FT)
 const CORP_DEATH_ROUTE = [
     (n, co) => `${n} was listed as a casualty in ${co}'s internal incident report under category 7: "personnel loss." Next of kin were notified via automated correspondence.`,
     (n, co) => `${co}'s quarterly safety review noted the incident involving ${n}. A process review was scheduled. No changes were made.`,
@@ -944,65 +1171,75 @@ const CORP_DEATH_HAZARD = [
     (n, co) => `${co}'s liability waiver covered the circumstances of ${n}'s death. The legal team was satisfied. ${n} was not available for comment.`,
     (n) => `${n} died doing the work. The corporation logged it as an acceptable operational loss and moved on.`,
 ];
-const FT_DEATH = [
-    (n) => `${n} didn't make it back from this one. The ship was recovered. The cargo was not. No one filed a report.`,
-    (n) => `The job went wrong. ${n} knew the risks when they took it. Doesn't make it any less final.`,
-    (n) => `${n} died in the void between stars. No fanfare. No pension. Just silence.`,
-];
 
 export function buildMerchantYearHistory(
-    characterName, assignment, _dept, _year, _term,
+    characterName, assignment, _dept, year, _term,
     isLarge, isFT, _lineName, companyName, flags
 ) {
-    const { skillGained, bonusAmount, posAvail } = flags;
+    const { bonusAmount, posAvail } = flags;
     const n = characterName;
     const co = companyName;
-    let line = '';
+    let flavor = '';
 
     if (isFT) {
         switch (assignment) {
-            case 'Route': line = pick(FT_ROUTE)(n); break;
-            case 'Charter': line = pick(FT_CHARTER)(n); break;
-            case 'Speculative': line = pick(FT_SPECULATIVE)(n); break;
-            case 'Exploratory': line = pick(FT_EXPLORATORY)(n); break;
-            case 'Smuggling': line = pick(FT_SMUGGLING)(n); break;
-            case 'Piracy': line = pick(FT_PIRACY)(n); break;
-            case 'No Business': line = pick(FT_NO_BUSINESS)(n); break;
-            default: line = `${n} completed the assignment.`;
+            case 'Route': flavor = pick(FT_ROUTE)(n); break;
+            case 'Charter': flavor = pick(FT_CHARTER)(n); break;
+            case 'Speculative': flavor = pick(FT_SPECULATIVE)(n); break;
+            case 'Exploratory': flavor = pick(FT_EXPLORATORY)(n); break;
+            case 'Smuggling': flavor = pick(FT_SMUGGLING)(n); break;
+            case 'Piracy': flavor = pick(FT_PIRACY)(n); break;
+            case 'No Business': flavor = pick(FT_NO_BUSINESS)(n); break;
+            default: flavor = `${n} completed the assignment.`;
         }
     } else if (isLarge) {
         switch (assignment) {
-            case 'Route': line = pick(CORP_ROUTE)(n, co); break;
-            case 'Charter': line = pick(CORP_CHARTER)(n, co); break;
-            case 'Speculative': line = pick(CORP_SPECULATIVE)(n, co); break;
-            case 'Exploratory': line = pick(CORP_EXPLORATORY)(n, co); break;
-            default: line = pick(CORP_ROUTE)(n, co);
+            case 'Route': flavor = pick(CORP_ROUTE)(n, co); break;
+            case 'Charter': flavor = pick(CORP_CHARTER)(n, co); break;
+            case 'Speculative': flavor = pick(CORP_SPECULATIVE)(n, co); break;
+            case 'Exploratory': flavor = pick(CORP_EXPLORATORY)(n, co); break;
+            default: flavor = pick(CORP_ROUTE)(n, co);
         }
     } else {
         switch (assignment) {
-            case 'Route': line = pick(SMALL_ROUTE)(n, co); break;
-            case 'Charter': line = pick(CORP_CHARTER)(n, co); break;
-            case 'Speculative': line = pick(SMALL_SPECULATIVE)(n, co); break;
-            case 'Exploratory': line = pick(SMALL_EXPLORATORY)(n, co); break;
-            default: line = pick(SMALL_ROUTE)(n, co);
+            case 'Route': flavor = pick(SMALL_ROUTE)(n, co); break;
+            case 'Charter': flavor = pick(CORP_CHARTER)(n, co); break;
+            case 'Speculative': flavor = pick(SMALL_SPECULATIVE)(n, co); break;
+            case 'Exploratory': flavor = pick(SMALL_EXPLORATORY)(n, co); break;
+            default: flavor = pick(SMALL_ROUTE)(n, co);
         }
     }
 
+    let line = `[Year ${year} — ${assignment}] ${flavor}`;
     if (!posAvail) line += ' ' + pick(CORP_NO_POS)(n);
-    if (skillGained) line += ` ${n} picked up something useful along the way.`;
     if (bonusAmount > 0) line += ` A profit-sharing bonus of Cr${bonusAmount.toLocaleString()} was deposited.`;
 
     return line;
 }
 
 export function buildMerchantDeathHistory(characterName, assignment, _dept, _isLarge, isFT) {
+    const n = characterName;
+    if (isFT) {
+        let pool;
+        switch (assignment) {
+            case 'Smuggling':    pool = DEATH_CRIMINAL_SMUGGLING; break;
+            case 'Piracy':      pool = DEATH_CRIMINAL_PIRACY; break;
+            case 'Charter':     pool = DEATH_FT_CHARTER; break;
+            case 'Speculative': pool = DEATH_FT_SPECULATIVE; break;
+            case 'Exploratory': pool = DEATH_FT_EXPLORATORY; break;
+            default:            pool = DEATH_FT_ROUTE;
+        }
+        return `${pick(pool)(n)} The story ends here.`;
+    }
     const co = 'the company';
-    if (isFT) return pick(FT_DEATH)(characterName);
-    if (['Exploratory', 'Speculative'].includes(assignment)) return pick(CORP_DEATH_HAZARD)(characterName, co);
-    return pick(CORP_DEATH_ROUTE)(characterName, co);
+    if (['Exploratory', 'Speculative'].includes(assignment)) return `${pick(CORP_DEATH_HAZARD)(n, co)} The story ends here.`;
+    return `${pick(CORP_DEATH_ROUTE)(n, co)} The story ends here.`;
 }
 
-export function buildMerchantEndOfTermHistory(characterName, termNumber, dept, lineName, agingHist) {
+export function buildMerchantEndOfTermHistory(characterName, termNumber, dept, lineName, agingHist, isFT = false) {
+    if (isFT) {
+        return pick(FT_END_OF_TERM)(characterName) + agingHist;
+    }
     const lines = [
         `${characterName} completed term ${termNumber} in the ${dept} Department with ${lineName}.`,
         `Four years logged with ${lineName}. ${characterName}'s file was updated. Performance was noted.`,

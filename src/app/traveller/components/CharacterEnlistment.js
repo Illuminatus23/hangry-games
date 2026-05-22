@@ -14,6 +14,14 @@ export default function CharacterEnlistment({
     characterName,
     handleHistoryAdd
 }) {
+    const CAREER_LABEL = {
+        army: 'in the Army', marines: 'in the Marines', navy: 'in the Navy',
+        scouts: 'in the Scout Service', merchants: 'as a Merchant',
+        flyer: 'as a Flyer', sailor: 'as a Sailor', 'law enforcement': 'in Law Enforcement',
+        doctor: 'as a Doctor', diplomat: 'as a Diplomat', bureaucrat: 'as a Bureaucrat',
+        scientist: 'as a Scientist', belter: 'as a Belter', pirate: 'as a Pirate',
+        rogue: 'as a Rogue', hunter: 'as a Hunter', barbarian: 'as a Barbarian', noble: 'as a Noble',
+    };
     const enlistmentList = generateEnlistmentChoices(upp, characterData.homeworld);
     const approvedCareers = Object.keys(enlistmentList[0]);
     const [enlistmentChoice, setEnlistmentChoice] = useState("");
@@ -84,7 +92,7 @@ export default function CharacterEnlistment({
             setWarning(info);
             handleHistoryAdd(historyStr);
             setEnlistOps([
-                { id: 1, name: `Begin your career as a ${careerName}`, value: "year1" },
+                { id: 1, name: `Begin your career ${CAREER_LABEL[careerName] ?? careerName}`, value: "year1" },
             ]);
         } else {
             const stats = careers[nextEnlistmentChoice].enlist;
@@ -129,7 +137,7 @@ export default function CharacterEnlistment({
                 ));
                 handleHistoryAdd(`${characterName} ${datatables.careerDesc[careerName]}`)
                 setEnlistOps([
-                    { id: 1, name: `Begin your career as a ${careerName}`, value: "year1" },
+                    { id: 1, name: `Begin your career ${CAREER_LABEL[careerName] ?? careerName}`, value: "year1" },
                 ])
             }
         }

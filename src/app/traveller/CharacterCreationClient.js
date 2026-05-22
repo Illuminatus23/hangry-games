@@ -149,8 +149,10 @@ export default function CharacterCreation() {
         let rankName = "";
         const ranktable = datatables.rank[characterData.career.careername];
         if (characterData.career.careername !== "" && ranktable) {
-            const rank = (characterData.career.officer) ? ranktable["O"] : ranktable["E"];
-            rankName = `${rank[characterData.career.rank][1]} `;
+            const o = ranktable[characterData.career.officer ? "O" : "E"];
+            const rankArr = Array.isArray(o) ? o : (o[characterData.career.branch] ?? []);
+            const entry = rankArr[characterData.career.rank];
+            if (entry?.[1]) rankName = `${entry[1]} `;
         }
         return `${peerage}${rankName}${characterName}${medgrad}`;
     };
@@ -162,8 +164,11 @@ export default function CharacterCreation() {
         }
         const ranktable = datatables.rank[characterData.career.careername];
         if (!ranktable) return "n/a";
-        const rank = (characterData.career.officer) ? ranktable["O"] : ranktable["E"];
-        const rankText = rank[characterData.career.rank][0];
+        const o = ranktable[characterData.career.officer ? "O" : "E"];
+        const rankArr = Array.isArray(o) ? o : (o[characterData.career.branch] ?? []);
+        const entry = rankArr[characterData.career.rank];
+        if (!entry) return "n/a";
+        const rankText = entry[0];
         const fullRank = `${(characterData.career.officer) ? "O" : (characterData.career.careername === "scouts") ? "IS-" : "E"}${characterData.career.rank}`;
         const fullRankText = (rankText !== "") ? `${fullRank}: ${rankText}` : "No Rank";
         if (["belter", "hunter", "rogue", "doctor", "scientist"].includes(characterData.career.careername)) {
